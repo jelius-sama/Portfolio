@@ -1,0 +1,128 @@
+[
+    {
+        "path": "*",
+        "meta": [
+            {
+                "charset": "UTF-8"
+            },
+            {
+                "name": "viewport",
+                "content": "width=device-width, initial-scale=1.0"
+            }
+        ],
+        "link": [
+            {
+                "rel": "icon",
+                "href": "/assets/jelius.jpg"
+            }
+        ]
+    },
+    {
+        "path": "/",
+        "title": "Portfolio | Jelius",
+        "meta": [
+            {
+                "name": "description",
+                "content": "A showcase of my expertise in Fullstack Web and App development, featuring functional and visually appealing applications. This site showcases my skills, adaptability, and dedication to continuous learning and improvement in modern web and app development practices."
+            },
+            {
+                "name": "application-name",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "name": "robots",
+                "content": "index, follow"
+            },
+            {
+                "name": "format-detection",
+                "content": "telephone=no"
+            },
+            {
+                "name": "apple-mobile-web-app-capable",
+                "content": "yes"
+            },
+            {
+                "name": "apple-mobile-web-app-title",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "name": "theme-color",
+                "content": "#FFFFFF"
+            },
+            {
+                "name": "apple-mobile-web-app-status-bar-style",
+                "content": "default"
+            },
+            {
+                "property": "og:title",
+                "content": "Portfolio | Jelius"
+            },
+            {
+                "property": "og:description",
+                "content": "A showcase of my expertise in Fullstack Web and App development, featuring functional and visually appealing applications. This site showcases my skills, adaptability, and dedication to continuous learning and improvement in modern web and app development practices."
+            },
+            {
+                "property": "og:url",
+                "content": "https://jelius.dev"
+            },
+            {
+                "property": "og:site_name",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "property": "og:image",
+                "content": "/assets/jelius.jpg"
+            },
+            {
+                "property": "og:type",
+                "content": "website"
+            },
+            {
+                "name": "twitter:card",
+                "content": "summary"
+            },
+            {
+                "name": "twitter:site",
+                "content": "@jelius_sama"
+            },
+            {
+                "name": "twitter:creator",
+                "content": "@jelius_sama"
+            },
+            {
+                "name": "twitter:title",
+                "content": "Portfolio | Jelius"
+            },
+            {
+                "name": "twitter:description",
+                "content": "A showcase of my expertise in Fullstack Web and App development, featuring functional and visually appealing applications. This site showcases my skills, adaptability, and dedication to continuous learning and improvement in modern web and app development practices."
+            },
+            {
+                "name": "twitter:image",
+                "content": "/assets/jelius.jpg"
+            }
+        ],
+        "link": [
+            {
+                "rel": "manifest",
+                "href": "/manifest.json"
+            },
+            {
+                "rel": "icon",
+                "href": "/assets/jelius.jpg"
+            },
+            {
+                "rel": "apple-touch-icon",
+                "href": "/assets/icons/apple-icon-180.png"
+            },
+            {
+                "rel": "canonical",
+                "href": "https://jelius.dev"
+            }
+        ]
+    },
+    {
+        "path": "/links",
+        "title": "Links | Jelius"
+    }
+]
