@@ -1,38 +1,23 @@
 import { TerminalWindow } from "@/components/layout/terminal-window"
-import { Home, RefreshCw } from "lucide-react"
+import { Home, LinkIcon } from "lucide-react"
 import { Fragment } from "react"
 import { StaticMetadata } from "@/contexts/metadata"
 import { useLocation, Link } from "react-router-dom"
 
+export const suggestions = [
+  { title: "Portfolio", description: "Go back to the main page", url: "/", icon: <Home size={20} /> },
+  { title: "Links", description: "Find all my social links", url: "/links", icon: <LinkIcon size={20} /> },
+]
+
 export default function NotFoundPage() {
   const location = useLocation()
-
-  const suggestions = [
-    { title: "Home", description: "Go back to the main page", url: "/", icon: <Home size={20} /> },
-    { title: "Links", description: "Find all my social links", url: "/links", icon: <RefreshCw size={20} /> },
-  ]
 
   return (
     <Fragment>
       <StaticMetadata />
 
-      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center px-6 py-12">
-        <div className="w-6xl mx-auto px-6 py-4">
-          {/* Header */}
-          <header className="fixed top-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-orange-500/30">
-            <div className="w-6xl mx-auto px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="text-orange-400 font-bold text-xl font-mono">
-                  {"> "}
-                  <span className="text-white">jelius.dev</span>
-                </div>
-                <Link to="/" className="text-gray-300 hover:text-orange-400 transition-colors font-mono text-sm flex items-center gap-x-2">
-                  Back to Portfolio
-                </Link>
-              </div>
-            </div>
-          </header>
-
+      <main className="flex items-center justify-center px-6 py-12">
+        <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="text-center my-8">
             <div className="text-6xl font-bold text-orange-400 mb-4 font-mono">404</div>
             <h1 className="text-2xl font-bold text-white mb-2">Page Not Found</h1>
@@ -45,10 +30,10 @@ export default function NotFoundPage() {
               <pre>{`
     ╔══════════════════════════════════════╗
     ║                                      ║
-    ║    ┌─┐┌─┐┌─┐┌─┐  ┌┐┌┌─┐┌┬┐         ║
-    ║    ├─┘├─┤│ ┬├┤   ││││ │ │          ║
-    ║    ┴  ┴ ┴└─┘└─┘  ┘└┘└─┘ ┴          ║
-    ║              ┌─┐┌─┐┬ ┬┌┐┌┌┬┐        ║
+    ║    ┌─┐┌─┐┌─┐┌─┐  ┌┐┌┌─┐┌┬┐           ║
+    ║    ├─┘├─┤│ ┬├┤   ││││ │ │            ║
+    ║    ┴  ┴ ┴└─┘└─┘  ┘└┘└─┘ ┴            ║
+    ║              ┌─┐┌─┐┬ ┬┌┐┌┌┬┐         ║
     ║              ├┤ │ ││ ││││ ││         ║
     ║              └  └─┘└─┘┘└┘─┴┘         ║
     ║                                      ║
@@ -112,11 +97,11 @@ export default function NotFoundPage() {
 
           {/* Footer */}
           <div className="text-center text-gray-500 text-sm font-mono">
-            <div>Error Code: HTTP 404 • Server: nginx/1.24.0</div>
+            <div>Error Code: HTTP 404 • Powered by Go 1.24.5 (net/http)</div>
             <div className="mt-2">If you believe this is an error, please contact the administrator</div>
           </div>
         </div>
-      </div>
+      </main>
     </Fragment>
   )
 }

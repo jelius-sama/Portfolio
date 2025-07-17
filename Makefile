@@ -53,5 +53,6 @@ INCLUDE_FILES = \
 	README.md \
 
 archive_prod:
-	@make build
-	@tar -czf $(APP_NAME)-$(VERSION).tar.gz $(INCLUDE_FILES)
+	@make build -B
+	@mkdir -p ./build
+	@tar -czf ./build/$(APP_NAME)-$(VERSION).tar.gz $(INCLUDE_FILES)

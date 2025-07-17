@@ -12,7 +12,6 @@ import (
 
 // TODO: Add PWA Support
 // TODO: Test for unexpected behaviors & test the code
-
 var Environment = "development"
 var Port = "6969"
 var Version string

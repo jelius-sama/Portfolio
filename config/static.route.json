@@ -226,6 +226,10 @@
         ]
     },
     {
+        "path": "/blogs",
+        "title": "Blogs | Jelius"
+    },
+    {
         "path": "#not_found",
         "title": "Not Found | Jelius"
     }
