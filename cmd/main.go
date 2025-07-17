@@ -10,14 +10,8 @@ import (
 	"path/filepath"
 )
 
-// TODO: Cleanup Server Side Code (eg.: http error response re-using function)
-// TODO: Cleanup Client Side Code
-// TODO: Write Home page with new UI design
-// TODO: Work on Metadata for links page
-// TODO: Perfect SEO & Metadata for all pages
 // TODO: Add PWA Support
 // TODO: Test for unexpected behaviors & test the code
-// TODO: Check if the server sent data is accurate (eg.: metadata parsing)
 
 var Environment = "development"
 var Port = "6969"
@@ -38,10 +32,10 @@ func init() {
 func fileExists(filePath string) bool {
 	_, err := os.Stat(filePath)
 	if err == nil {
-		return true // File exists
+		return true
 	}
 	if errors.Is(err, os.ErrNotExist) {
-		return false // File does not exist
+		return false
 	}
 	// Handle other potential errors (e.g., permissions)
 	logger.Panic("Error checking file `"+filePath+"`\n    ", err)

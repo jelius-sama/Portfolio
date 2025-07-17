@@ -45,3 +45,7 @@ func MethodNotAllowed(w http.ResponseWriter, r *http.Request, msg *string) {
 func RequestTimeout(w http.ResponseWriter, r *http.Request, msg *string) {
 	writeError(w, http.StatusRequestTimeout, "408 Request Timeout", msg)
 }
+
+func InternalServerError(w http.ResponseWriter, r *http.Request, msg *string) {
+	writeError(w, http.StatusInternalServerError, "500 Internal Server Error", msg)
+}

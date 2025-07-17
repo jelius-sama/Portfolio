@@ -105,7 +105,7 @@
         "link": [
             {
                 "rel": "manifest",
-                "href": "/manifest.json"
+                "href": "/assets/manifest.json"
             },
             {
                 "rel": "icon",
@@ -123,6 +123,110 @@
     },
     {
         "path": "/links",
-        "title": "Links | Jelius"
+        "title": "Links | Jelius",
+        "meta": [
+            {
+                "name": "description",
+                "content": "A personalized hub showcasing all of Jelius's social media profiles and key links."
+            },
+            {
+                "name": "application-name",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "name": "robots",
+                "content": "index, follow"
+            },
+            {
+                "name": "format-detection",
+                "content": "telephone=no"
+            },
+            {
+                "name": "apple-mobile-web-app-capable",
+                "content": "yes"
+            },
+            {
+                "name": "apple-mobile-web-app-title",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "name": "theme-color",
+                "content": "#FFFFFF"
+            },
+            {
+                "name": "apple-mobile-web-app-status-bar-style",
+                "content": "default"
+            },
+            {
+                "property": "og:title",
+                "content": "Links | Jelius"
+            },
+            {
+                "property": "og:description",
+                "content": "A personalized hub showcasing all of Jelius's social media profiles and key links."
+            },
+            {
+                "property": "og:url",
+                "content": "https://jelius.dev/links"
+            },
+            {
+                "property": "og:site_name",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "property": "og:image",
+                "content": "/assets/jelius.jpg"
+            },
+            {
+                "property": "og:type",
+                "content": "website"
+            },
+            {
+                "name": "twitter:card",
+                "content": "summary"
+            },
+            {
+                "name": "twitter:site",
+                "content": "@jelius_sama"
+            },
+            {
+                "name": "twitter:creator",
+                "content": "@jelius_sama"
+            },
+            {
+                "name": "twitter:title",
+                "content": "Links | Jelius"
+            },
+            {
+                "name": "twitter:description",
+                "content": "A personalized hub showcasing all of Jelius's social media profiles and key links."
+            },
+            {
+                "name": "twitter:image",
+                "content": "/assets/jelius.jpg"
+            }
+        ],
+        "link": [
+            {
+                "rel": "manifest",
+                "href": "/assets/manifest.json"
+            },
+            {
+                "rel": "icon",
+                "href": "/assets/jelius.jpg"
+            },
+            {
+                "rel": "apple-touch-icon",
+                "href": "/assets/icons/apple-icon-180.png"
+            },
+            {
+                "rel": "canonical",
+                "href": "https://jelius.dev/links"
+            }
+        ]
+    },
+    {
+        "path": "#not_found",
+        "title": "Not Found | Jelius"
     }
 ]

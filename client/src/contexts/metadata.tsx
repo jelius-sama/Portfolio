@@ -10,7 +10,6 @@ import type { MetaTag, LinkTag, ScriptTag } from "@/types/static.route";
 import { useConfig } from "@/contexts/config";
 import { useLocation } from "react-router-dom";
 
-// Context for internal validation
 const MetadataContext = createContext<boolean | undefined>(undefined);
 
 // Symbol to mark allowed components
@@ -63,8 +62,6 @@ function allowInsideMetadata<T extends React.FC<any>>(component: T): T {
   return component;
 }
 
-// ---- Subcomponents ----
-
 export const Title = allowInsideMetadata(({ children }: { children: string }) => {
   useMetadataContext("Title");
   return <title>{children}</title>;
@@ -110,7 +107,9 @@ export const StaticMetadata = () => {
   }, [location]);
 
   const defaultMeta = staticRoute.find(route => route.path === "*");
-  const currentMeta = staticRoute.find(route => route.path === location.pathname);
+  const currentMeta =
+    staticRoute.find(route => route.path === location.pathname) ??
+    staticRoute.find(route => route.path === "#not_found");
 
   const mergedMeta = {
     title: currentMeta?.title,

@@ -4,12 +4,13 @@ import (
 	"KazuFolio/types"
 	"encoding/json"
 	"fmt"
+	"html"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-func ParseMetadata() (string, error) {
+func ParseMetadata(path string) (string, error) {
 	data, err := os.ReadFile(filepath.Join(os.Getenv("ROOT_PATH"), "config", "static.route.json"))
 	if err != nil {
 		return "", fmt.Errorf("failed to read metadata file: %w", err)
@@ -20,63 +21,60 @@ func ParseMetadata() (string, error) {
 		return "", fmt.Errorf("failed to parse JSON: %w", err)
 	}
 
-	var defaultMeta *types.RouteMetadata
-	var builder strings.Builder
+	var defaultMeta, currentMeta, notFoundMeta *types.RouteMetadata
 
-	// First, find the default "*" route
-	for _, route := range routes {
-		if route.Path == "*" {
-			defaultMeta = &route
-			break
+	// Index the metadata by path
+	for i := range routes {
+		switch routes[i].Path {
+		case "*":
+			defaultMeta = &routes[i]
+		case path:
+			currentMeta = &routes[i]
+		case "#not_found":
+			notFoundMeta = &routes[i]
 		}
 	}
 
-	// Now iterate again, skipping "*", and merge
-	for _, route := range routes {
-		if route.Path == "*" {
-			continue
-		}
+	// Use #not_found if no match
+	if currentMeta == nil {
+		currentMeta = notFoundMeta
+	}
 
-		// Merge default with specific
-		combinedMeta := types.RouteMetadata{
-			Path:  route.Path,
-			Title: route.Title,
-			Meta:  append([]types.MetaTag{}, append(defaultMeta.Meta, route.Meta...)...),
-			Link:  append([]types.LinkTag{}, append(defaultMeta.Link, route.Link...)...),
-		}
+	if currentMeta == nil {
+		// Still no metadata? Nothing to render
+		return "", nil
+	}
 
-		// Render HTML
-		if combinedMeta.Title != "" {
-			builder.WriteString(fmt.Sprintf(`<title id="__SERVER_PROPS__">%s</title>`+"\n", htmlEscape(combinedMeta.Title)))
-		}
+	// Merge defaultMeta + currentMeta
+	var mergedMeta = types.RouteMetadata{
+		Path:  currentMeta.Path,
+		Title: currentMeta.Title,
+		Meta:  append(defaultMeta.Meta, currentMeta.Meta...),
+		Link:  append(defaultMeta.Link, currentMeta.Link...),
+	}
 
-		for _, meta := range combinedMeta.Meta {
-			switch {
-			case meta.Charset != "":
-				builder.WriteString(fmt.Sprintf(`<meta id="__SERVER_PROPS__" charset="%s">`+"\n", htmlEscape(meta.Charset)))
-			case meta.Name != "":
-				builder.WriteString(fmt.Sprintf(`<meta id="__SERVER_PROPS__" name="%s" content="%s">`+"\n", htmlEscape(meta.Name), htmlEscape(meta.Content)))
-			case meta.Property != "":
-				builder.WriteString(fmt.Sprintf(`<meta id="__SERVER_PROPS__" property="%s" content="%s">`+"\n", htmlEscape(meta.Property), htmlEscape(meta.Content)))
-			case meta.HTTPEquiv != "":
-				builder.WriteString(fmt.Sprintf(`<meta id="__SERVER_PROPS__" http-equiv="%s" content="%s">`+"\n", htmlEscape(meta.HTTPEquiv), htmlEscape(meta.Content)))
-			}
-		}
+	var builder strings.Builder
 
-		for _, link := range combinedMeta.Link {
-			builder.WriteString(fmt.Sprintf(`<link id="__SERVER_PROPS__" rel="%s" href="%s">`+"\n", htmlEscape(link.Rel), htmlEscape(link.Href)))
+	if mergedMeta.Title != "" {
+		builder.WriteString(fmt.Sprintf(`<title id="__SERVER_PROPS__">%s</title>`+"\n", html.EscapeString(mergedMeta.Title)))
+	}
+
+	for _, meta := range mergedMeta.Meta {
+		switch {
+		case meta.Charset != "":
+			builder.WriteString(fmt.Sprintf(`<meta id="__SERVER_PROPS__" charset="%s">`+"\n", html.EscapeString(meta.Charset)))
+		case meta.Name != "":
+			builder.WriteString(fmt.Sprintf(`<meta id="__SERVER_PROPS__" name="%s" content="%s">`+"\n", html.EscapeString(meta.Name), html.EscapeString(meta.Content)))
+		case meta.Property != "":
+			builder.WriteString(fmt.Sprintf(`<meta id="__SERVER_PROPS__" property="%s" content="%s">`+"\n", html.EscapeString(meta.Property), html.EscapeString(meta.Content)))
+		case meta.HTTPEquiv != "":
+			builder.WriteString(fmt.Sprintf(`<meta id="__SERVER_PROPS__" http-equiv="%s" content="%s">`+"\n", html.EscapeString(meta.HTTPEquiv), html.EscapeString(meta.Content)))
 		}
+	}
+
+	for _, link := range mergedMeta.Link {
+		builder.WriteString(fmt.Sprintf(`<link id="__SERVER_PROPS__" rel="%s" href="%s">`+"\n", html.EscapeString(link.Rel), html.EscapeString(link.Href)))
 	}
 
 	return builder.String(), nil
-}
-
-func htmlEscape(s string) string {
-	replacer := strings.NewReplacer(
-		`&`, "&amp;",
-		`<`, "&lt;",
-		`>`, "&gt;",
-		`"`, "&quot;",
-	)
-	return replacer.Replace(s)
 }

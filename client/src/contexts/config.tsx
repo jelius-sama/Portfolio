@@ -1,22 +1,19 @@
-import { type AppConfig } from "@/types/config";
-import { type StaticRoute } from "@/types/static.route";
 import { createContext, useContext } from "react"
 import AppConfigJSON from "~/client.config.json";
 import StaticRouteJSON from "~/static.route.json";
+import { type StaticRoute } from "@/types/static.route";
 
 type ConfigState = {
-  app: AppConfig;
+  app: typeof AppConfigJSON;
   staticRoute: StaticRoute[];
 }
 
 const ConfigProviderContext = createContext<ConfigState | undefined>(undefined)
 
 export function ConfigProvider({ children }: { children: React.ReactNode }) {
-  const appConfig: ConfigState["app"] = AppConfigJSON;
-  const staticRoute: ConfigState["staticRoute"] = StaticRouteJSON as StaticRoute[];
 
   return (
-    <ConfigProviderContext.Provider value={{ app: appConfig, staticRoute: staticRoute }}>
+    <ConfigProviderContext.Provider value={{ app: AppConfigJSON, staticRoute: StaticRouteJSON as StaticRoute[] }}>
       {children}
     </ConfigProviderContext.Provider>
   )

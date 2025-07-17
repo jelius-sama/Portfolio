@@ -8,9 +8,9 @@ DEV_PORT := $(shell jq -r '.references[].path' $(CONFIG_FILE) | xargs -I{} jq -r
 BIN_DIR := ./bin
 ENV := production
 
-.PHONY: portfolio dev archive_prod
+.PHONY: build dev archive_prod
 
-portfolio:
+build:
 	(cd client && bun run build)
 	@mkdir -p $(BIN_DIR)
 	CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w -X main.Environment=$(ENV) -X main.Port=$(DEV_PORT) -X main.Version=$(VERSION)" -trimpath -buildvcs=false -o $(BIN_DIR)/$(APP_NAME)-$(VERSION) ./cmd
@@ -53,4 +53,5 @@ INCLUDE_FILES = \
 	README.md \
 
 archive_prod:
-	tar -czf $(APP_NAME)-$(VERSION) $(INCLUDE_FILES)
+	@make build
+	@tar -czf $(APP_NAME)-$(VERSION).tar.gz $(INCLUDE_FILES)

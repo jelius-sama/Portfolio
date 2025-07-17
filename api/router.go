@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -22,7 +23,7 @@ func HandleRouting() *http.ServeMux {
 
 	router.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
-			Forbidden(w, r, getOnlyRoute)
+			MethodNotAllowed(w, r, getOnlyRoute)
 			return
 		}
 
@@ -35,7 +36,7 @@ func HandleRouting() *http.ServeMux {
 
 		ext := filepath.Ext(path)
 		mimeType := mime.TypeByExtension(ext)
-		if mimeType == "" {
+		if len(mimeType) == 0 {
 			mimeType = "application/octet-stream"
 		}
 
@@ -45,7 +46,13 @@ func HandleRouting() *http.ServeMux {
 
 	router.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
 		if !strings.HasPrefix(r.URL.Path, "/api/") {
-			NotFound(w, r, nil)
+			_, file, line, ok := runtime.Caller(1)
+			NotFound(w, r, util.AddrOf("Unreachable code reached!"))
+			if ok {
+				logger.Error("Reached unreachable code in `", file, "` at line: ", line)
+			} else {
+				logger.Error("Reached unreachable code (unknown location)")
+			}
 			return
 		}
 
@@ -63,19 +70,20 @@ func HandleRouting() *http.ServeMux {
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
-			http.Error(w, "Error: Method not allowed!", http.StatusMethodNotAllowed)
+			MethodNotAllowed(w, r, getOnlyRoute)
 			return
 		}
 
 		html, err := parser.GetHTML()
 		if err != nil {
-			http.Error(w, "Error: Internal Server Error!", http.StatusInternalServerError)
+			InternalServerError(w, r, util.AddrOf("Something went wrong when getting html from FS!"))
+			logger.Error("failed to get html shell:\n    " + err.Error())
 			return
 		}
 
-		metadata, err := parser.ParseMetadata()
+		metadata, err := parser.ParseMetadata(r.URL.Path)
 		if err != nil {
-			http.Error(w, "Error: Failed to parse metadata", http.StatusInternalServerError)
+			InternalServerError(w, r, util.AddrOf("Failed to parse metadata of the page!"))
 			logger.Error("metadata parsing failed:\n    " + err.Error())
 			return
 		}
@@ -91,7 +99,7 @@ func HandleRouting() *http.ServeMux {
 	if os.Getenv("env") == types.ENV.Prod {
 		router.HandleFunc("/src/", func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodGet {
-				Forbidden(w, r, getOnlyRoute)
+				MethodNotAllowed(w, r, getOnlyRoute)
 				return
 			}
 
@@ -104,7 +112,7 @@ func HandleRouting() *http.ServeMux {
 
 			ext := filepath.Ext(path)
 			mimeType := mime.TypeByExtension(ext)
-			if mimeType == "" {
+			if len(mimeType) == 0 {
 				mimeType = "application/octet-stream"
 			}
 

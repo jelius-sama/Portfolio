@@ -1,4 +1,252 @@
 {
     "version": "1.0.0",
-    "title": "Portfolio"
+    "title": "Portfolio",
+    "portfolio": {
+        "first_name": "Jelius",
+        "middle_name": null,
+        "last_name": "Basumatary",
+        "nick_name": "Kazuma Satō",
+        "handle": "jelius_sama",
+        "dob": "2007-11-26",
+        "developer": "Full Stack",
+        "enthusiast": "Open Source",
+        "introduction": "A passionate developer who loves building things that work well and are easy to use.",
+        "basic_skills": "Frontend • Backend • Full Stack • Problem Solving",
+        "about_me": [
+            "I'm a backend developer who loves building things that work well and are easy to use. I enjoy solving problems, making code simple, and learning new things every day.",
+            "Right now, I'm in my bachelors degree in Assam Don Bosco University. I like watching Anime a lot. I enjoy developing software that makes a difference in my daily life, and sometimes I play video games (but not too much!).",
+            "When I'm not coding, you can find me exploring new technologies, or sharing insights with the developer community."
+        ],
+        "skills": {
+            "languages": [
+                {
+                    "skill": "JavaScript",
+                    "level": "Experienced"
+                },
+                {
+                    "skill": "TypeScript",
+                    "level": "Experienced"
+                },
+                {
+                    "skill": "Go",
+                    "level": "Experienced"
+                },
+                {
+                    "skill": "Rust",
+                    "level": "Learning"
+                },
+                {
+                    "skill": "C",
+                    "level": "Beginner"
+                }
+            ],
+            "frameworks": [
+                {
+                    "skill": "React",
+                    "level": "Experienced"
+                },
+                {
+                    "skill": "Next.js",
+                    "level": "Experienced"
+                },
+                {
+                    "skill": "Node.js",
+                    "level": "Experienced"
+                }
+            ],
+            "tools": [
+                {
+                    "skill": "Git",
+                    "level": "Experienced"
+                },
+                {
+                    "skill": "AWS",
+                    "level": "Learning"
+                },
+                {
+                    "skill": "Cloudflare",
+                    "level": "Learning"
+                },
+                {
+                    "skill": "PostgreSQL",
+                    "level": "Experienced"
+                },
+                {
+                    "skill": "Redis",
+                    "level": "Learning"
+                }
+            ]
+        },
+        "experience": [
+            {
+                "title": "Birth",
+                "subtitle": "ST. Augustine Hospital • New born",
+                "date": "November 2007"
+            },
+            {
+                "title": "Student",
+                "subtitle": "Holy Child • Primary School",
+                "date": "Jan 2009 – Dec 2013"
+            },
+            {
+                "title": "Student",
+                "subtitle": "ST. John's • High School",
+                "date": "Jan 2014 – April 2025"
+            },
+            {
+                "title": "Undergraduate",
+                "subtitle": "Assam Don Bosco • University",
+                "date": "April 2025 – Present",
+                "highlighted": true
+            }
+        ],
+        "pictures": [
+            "/assets/jelius.jpg"
+        ],
+        "projects": [
+            {
+                "id": "pixelle",
+                "title": "Pixelle",
+                "description": "An anime image gallery application with collections of illustrations and photography.",
+                "image": "/assets/project-pixelle.png",
+                "technologies": [
+                    "Next.js",
+                    "TypeScript",
+                    "PostgreSQL"
+                ],
+                "codeUrl": "https://github.com/jelius-sama/pixelle-demo",
+                "liveUrl": "https://pixelle.jelius.dev"
+            },
+            {
+                "id": "local-dex",
+                "title": "LocalDex",
+                "description": "NAS Client & Server, Full-Fledge NAS Software that lets you manage your contents in your NAS.",
+                "image": "/assets/local-dex.png",
+                "technologies": [
+                    "Go",
+                    "React",
+                    "SQLite"
+                ],
+                "codeUrl": "https://github.com/jelius-sama/LocalDex"
+            }
+        ],
+        "links": {
+            "Email": {
+                "username": "contact@jelius.dev",
+                "link": "mailto:contact@jelius.dev"
+            },
+            "X": {
+                "username": "@jelius_sama",
+                "link": "https://x.com/jelius_sama"
+            },
+            "LinkedIn": {
+                "username": "Jelius Basumatary",
+                "link": "https://www.linkedin.com/in/jelius-basumatary-485044339/"
+            },
+            "GitHub": {
+                "username": "@jelius_sama",
+                "link": "https://github.com/jelius-sama"
+            },
+            "jelius.dev": {
+                "username": "jelius.dev",
+                "link": "https://jelius.dev",
+                "qr_code_link": "/assets/jelius-dev-dark.png"
+            },
+            "jelius.dev/links": {
+                "username": "jelius.dev/links",
+                "link": "https://jelius.dev/links",
+                "qr_code_link": "/assets/links.png"
+            }
+        },
+        "logs": [
+            "[2025-07-16] INFO: Re-designing my Personal Portfolio site from scratch - Tags: Go/React, AWS EC2/Hosting, UI/UX Design",
+            "[2025-07-11] INFO: Better NAS Client: Building a Full-Fledge NAS Client - Tags: Go/React, Networking, Database"
+        ],
+        "linktree": [
+            {
+                "title": "GitHub",
+                "description": "Check out my code and projects",
+                "url": "https://github.com/jelius-sama",
+                "icon": "Github"
+            },
+            {
+                "title": "LinkedIn",
+                "description": "Connect with me professionally",
+                "url": "https://www.linkedin.com/in/jelius-basumatary-485044339/",
+                "icon": "Linkedin"
+            },
+            {
+                "title": "Portfolio",
+                "description": "View my complete portfolio",
+                "url": "https://jelius.dev",
+                "icon": "Code"
+            },
+            {
+                "title": "X",
+                "description": "Follow me for tech updates",
+                "url": "https://x.com/jelius_sama",
+                "icon": "Twitter"
+            },
+            {
+                "title": "YouTube",
+                "description": "Watch my videos when I start uploading content.",
+                "url": "https://youtube.com/@jelius-sama",
+                "icon": "Youtube"
+            },
+            {
+                "title": "Instagram",
+                "description": "Behind the scenes content",
+                "url": "https://instagram.com/_jelius_sama",
+                "icon": "Instagram"
+            },
+            {
+                "title": "Email Me",
+                "description": "Get in touch directly",
+                "url": "mailto:contact@jelius.dev",
+                "icon": "Mail"
+            }
+        ],
+        "neofetch": [
+            {
+                "label": "OS",
+                "value": "Amazon Linux 2023"
+            },
+            {
+                "label": "Host",
+                "value": "AWS EC2 t3.micro"
+            },
+            {
+                "label": "Kernel",
+                "value": "6.1.0-aws"
+            },
+            {
+                "label": "Uptime",
+                "value": "365 days, 7 hours, 42 mins"
+            },
+            {
+                "label": "Shell",
+                "value": "bash 5.2.15"
+            },
+            {
+                "label": "Terminal",
+                "value": "tmux"
+            },
+            {
+                "label": "CPU",
+                "value": "Intel Xeon E5-2686 v4 (1) @ 2.3GHz"
+            },
+            {
+                "label": "Memory",
+                "value": "200MiB / 1024MiB"
+            },
+            {
+                "label": "Disk",
+                "value": "4G / 8G (50%)"
+            },
+            {
+                "label": "Region",
+                "value": "ap-northeast-1 (Tokyo)"
+            }
+        ]
+    }
 }
