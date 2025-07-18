@@ -3,6 +3,7 @@ import { useConfig } from "@/contexts/config"
 import { Mail, Github, Linkedin, Twitter, LinkIcon } from "lucide-react"
 import { type JSX } from "react"
 import { Link } from "react-router-dom"
+import { InteractiveTerminal } from "@/components/layout/interactive-term"
 
 const iconMap: Record<string, JSX.Element> = {
     Email: <Mail className="text-orange-400" size={20} />,
@@ -69,27 +70,7 @@ export function ContactSection() {
                         </div>
                     </TerminalWindow>
 
-                    <TerminalWindow title="stats">
-                        <div className="font-mono text-sm">
-                            <div className="text-orange-400 mb-2">$ neofetch | less</div>
-
-                            <div className="flex w-full place-content-center gap-6 mb-6">
-                                <div className="flex-shrink-0">
-                                    <div className="w-64 h-64 bg-[#1E1E1E] border border-orange-500/30 rounded flex items-center justify-center">
-                                        {me.links["jelius.dev"]?.qr_code_link ? (
-                                            <img
-                                                src={me.links["jelius.dev"]?.qr_code_link}
-                                                alt="QR Code to portfolio page"
-                                                className="w-58 h-58 rounded object-cover"
-                                            />
-                                        ) : (
-                                            <span className="text-gray-500">QR Code not available</span>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </TerminalWindow>
+                    <InteractiveTerminal />
                 </div>
 
                 <TerminalWindow title="latest-logs" className="mb-8">

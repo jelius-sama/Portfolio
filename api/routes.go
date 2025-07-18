@@ -6,6 +6,8 @@ import (
 )
 
 var ApiRoutes = map[string]http.HandlerFunc{
-	"GET /latest_commit": handler.LatestCommit,
-	"GET /neofetch":      handler.NeofetchInfo,
+	"GET /latest_commit":  handler.LatestCommit,
+	"GET /neofetch":       handler.NeofetchInfo,
+	"POST /sudo":          handler.VerifySudo,
+	"POST /update_server": handler.UpdateServer,
 }
