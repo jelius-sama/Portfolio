@@ -29,7 +29,7 @@ export default function DevelopmentPage() {
   const { isPending, error, data } = useQuery({
     queryKey: ['latestCommit'],
     queryFn: async () => {
-      const res = await fetch('/api/latest_commit?repo=portfolio&branch=master')
+      const res = await fetch('/api/latest_commit?repo=Portfolio&branch=main')
       if (!res.ok) {
         const errMsg = "Failed to fetch last commit!"
         toast.error(errMsg)
@@ -105,11 +105,11 @@ export default function DevelopmentPage() {
           <div className="flex flex-col justify-center items-center text-gray-500 text-sm font-mono">
             <div>Development Environment • Go 1.24.5</div>
             {isPending ? (
-              <div className="mt-2 flex items-center justify-center">Last commit: <Skeleton className="h-3 w-[100px] mx-1" /> • Branch: portfolio/master</div>
+              <div className="mt-2 flex items-center justify-center">Last commit: <Skeleton className="h-3 w-[100px] mx-1" /> • Branch: Portfolio/main</div>
             ) : error ? (
               <div className="mt-2">{error.message}</div>
             ) : data && (
-              <div className="mt-2">Last commit: {data.sha.slice(0, 7)} • {timeAgo} • Branch: portfolio/master</div>
+              <div className="mt-2">Last commit: {data.sha.slice(0, 7)} • {timeAgo} • Branch: Portfolio/main</div>
             )}
           </div>
         </div>
