@@ -45,7 +45,7 @@ export default function DevelopmentPage() {
     <Fragment>
       <StaticMetadata />
 
-      <div className="min-h-screen flex items-center justify-center px-6">
+      <div className="min-h-screen flex items-center justify-center px-6 py-12">
         <div className="w-6xl mx-auto px-6 py-4">
           {/* Header */}
           <div className="text-center my-8">
@@ -105,7 +105,7 @@ export default function DevelopmentPage() {
           <div className="flex flex-col justify-center items-center text-gray-500 text-sm font-mono">
             <div>Development Environment • Go 1.24.5</div>
             {isPending ? (
-              <div className="mt-2 flex items-center justify-center">Last commit: <Skeleton className="h-3 w-[100px] mx-1" /> • Branch: Portfolio/main</div>
+              <div className="w-full mt-2 flex items-center justify-center">Last commit: <Skeleton className="h-3 w-full max-w-[200px] mx-1" /> • Branch: Portfolio/main</div>
             ) : error ? (
               <div className="mt-2">{error.message}</div>
             ) : data && (
