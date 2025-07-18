@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 export function InteractiveTerminal() {
     const { app: { portfolio: me } } = useConfig()
 
+    const hasMountedRef = useRef(false)
     const [command, setCommand] = useState("")
     const [output, setOutput] = useState<string[]>([])
     const inputRef = useRef<HTMLInputElement>(null)
@@ -48,11 +49,11 @@ export function InteractiveTerminal() {
     const [pendingSudoCommand, setPendingSudoCommand] = useState<string | null>(null);
 
     useEffect(() => {
-        // Focus the input when the component mounts or output changes
-        if (inputRef.current) {
-            inputRef.current.focus()
+        if (!hasMountedRef.current) {
+            hasMountedRef.current = true
+            return
         }
-        // Scroll to the bottom of the output
+
         if (scrollableContentRef.current) {
             scrollableContentRef.current.scrollTop = scrollableContentRef.current.scrollHeight
         }
