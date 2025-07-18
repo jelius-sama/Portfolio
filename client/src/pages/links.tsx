@@ -76,7 +76,7 @@ export default function Links() {
             <h1 className="text-2xl font-bold text-white mb-2">
               <span className="text-orange-400">@</span>{me.handle}
             </h1>
-            <p className="text-gray-400 font-mono text-sm">{me.developer} Developer • {me.enthusiast} Enthusiast</p>
+            <p className="text-gray-400 font-mono text-sm">{"developer" in me ? me.developer + " Developer" : me.student + " Student"} • {me.enthusiast} Enthusiast</p>
           </div>
 
           {/* Terminal Info */}

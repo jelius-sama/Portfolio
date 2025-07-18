@@ -21,7 +21,7 @@ export function HeroSection() {
                 <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
                     <span className="text-orange-400">{me.first_name}</span> {me.last_name}
                 </h1>
-                <p className="text-xl text-gray-300 font-mono">{me.developer} Developer</p>
+                <p className="text-xl text-gray-300 font-mono">{"developer" in me ? me.developer + " Developer" : me.student + " Student"}</p>
             </div>
 
             <div className="flex flex-wrap gap-4 justify-center mb-8">
