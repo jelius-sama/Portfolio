@@ -1,14 +1,45 @@
 import { TerminalWindow } from "@/components/layout/terminal-window"
 import { Github, Mail, Wrench } from "lucide-react"
 import { suggestions } from "@/pages/not-found"
-import { Link, useLocation } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { useConfig } from "@/contexts/config"
 import { StaticMetadata } from "@/contexts/metadata"
 import { Fragment } from "react"
+import { useQuery } from '@tanstack/react-query'
+import { toast } from "sonner"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useTimeAgo } from "@/lib/utils"
+
+type CommitResponse = {
+  sha: string
+  commit: {
+    message: string
+    author: {
+      name: string
+      email: string
+      date: string
+    }
+  }
+  html_url: string
+}
 
 export default function DevelopmentPage() {
-  const location = useLocation()
   const { app: { portfolio: me } } = useConfig()
+
+  const { isPending, error, data } = useQuery({
+    queryKey: ['latestCommit'],
+    queryFn: async () => {
+      const res = await fetch('/api/latest_commit?repo=portfolio&branch=master')
+      if (!res.ok) {
+        const errMsg = "Failed to fetch last commit!"
+        toast.error(errMsg)
+        throw new Error(errMsg)
+      }
+      return res.json() as Promise<CommitResponse>
+    }
+  })
+
+  const timeAgo = useTimeAgo(data?.commit.author.date)
 
   return (
     <Fragment>
@@ -71,9 +102,15 @@ export default function DevelopmentPage() {
           </TerminalWindow>
 
           {/* Footer */}
-          <div className="text-center text-gray-500 text-sm font-mono">
+          <div className="flex flex-col justify-center items-center text-gray-500 text-sm font-mono">
             <div>Development Environment • Go 1.24.5</div>
-            <div className="mt-2">Last commit: {Math.random().toString(36).substr(2, 7)} • Branch: master{location.pathname}</div>
+            {isPending ? (
+              <div className="mt-2 flex items-center justify-center">Last commit: <Skeleton className="h-3 w-[100px] mx-1" /> • Branch: portfolio/master</div>
+            ) : error ? (
+              <div className="mt-2">{error.message}</div>
+            ) : data && (
+              <div className="mt-2">Last commit: {data.sha.slice(0, 7)} • {timeAgo} • Branch: portfolio/master</div>
+            )}
           </div>
         </div>
       </div>

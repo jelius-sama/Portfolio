@@ -4,6 +4,8 @@ import { Github, Linkedin, Twitter, Mail, FileText, Code, Rss, Youtube, Instagra
 import { useConfig } from "@/contexts/config"
 import { type JSX, Fragment } from "react"
 import { StaticMetadata } from "@/contexts/metadata"
+import { useQuery } from "@tanstack/react-query"
+import { toast } from "sonner"
 
 const iconMap: Record<string, JSX.Element> = {
   Github: <Github size={20} />,
@@ -19,6 +21,21 @@ const iconMap: Record<string, JSX.Element> = {
 
 export default function Links() {
   const { app: { portfolio: me } } = useConfig()
+
+  const { isPending, error, data } = useQuery({
+    queryKey: ['neofetch'],
+    queryFn: async () => {
+      const res = await fetch('/api/neofetch')
+      if (!res.ok) {
+        const errMsg = "Failed to fetch netfetch command!"
+        toast.error(errMsg)
+        throw new Error(errMsg)
+      }
+      return res.json() as Promise<Array<{ label: string, value: string }>>
+    }
+  })
+
+  const neofetch: undefined | Array<{ label: string, value: string }> = isPending ? undefined : error ? me.neofetch : data && data
 
   return (
     <Fragment>
@@ -97,7 +114,8 @@ export default function Links() {
                 <div>• Status: All systems operational</div>
               </div>
 
-              <div className="text-orange-400 mt-4 mb-2">$ neofetch</div>
+              <div className="text-orange-400 mt-4 mb-2 sm:block hidden">$ neofetch</div>
+              <div className="text-orange-400 mt-4 mb-2 sm:hidden block">$ neofetch | less</div>
 
               {/* Neofetch Output */}
               <div className="flex gap-6 mb-6">
@@ -118,13 +136,15 @@ export default function Links() {
                 </div>
 
                 {/* Right side - System Info */}
-                <div className="flex-1 text-gray-300 space-y-1">
-                  {me.neofetch.map((stat, index) => (
-                    <div key={index}>
-                      <span className="text-orange-400">{stat.label}:</span> {stat.value}
-                    </div>
-                  ))}
-                </div>
+                {neofetch && (
+                  <div className="sm:block flex-1 text-gray-300 space-y-1 hidden">
+                    {neofetch.map((stat, index) => (
+                      <div key={index}>
+                        <span className="text-orange-400">{stat.label}:</span> {stat.value}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="text-orange-400 mt-4 mb-2">$ echo "Thanks for visiting!"</div>

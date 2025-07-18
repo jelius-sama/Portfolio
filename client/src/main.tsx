@@ -8,6 +8,9 @@ import { ConfigProvider } from '@/contexts/config'
 import { lazy, Suspense, useLayoutEffect } from 'react'
 import { Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { Header } from "@/components/layout/header"
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
+
+const queryClient = new QueryClient()
 
 const Home = lazy(() => import("@/pages/home"))
 const Development = lazy(() => import("@/pages/development"))
@@ -52,17 +55,19 @@ const Entry = () => {
     <StrictMode>
       <ConfigProvider>
         <BrowserRouter>
-          <ThemeProvider defaultTheme="dark" storageKey="theme">
-            <Routes>
-              <Route path='/' element={<App />}>
-                <Route path='/' element={<Home />} />
-                <Route path='/links' element={<Links />} />
-                <Route path='/blogs' element={<Development />} />
-                <Route path='*' element={<NotFound />} />
-              </Route>
-            </Routes>
-            <Toaster richColors={true} />
-          </ThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider defaultTheme="dark" storageKey="theme">
+              <Routes>
+                <Route path='/' element={<App />}>
+                  <Route path='/' element={<Home />} />
+                  <Route path='/links' element={<Links />} />
+                  <Route path='/blogs' element={<Development />} />
+                  <Route path='*' element={<NotFound />} />
+                </Route>
+              </Routes>
+              <Toaster richColors={true} />
+            </ThemeProvider>
+          </QueryClientProvider>
         </BrowserRouter>
       </ConfigProvider>
     </StrictMode>
