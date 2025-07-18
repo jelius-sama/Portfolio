@@ -9,7 +9,6 @@ import (
 )
 
 func UpdateServer(w http.ResponseWriter, r *http.Request) {
-	// Extract Bearer token
 	authHeader := r.Header.Get("Authorization")
 	if !strings.HasPrefix(authHeader, "Bearer ") {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -17,23 +16,19 @@ func UpdateServer(w http.ResponseWriter, r *http.Request) {
 	}
 	password := strings.TrimPrefix(authHeader, "Bearer ")
 
-	// Load expected password from systemd credentials
-	credPath := "/run/cred/Portfolio.service/sudo_pass"
-	expectedPasswordBytes, err := os.ReadFile(credPath)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	expectedPassword := os.Getenv("SUDO_PASS")
+	if expectedPassword == "" {
+		http.Error(w, "Server misconfigured", http.StatusInternalServerError)
 		return
 	}
-	expectedPassword := strings.TrimSpace(string(expectedPasswordBytes))
 
-	// Secure compare
 	if subtle.ConstantTimeCompare([]byte(password), []byte(expectedPassword)) != 1 {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	// Execute update script
-	cmd := exec.Command("bash", "-c", "~/update_prod.sh")
+	// Execute update script (in background)
+	cmd := exec.Command("bash", "/home/ec2-user/update_prod.sh")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -42,7 +37,6 @@ func UpdateServer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Detach the update process (don't wait for completion)
 	go func() {
 		_ = cmd.Wait()
 	}()
