@@ -143,11 +143,23 @@ export function InteractiveTerminal() {
                 ]);
                 break;
 
+            case "version":
+                try {
+                    const res = await fetch("/api/version");
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    setOutput((prev) => [...prev, `Version: ${data.version}`]);
+                } catch {
+                    setOutput((prev) => [...prev, "Failed to fetch version"]);
+                }
+                break;
+
             case "help":
                 setOutput((prev) => [
                     ...prev,
                     "Usage:",
                     "- help: Show this help message",
+                    "- version: Show the current server version",
                     "- clear: Clear the terminal output",
                     "- neofetch: Show system info",
                     "More commands will be implemented soon..."

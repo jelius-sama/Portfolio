@@ -10,4 +10,5 @@ var ApiRoutes = map[string]http.HandlerFunc{
 	"GET /neofetch":       handler.NeofetchInfo,
 	"POST /sudo":          handler.VerifySudo,
 	"POST /update_server": handler.UpdateServer,
+	"GET /version":        handler.GetVersion,
 }
