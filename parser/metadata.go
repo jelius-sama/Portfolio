@@ -73,7 +73,33 @@ func ParseMetadata(path string) (string, error) {
 	}
 
 	for _, link := range mergedMeta.Link {
-		builder.WriteString(fmt.Sprintf(`<link id="__SERVER_PROPS__" rel="%s" href="%s">`+"\n", html.EscapeString(link.Rel), html.EscapeString(link.Href)))
+		builder.WriteString(`<link id="__SERVER_PROPS__"`)
+		builder.WriteString(fmt.Sprintf(` rel="%s"`, html.EscapeString(link.Rel)))
+		builder.WriteString(fmt.Sprintf(` href="%s"`, html.EscapeString(link.Href)))
+
+		if link.Type != "" {
+			builder.WriteString(fmt.Sprintf(` type="%s"`, html.EscapeString(link.Type)))
+		}
+		if link.Crossorigin != "" {
+			builder.WriteString(fmt.Sprintf(` crossorigin="%s"`, html.EscapeString(link.Crossorigin)))
+		}
+		if link.Media != "" {
+			builder.WriteString(fmt.Sprintf(` media="%s"`, html.EscapeString(link.Media)))
+		}
+		if link.Sizes != "" {
+			builder.WriteString(fmt.Sprintf(` sizes="%s"`, html.EscapeString(link.Sizes)))
+		}
+		if link.As != "" {
+			builder.WriteString(fmt.Sprintf(` as="%s"`, html.EscapeString(link.As)))
+		}
+		if link.Referrer != "" {
+			builder.WriteString(fmt.Sprintf(` referrerpolicy="%s"`, html.EscapeString(link.Referrer)))
+		}
+		if link.Title != "" {
+			builder.WriteString(fmt.Sprintf(` title="%s"`, html.EscapeString(link.Title)))
+		}
+
+		builder.WriteString(`>` + "\n")
 	}
 
 	return builder.String(), nil

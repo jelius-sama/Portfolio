@@ -130,7 +130,7 @@ export const StaticMetadata = () => {
       })}
 
       {mergedMeta.link?.map((link, i) => (
-        <Link key={i} rel={link.rel} href={link.href} />
+        <Link key={i} {...link} />
       ))}
     </Metadata>
   );

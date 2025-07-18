@@ -76,7 +76,7 @@ export function ProjectsSection() {
                 </div>
 
                 {/* Terminal Command for More Projects */}
-                <TerminalWindow title="more-projects" className="mt-12 max-w-2xl mx-auto">
+                <TerminalWindow title="more-projects" className="mt-12 max-w-6xl mx-auto">
                     <div className="font-mono text-sm">
                         <div className="text-orange-400 mb-2">$ ls projects/ --all</div>
                         <div className="text-gray-300 mb-2">Found {me.projects.length} projects in current directory</div>

@@ -36,8 +36,22 @@ func HandleRouting() *http.ServeMux {
 
 		ext := filepath.Ext(path)
 		mimeType := mime.TypeByExtension(ext)
-		if len(mimeType) == 0 {
-			mimeType = "application/octet-stream"
+
+		switch path {
+		case "assets/sw.js":
+			mimeType = "application/javascript"
+			break
+
+		case "assets/manifest.json":
+			mimeType = "application/manifest+json"
+			w.Header().Set("Service-Worker-Allowed", "/")
+			break
+
+		default:
+			if len(mimeType) == 0 {
+				mimeType = "application/octet-stream"
+			}
+			break
 		}
 
 		w.Header().Set("Content-Type", mimeType)

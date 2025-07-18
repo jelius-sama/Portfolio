@@ -17,7 +17,7 @@ export function ContactSection() {
 
     return (
         <section id="contact" className="py-20 px-6 bg-gray-900/50">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-6xl mx-auto">
                 <h2 className="text-3xl font-bold text-center mb-12">
                     <span className="text-orange-400">|</span> <span className="text-white">Get in Touch</span>
                 </h2>

@@ -24,6 +24,7 @@ export interface LinkTag {
     href: string;
     type?: string;
     crossorigin?: string;
+    media?: string;
 }
 
 export interface ScriptTag {

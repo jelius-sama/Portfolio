@@ -19,8 +19,15 @@ type MetaTag struct {
 }
 
 type LinkTag struct {
-	Rel  string `json:"rel"`
-	Href string `json:"href"`
+	Rel         string `json:"rel"`
+	Href        string `json:"href"`
+	Type        string `json:"type,omitempty"`
+	Crossorigin string `json:"crossorigin,omitempty"`
+	Media       string `json:"media,omitempty"`
+	Sizes       string `json:"sizes,omitempty"`
+	As          string `json:"as,omitempty"`
+	Referrer    string `json:"referrer,omitempty"`
+	Title       string `json:"title,omitempty"`
 }
 
 type RouteMetadata struct {

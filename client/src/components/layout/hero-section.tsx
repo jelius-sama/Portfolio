@@ -7,7 +7,7 @@ export function HeroSection() {
 
     return (
         <section id="home" className="min-h-screen flex items-center justify-center px-6 pt-20">
-            <div className="max-w-4xl mx-auto text-center">
+            <div className="max-w-6xl mx-auto text-center">
                 <div className="mb-8">
                     <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 p-1">
                         <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
@@ -34,7 +34,7 @@ export function HeroSection() {
                     </a>
                 </div>
 
-                <TerminalWindow title="welcome" className="max-w-2xl mx-auto text-left">
+                <TerminalWindow title="welcome" className="w-6xl mx-auto text-left">
                     <div className="font-mono text-sm">
                         <div className="text-orange-400 mb-2">$ whoami</div>
                         <div className="text-gray-300 mb-4">{me.introduction}</div>
