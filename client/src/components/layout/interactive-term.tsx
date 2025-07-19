@@ -15,7 +15,6 @@ export function InteractiveTerminal() {
     const inputWrapperRef = useRef<HTMLDivElement>(null);
     const initialMaxHeight = useRef<string | null>(null);
     const [maxHeight, setMaxHeight] = useState("auto");
-    const [sudoPassword, setSudoPassword] = useState<string | null>(null);
 
     const verifySudoPassword = async (token: string): Promise<boolean> => {
         try {
@@ -80,7 +79,6 @@ export function InteractiveTerminal() {
         // Handle sudo password input
         if (awaitingPassword) {
             setAwaitingPassword(false);
-            setSudoPassword(cmd);
 
             const isValid = await verifySudoPassword(cmd || "");
 
@@ -103,7 +101,7 @@ export function InteractiveTerminal() {
             } else if (pendingSudoCommand === "update-server") {
                 setOutput((prev) => [...prev, "[sudo] password accepted"]);
 
-                const success = await updateServer(sudoPassword || "");
+                const success = await updateServer(cmd || "");
 
                 if (success) {
                     setOutput((prev) => [
