@@ -11,4 +11,5 @@ var ApiRoutes = map[string]http.HandlerFunc{
 	"POST /sudo":          handler.VerifySudo,
 	"POST /update_server": handler.UpdateServer,
 	"GET /version":        handler.GetVersion,
+	"POST /analytics":     handler.SaveAnalytics,
 }

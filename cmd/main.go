@@ -2,17 +2,22 @@ package main
 
 import (
 	"KazuFolio/api"
+	"KazuFolio/db"
 	"KazuFolio/logger"
 	m "KazuFolio/middleware"
+	"database/sql"
 	"errors"
+	_ "modernc.org/sqlite"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 )
 
 var Environment = "development"
 var Port = "6969"
 var Version string
+var Home = "/home/ec2-user"
 
 func init() {
 	exePath, err := os.Executable()
@@ -24,6 +29,17 @@ func init() {
 	os.Setenv("version", Version)
 	os.Setenv("env", Environment)
 	os.Setenv("port", Port)
+	os.Setenv("home", Home)
+	os.Setenv("db_file", path.Join(Home, "/portfolio.db"))
+
+	db.Conn, err = sql.Open("sqlite", os.Getenv("db_file"))
+	if err != nil {
+		logger.Panic(err)
+	}
+
+	if err = db.InitializeSchema(db.Conn); err != nil {
+		logger.Panic(err)
+	}
 }
 
 func fileExists(filePath string) bool {
@@ -79,6 +95,8 @@ func main() {
 			}
 		}
 	}
+
+	defer db.Conn.Close()
 
 	if err, port := startServer(); err != nil {
 		logger.Panic("Could not start the server on port :"+port, "\n", err)
