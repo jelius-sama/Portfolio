@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"KazuFolio/types"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -34,7 +33,18 @@ func LatestCommit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var commit types.Commit
+	var commit struct {
+		SHA    string `json:"sha"`
+		Commit struct {
+			Message string `json:"message"`
+			Author  struct {
+				Name  string `json:"name"`
+				Email string `json:"email"`
+				Date  string `json:"date"`
+			} `json:"author"`
+		} `json:"commit"`
+		HTMLURL string `json:"html_url"`
+	}
 	if err := json.NewDecoder(resp.Body).Decode(&commit); err != nil {
 		http.Error(w, "Failed to parse GitHub response", http.StatusInternalServerError)
 		return

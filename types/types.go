@@ -1,15 +1,24 @@
 package types
 
+// Type of Server Environment
 type Environment struct {
 	Prod string
 	Dev  string
 }
 
+// Enum of Server ENvironment
 var ENV = Environment{
 	Prod: "production",
 	Dev:  "development",
 }
 
+// Type representing reverse proxy status and settings
+type BehindReverseProxy struct {
+	StatementValid bool
+	Port           string
+}
+
+// Type related to static page metadata
 type MetaTag struct {
 	Charset   string `json:"charset,omitempty"`
 	Name      string `json:"name,omitempty"`
@@ -35,17 +44,4 @@ type RouteMetadata struct {
 	Title string    `json:"title,omitempty"`
 	Meta  []MetaTag `json:"meta,omitempty"`
 	Link  []LinkTag `json:"link,omitempty"`
-}
-
-type Commit struct {
-	SHA    string `json:"sha"`
-	Commit struct {
-		Message string `json:"message"`
-		Author  struct {
-			Name  string `json:"name"`
-			Email string `json:"email"`
-			Date  string `json:"date"`
-		} `json:"author"`
-	} `json:"commit"`
-	HTMLURL string `json:"html_url"`
 }

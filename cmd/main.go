@@ -1,11 +1,13 @@
 package main
 
 import (
+	vars "KazuFolio"
 	"KazuFolio/api"
 	"KazuFolio/db"
 	"KazuFolio/logger"
 	m "KazuFolio/middleware"
 	"KazuFolio/types"
+	"KazuFolio/util"
 	"database/sql"
 	"errors"
 	_ "modernc.org/sqlite"
@@ -15,10 +17,15 @@ import (
 	"path/filepath"
 )
 
-var Environment = "development"
-var Port = "6969"
-var Version string
-var Home = "/home/ec2-user"
+var (
+	Environment = "development"
+	DevPort     = "6969"
+	Version     string
+	Home        = "/home/ec2-user"
+
+	ReverseProxy string
+	ProxyPort    string
+)
 
 func init() {
 	exePath, err := os.Executable()
@@ -26,10 +33,24 @@ func init() {
 		logger.Panic("could not get executable path:", err)
 	}
 
+	if ReverseProxy == "true" {
+		if util.IsValidPort(ProxyPort) == false {
+			logger.Panic("supplied port for reverse proxy is invalid.")
+		}
+
+		vars.ReverseProxy = types.BehindReverseProxy{
+			StatementValid: true,
+			Port:           ProxyPort,
+		}
+	} else {
+		vars.ReverseProxy = types.BehindReverseProxy{
+			StatementValid: false,
+		}
+	}
+
 	os.Setenv("ROOT_PATH", filepath.Dir(filepath.Dir(exePath)))
 	os.Setenv("version", Version)
 	os.Setenv("env", Environment)
-	os.Setenv("port", Port)
 	os.Setenv("home", Home)
 	os.Setenv("db_file", path.Join(Home, "/portfolio.db"))
 
@@ -66,7 +87,6 @@ func main() {
 
 	startServer := func() (ServerResp, string) {
 		respChan := make(chan ServerResp, 2)
-		portToStart := Port
 
 		routeHandler := m.Chain(m.MiddlewareChain{
 			Handler: api.HandleRouting(),
@@ -78,15 +98,33 @@ func main() {
 
 		// INFO: Development Server
 		if Environment == types.ENV.Dev {
-			os.Setenv("port", portToStart)
-			logger.Info("Development server started on port :" + portToStart)
+			if util.IsValidPort(DevPort) == false {
+				logger.Panic("supplied port for dev server is invalid, falling back to :6969")
+				DevPort = "6969"
+			}
+
+			os.Setenv("port", DevPort)
+			logger.Info("Development server started on port :" + DevPort)
 
 			go func() {
-				err := http.ListenAndServe(":"+portToStart, routeHandler)
+				err := http.ListenAndServe(":"+DevPort, routeHandler)
 				respChan <- ServerResp{Http: err}
 			}()
 
-			return <-respChan, portToStart
+			return <-respChan, DevPort
+		}
+
+		// TODO: Support secure connection over https
+		if vars.ReverseProxy.StatementValid == true {
+			os.Setenv("port", vars.ReverseProxy.Port)
+			logger.Info("Production server started behind reverse proxy on port :" + vars.ReverseProxy.Port)
+
+			go func() {
+				err := http.ListenAndServe(":"+vars.ReverseProxy.Port, routeHandler)
+				respChan <- ServerResp{Http: err}
+			}()
+
+			return <-respChan, vars.ReverseProxy.Port
 		}
 
 		// INFO: Production server
@@ -96,7 +134,7 @@ func main() {
 		exists2 := fileExists(privkey)
 
 		if exists1 && exists2 {
-			portToStart = "443"
+			portToStart := "443"
 			os.Setenv("port", portToStart)
 			logger.Info("Production server started on port :" + portToStart)
 
@@ -128,22 +166,26 @@ func main() {
 		}
 
 		// INFO: If no SSL certificates were found, fallback to HTTP only mode
-		portToStart = "80"
-		os.Setenv("port", portToStart)
+		fallbackPort := "80"
+		os.Setenv("port", fallbackPort)
 		logger.Warning("Production server was started without SSL certificate falling back to http only mode.")
-		logger.Info("Production server started on port :" + portToStart)
+		logger.Info("Production server started on port :" + fallbackPort)
 
 		go func() {
-			err := http.ListenAndServe(":"+portToStart, routeHandler)
+			err := http.ListenAndServe(":"+fallbackPort, routeHandler)
 			respChan <- ServerResp{Http: err}
 		}()
 
-		return <-respChan, portToStart
+		return <-respChan, fallbackPort
 	}
 
 	if serverResp, port := startServer(); serverResp.Http != nil || serverResp.Https != nil {
 		if serverResp.Http != nil {
-			logger.Error("HTTP server failed on port " + port + ":\n" + serverResp.Http.Error())
+			if vars.ReverseProxy.StatementValid == true {
+				logger.Error("Server failed behind reverse proxy on port " + port + ": " + serverResp.Http.Error())
+			} else {
+				logger.Error("HTTP server failed on port " + port + ":\n" + serverResp.Http.Error())
+			}
 		}
 		if serverResp.Https != nil {
 			logger.Error("HTTPS server failed on port " + port + ":\n" + serverResp.Https.Error())

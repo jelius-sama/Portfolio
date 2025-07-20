@@ -1,7 +1,7 @@
 package parser
 
 import (
-	embed "KazuFolio"
+	vars "KazuFolio"
 	"KazuFolio/types"
 	"errors"
 	"io/fs"
@@ -32,7 +32,7 @@ const DevHTMLShell string = `<!doctype html>
 
 func GetHTML() ([]byte, error) {
 	if os.Getenv("env") == types.ENV.Prod {
-		content, err := fs.ReadFile(embed.ViteFS, "client/dist/index.html")
+		content, err := fs.ReadFile(vars.ViteFS, "client/dist/index.html")
 		if err != nil {
 			return []byte{}, errors.New("file not found")
 		}

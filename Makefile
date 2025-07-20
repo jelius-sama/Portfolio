@@ -5,6 +5,14 @@ VERSION := $(shell jq -r '.references[].path' $(CONFIG_FILE) | xargs -I{} jq -r 
 APP_NAME := $(shell jq -r '.references[].path' $(CONFIG_FILE) | xargs -I{} jq -r 'select(has("title")) | .title' $(CONFIG_DIR){} )
 DEV_PORT := $(shell jq -r '.references[].path' $(CONFIG_FILE) | xargs -I{} jq -r 'select(has("dev_port")) | .dev_port' $(CONFIG_DIR){} )
 HOME_PATH := $(shell jq -r '.references[].path' $(CONFIG_FILE) | xargs -I{} jq -r 'select(has("home_path")) | .home_path' $(CONFIG_DIR){} )
+IS_REVERSE_PROXIED := $(shell \
+  jq -r '.references[].path' $(CONFIG_FILE) | \
+  xargs -I{} jq -er 'if has("is_behind_reverse_proxy") then .is_behind_reverse_proxy.statement_valid else empty end' $(CONFIG_DIR)/{} \
+)
+PORT := $(shell \
+  jq -r '.references[].path' $(CONFIG_FILE) | \
+  xargs -I{} jq -er 'if has("is_behind_reverse_proxy") then .is_behind_reverse_proxy.port_to_use else empty end' $(CONFIG_DIR)/{} \
+)
 
 BIN_DIR := ./bin
 ENV := production
@@ -14,7 +22,15 @@ ENV := production
 build:
 	(cd client && bun run build)
 	@mkdir -p $(BIN_DIR)
-	CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w -X main.Environment=$(ENV) -X main.Home=$(HOME_PATH) -X main.Port=$(DEV_PORT) -X main.Version=$(VERSION)" -trimpath -buildvcs=false -o $(BIN_DIR)/$(APP_NAME)-$(VERSION) ./cmd
+	CGO_ENABLED=0 GOOS=linux go build -ldflags "\
+		    -s -w \
+		    -X main.Environment=$(ENV) \
+		    -X main.Home=$(HOME_PATH) \
+		    -X main.DevPort=$(DEV_PORT) \
+		    -X main.Version=$(VERSION) \
+		    -X main.ReverseProxy="$(IS_REVERSE_PROXIED)" \
+		    -X main.ProxyPort=$(PORT)" \
+		    -trimpath -buildvcs=false -o $(BIN_DIR)/$(APP_NAME)-$(VERSION) ./cmd
 
 dev:
 	@echo "Starting development servers..."

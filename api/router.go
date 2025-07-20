@@ -1,7 +1,7 @@
 package api
 
 import (
-	embed "KazuFolio"
+	vars "KazuFolio"
 	"KazuFolio/logger"
 	"KazuFolio/parser"
 	"KazuFolio/types"
@@ -28,7 +28,7 @@ func HandleRouting() *http.ServeMux {
 		}
 
 		path := strings.TrimPrefix(r.URL.Path, "/")
-		content, err := fs.ReadFile(embed.AssetsFS, path)
+		content, err := fs.ReadFile(vars.AssetsFS, path)
 		if err != nil {
 			NotFound(w, r, util.AddrOf("Requested Asset was not found"))
 			return
@@ -118,7 +118,7 @@ func HandleRouting() *http.ServeMux {
 			}
 
 			path := strings.TrimPrefix(r.URL.Path, "/")
-			content, err := fs.ReadFile(embed.ViteFS, "client/dist/"+path)
+			content, err := fs.ReadFile(vars.ViteFS, "client/dist/"+path)
 			if err != nil {
 				NotFound(w, r, util.AddrOf("Requested Source file was not found!"))
 				return

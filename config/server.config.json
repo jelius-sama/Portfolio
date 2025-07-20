@@ -1,4 +1,8 @@
 {
     "dev_port": "6969",
-    "home_path": "/home/ec2-user"
+    "is_behind_reverse_proxy": {
+        "statement_valid": false,
+        "port_to_use": "3000"
+    },
+    "home_path": "/home/jelius-sama"
 }
