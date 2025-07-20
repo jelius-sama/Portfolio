@@ -5,6 +5,7 @@ import (
 	"KazuFolio/db"
 	"KazuFolio/logger"
 	m "KazuFolio/middleware"
+	"KazuFolio/types"
 	"database/sql"
 	"errors"
 	_ "modernc.org/sqlite"
@@ -55,9 +56,18 @@ func fileExists(filePath string) bool {
 	return false
 }
 
+type ServerResp struct {
+	Http  error
+	Https error
+}
+
 func main() {
-	startServer := func() (error, string) {
+	defer db.Conn.Close()
+
+	startServer := func() (ServerResp, string) {
+		respChan := make(chan ServerResp, 2)
 		portToStart := Port
+
 		routeHandler := m.Chain(m.MiddlewareChain{
 			Handler: api.HandleRouting(),
 			Middlewares: []m.Middleware{
@@ -66,39 +76,78 @@ func main() {
 			},
 		})
 
-		if Environment == "development" {
-			portToStart = Port
+		// INFO: Development Server
+		if Environment == types.ENV.Dev {
 			os.Setenv("port", portToStart)
+			logger.Info("Development server started on port :" + portToStart)
 
-			logger.Info("Server started on port :" + portToStart)
-			return http.ListenAndServe(":"+portToStart, routeHandler), portToStart
-		} else {
-			fullchain := "/etc/letsencrypt/live/jelius.dev/fullchain.pem"
-			privkey := "/etc/letsencrypt/live/jelius.dev/privkey.pem"
-			exists1 := fileExists(fullchain)
-			exists2 := fileExists(privkey)
+			go func() {
+				err := http.ListenAndServe(":"+portToStart, routeHandler)
+				respChan <- ServerResp{Http: err}
+			}()
 
-			if exists1 && exists2 {
-				portToStart = "443"
-				os.Setenv("port", portToStart)
-
-				logger.Info("Server started on port :" + portToStart)
-				return http.ListenAndServeTLS(":"+portToStart, fullchain, privkey, routeHandler), portToStart
-			} else {
-				portToStart = Port
-				os.Setenv("port", portToStart)
-
-				logger.Warning("Production server was started without SSL certificate falling back to http")
-
-				logger.Info("Server started on port :" + portToStart)
-				return http.ListenAndServe(":"+portToStart, routeHandler), portToStart
-			}
+			return <-respChan, portToStart
 		}
+
+		// INFO: Production server
+		fullchain := "/etc/letsencrypt/live/jelius.dev/fullchain.pem"
+		privkey := "/etc/letsencrypt/live/jelius.dev/privkey.pem"
+		exists1 := fileExists(fullchain)
+		exists2 := fileExists(privkey)
+
+		if exists1 && exists2 {
+			portToStart = "443"
+			os.Setenv("port", portToStart)
+			logger.Info("Production server started on port :" + portToStart)
+
+			go func() {
+				err := http.ListenAndServeTLS(":"+portToStart, fullchain, privkey, routeHandler)
+				respChan <- ServerResp{Https: err}
+			}()
+
+			go func() {
+				err := http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					target := "https://" + r.Host + r.URL.RequestURI()
+					http.Redirect(w, r, target, http.StatusMovedPermanently)
+				}))
+				respChan <- ServerResp{Http: err}
+			}()
+
+			var combined ServerResp
+			for i := 0; i < 2; i++ {
+				resp := <-respChan
+				if resp.Http != nil {
+					combined.Http = resp.Http
+				}
+				if resp.Https != nil {
+					combined.Https = resp.Https
+				}
+			}
+
+			return combined, portToStart
+		}
+
+		// INFO: If no SSL certificates were found, fallback to HTTP only mode
+		portToStart = "80"
+		os.Setenv("port", portToStart)
+		logger.Warning("Production server was started without SSL certificate falling back to http only mode.")
+		logger.Info("Production server started on port :" + portToStart)
+
+		go func() {
+			err := http.ListenAndServe(":"+portToStart, routeHandler)
+			respChan <- ServerResp{Http: err}
+		}()
+
+		return <-respChan, portToStart
 	}
 
-	defer db.Conn.Close()
-
-	if err, port := startServer(); err != nil {
-		logger.Panic("Could not start the server on port :"+port, "\n", err)
+	if serverResp, port := startServer(); serverResp.Http != nil || serverResp.Https != nil {
+		if serverResp.Http != nil {
+			logger.Error("HTTP server failed on port " + port + ":\n" + serverResp.Http.Error())
+		}
+		if serverResp.Https != nil {
+			logger.Error("HTTPS server failed on port " + port + ":\n" + serverResp.Https.Error())
+		}
+		logger.Panic("One or more servers failed to start.")
 	}
 }
