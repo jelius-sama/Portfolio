@@ -4,6 +4,7 @@ import { Calendar, Clock, ChevronLeft, ChevronRight, FileText } from "lucide-rea
 import type { Blog } from "@/types/blog"
 import { useParams, Link } from "react-router-dom"
 import { Footer } from "@/components/ui/footer"
+import { MarkdownRenderer } from "@/components/ui/markdown"
 
 // TODO: Integrate with server to do SSR
 export default function BlogPostPage() {
@@ -54,82 +55,6 @@ export default function BlogPostPage() {
       minute: "2-digit",
     }
     return new Date(dateString).toLocaleDateString(undefined, options)
-  }
-
-  // TODO: Simple markdown renderer for temporary use, we might want to use a proper markdown library
-  const renderMarkdown = (content: string) => {
-    return content.split("\n").map((line, index) => {
-      // Headers
-      if (line.startsWith("# ")) {
-        return (
-          <h1 key={index} className="text-2xl font-bold text-orange-400 mb-4 mt-6">
-            {line.slice(2)}
-          </h1>
-        )
-      }
-      if (line.startsWith("## ")) {
-        return (
-          <h2 key={index} className="text-xl font-bold text-orange-400 mb-3 mt-5">
-            {line.slice(3)}
-          </h2>
-        )
-      }
-      if (line.startsWith("### ")) {
-        return (
-          <h3 key={index} className="text-lg font-bold text-orange-400 mb-2 mt-4">
-            {line.slice(4)}
-          </h3>
-        )
-      }
-
-      // Code blocks
-      if (line.startsWith("```")) {
-        return (
-          <div key={index} className="bg-gray-800 border border-orange-500/30 rounded p-4 my-4 font-mono text-sm">
-            <div className="text-orange-400 mb-2">$ code</div>
-          </div>
-        )
-      }
-
-      // Inline code
-      if (line.includes("`")) {
-        const parts = line.split("`")
-        return (
-          <p key={index} className="text-gray-300 mb-3 leading-relaxed">
-            {parts.map((part, i) =>
-              i % 2 === 0 ? (
-                part
-              ) : (
-                <code key={i} className="bg-gray-800 px-2 py-1 rounded text-orange-400 font-mono text-sm">
-                  {part}
-                </code>
-              ),
-            )}
-          </p>
-        )
-      }
-
-      // Lists
-      if (line.startsWith("- ")) {
-        return (
-          <li key={index} className="text-gray-300 mb-1 ml-4">
-            {line.slice(2)}
-          </li>
-        )
-      }
-
-      // Empty lines
-      if (line.trim() === "") {
-        return <br key={index} />
-      }
-
-      // Regular paragraphs
-      return (
-        <p key={index} className="text-gray-300 mb-3 leading-relaxed">
-          {line}
-        </p>
-      )
-    })
   }
 
   if (loading) {
@@ -238,7 +163,7 @@ export default function BlogPostPage() {
         <TerminalWindow title="blog-content">
           <div className="font-mono text-sm">
             <div className="text-orange-400 mb-4">$ cat {blog.id}.md</div>
-            <div className="prose prose-invert max-w-none">{renderMarkdown(markdownContent)}</div>
+            <MarkdownRenderer content={markdownContent} />
           </div>
         </TerminalWindow>
 
