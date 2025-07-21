@@ -20,7 +20,7 @@ var (
 	Environment = "development"
 	DevPort     = "6969"
 	Version     string
-	Home, _     = os.UserHomeDir()
+	Home        = "/home/ec2-user"
 
 	ReverseProxy string
 	ProxyPort    string
