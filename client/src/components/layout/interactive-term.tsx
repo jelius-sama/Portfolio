@@ -47,10 +47,18 @@ export function InteractiveTerminal() {
         "help": {
             requiresSudo: false,
             async run(_, stdout) {
-                stdout("Usage:")
-                Object.entries(COMMANDS).forEach(([key, val]) => {
-                    if (!val.requiresSudo) stdout(`-> ${key}`)
-                })
+                if (pendingSudoCommand === "help") {
+                    stdout("Root-only commands:")
+                    Object.entries(COMMANDS).forEach(([key, val]) => {
+                        if (val.requiresSudo) stdout(`-> ${key}`)
+                    })
+                } else {
+                    stdout("Usage:")
+                    Object.entries(COMMANDS).forEach(([key, val]) => {
+                        if (!val.requiresSudo) stdout(`-> ${key}`)
+                    })
+
+                }
             }
         },
 
@@ -78,7 +86,7 @@ export function InteractiveTerminal() {
         "neofetch": {
             requiresSudo: false,
             async run(_, stdout) {
-                stdout("[Error] Not enough screen real estate. Try piping to less.")
+                stdout("[ERROR] Not enough screen real estate. Try piping to less.")
             }
         },
 
@@ -229,11 +237,7 @@ export function InteractiveTerminal() {
 
         if (cmd.startsWith("sudo ")) {
             if (cmd.endsWith("help")) {
-                stdout("Root-only commands:")
-                Object.entries(COMMANDS).forEach(([key, val]) => {
-                    if (val.requiresSudo) stdout(`-> ${key}`)
-                })
-
+                setPendingSudoCommand("help")
                 return
             }
 
@@ -259,7 +263,7 @@ export function InteractiveTerminal() {
         }
 
         if (handler.requiresSudo) {
-            stdout(`[Error] not enough privileges. Try using 'sudo ${cmd}'.`)
+            stdout(`[ERROR] not enough privileges. Try using 'sudo ${cmd}'.`)
             return
         }
 
