@@ -1,17 +1,25 @@
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useParams } from "react-router-dom"
 import { Fragment } from "react"
 
 export function Header() {
     const navItems = ["Home", "About", "Skills", "Experience", "Projects", "Contact", "Blogs", "Links"]
     const location = useLocation()
+    const params = useParams()
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-orange-500/30">
-            <div className="max-w-6xl mx-auto px-6 py-4">
+            <div className="max-w-6xl mx-auto py-4">
                 <div className="flex items-center justify-between">
                     <div className="text-orange-400 font-bold text-xl font-mono">
                         {"> "}
-                        <span className="text-white">jelius.dev{(location.pathname === "/links" || location.pathname === "/blogs") && location.pathname}</span>
+                        <span className="text-white">
+                            jelius.dev
+                            {location.pathname.startsWith("/blog/") && params?.id
+                                ? `/${params.id}`
+                                : ["/links", "/blogs"].includes(location.pathname)
+                                    ? location.pathname
+                                    : ""}
+                        </span>
                     </div>
 
                     <nav className="hidden md:flex items-center gap-8">

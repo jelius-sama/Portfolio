@@ -14,34 +14,35 @@ export default function BlogPostPage() {
   const { id } = useParams();
 
   useEffect(() => {
-    const fetchBlogData = async () => {
+    (async () => {
       try {
         setLoading(true)
         setError(null)
 
-        // First, fetch the blog details
-        const blogResponse = await fetch(`/api/blog?id=${id}`)
-        if (!blogResponse.ok) {
-          throw new Error(`Failed to fetch blog: ${blogResponse.status}`)
-        }
-        const blogData: Blog = await blogResponse.json()
-        setBlog(blogData)
+        const [blogRes, markdownRes] = await Promise.all([
+          fetch(`/api/blog?id=${id}`),
+          fetch(`/api/blog_file?id=${id}`)
+        ])
 
-        // Then, fetch the markdown file
-        const markdownResponse = await fetch(`/api/blog_file?id=${blogData.id}`)
-        if (!markdownResponse.ok) {
-          throw new Error(`Failed to fetch markdown: ${markdownResponse.status}`)
+        if (!blogRes.ok) {
+          throw new Error(`Failed to fetch blog: ${blogRes.status}`)
         }
-        const markdownText = await markdownResponse.text()
+
+        if (!markdownRes.ok) {
+          throw new Error(`Failed to fetch markdown: ${markdownRes.status}`)
+        }
+
+        const blogData: Blog = await blogRes.json()
+        const markdownText = await markdownRes.text()
+
+        setBlog(blogData)
         setMarkdownContent(markdownText)
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred")
       } finally {
         setLoading(false)
       }
-    }
-
-    fetchBlogData()
+    })()
   }, [id])
 
   const formatDate = (dateString: string) => {
@@ -55,7 +56,7 @@ export default function BlogPostPage() {
     return new Date(dateString).toLocaleDateString(undefined, options)
   }
 
-  // Simple markdown renderer (you might want to use a proper markdown library)
+  // TODO: Simple markdown renderer for temporary use, we might want to use a proper markdown library
   const renderMarkdown = (content: string) => {
     return content.split("\n").map((line, index) => {
       // Headers
@@ -133,67 +134,35 @@ export default function BlogPostPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white">
-        <header className="fixed top-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-orange-500/30">
-          <div className="max-w-4xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="text-orange-400 font-bold text-xl font-mono">
-                {"> "}
-                <span className="text-white">blog/{id}</span>
-              </div>
-              <Link to="/blogs" className="text-gray-300 hover:text-orange-400 transition-colors font-mono text-sm">
-                ← Back to Blogs
-              </Link>
+      <section className="pt-20 pb-12 px-6">
+        <div className="max-w-6xl mx-auto">
+          <TerminalWindow title="loading">
+            <div className="font-mono text-sm text-center py-8">
+              <div className="text-orange-400 mb-2">$ curl -X GET /api/blog?id={id}</div>
+              <div className="text-gray-300 mb-4">Fetching blog data...</div>
+              <div className="text-orange-400 mb-2">$ curl -X GET /api/blog_file?id={id}</div>
+              <div className="text-gray-300">Loading markdown content...</div>
             </div>
-          </div>
-        </header>
-
-        <main className="pt-20 pb-12 px-6">
-          <div className="max-w-4xl mx-auto">
-            <TerminalWindow title="loading">
-              <div className="font-mono text-sm text-center py-8">
-                <div className="text-orange-400 mb-2">$ curl -X GET /api/blog?id={id}</div>
-                <div className="text-gray-300 mb-4">Fetching blog data...</div>
-                <div className="text-orange-400 mb-2">$ curl -X GET /api/blog_file?id={id}</div>
-                <div className="text-gray-300">Loading markdown content...</div>
-              </div>
-            </TerminalWindow>
-          </div>
-        </main>
-      </div>
+          </TerminalWindow>
+        </div>
+      </section>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white">
-        <header className="fixed top-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-orange-500/30">
-          <div className="max-w-4xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="text-orange-400 font-bold text-xl font-mono">
-                {"> "}
-                <span className="text-white">error</span>
-              </div>
-              <Link to="/blogs" className="text-gray-300 hover:text-orange-400 transition-colors font-mono text-sm">
-                ← Back to Blogs
-              </Link>
+      <section className="pt-20 pb-12">
+        <div className="max-w-6xl mx-auto">
+          <TerminalWindow title="error">
+            <div className="font-mono text-sm">
+              <div className="text-orange-400 mb-2">$ curl -X GET /api/blog?id={id}</div>
+              <div className="text-red-400 mb-4">Error: {error}</div>
+              <div className="text-orange-400 mb-2">$ echo "Please try again later"</div>
+              <div className="text-gray-300">Please try again later</div>
             </div>
-          </div>
-        </header>
-
-        <main className="pt-20 pb-12 px-6">
-          <div className="max-w-4xl mx-auto">
-            <TerminalWindow title="error">
-              <div className="font-mono text-sm">
-                <div className="text-orange-400 mb-2">$ curl -X GET /api/blog?id={id}</div>
-                <div className="text-red-400 mb-4">Error: {error}</div>
-                <div className="text-orange-400 mb-2">$ echo "Please try again later"</div>
-                <div className="text-gray-300">Please try again later</div>
-              </div>
-            </TerminalWindow>
-          </div>
-        </main>
-      </div>
+          </TerminalWindow>
+        </div>
+      </section>
     )
   }
 
@@ -203,7 +172,7 @@ export default function BlogPostPage() {
 
   return (
     <Fragment>
-      <div className="max-w-6xl mx-auto py-12 px-6 mt-12">
+      <div className="max-w-6xl mx-auto py-12 mt-12">
         {/* Blog Header */}
         <div className="mb-8">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">

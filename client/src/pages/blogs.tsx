@@ -115,7 +115,7 @@ export default function BlogListPage() {
   return (
     <Fragment>
       <StaticMetadata />
-      <div className="max-w-6xl mx-auto py-12 px-6 mt-12">
+      <div className="max-w-6xl mx-auto py-12 mt-12">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">

@@ -20,7 +20,7 @@ var (
 	Environment = "development"
 	DevPort     = "6969"
 	Version     string
-	Home        = "/home/ec2-user"
+	Home        string
 
 	ReverseProxy string
 	ProxyPort    string
@@ -37,6 +37,12 @@ func init() {
 	exePath, err := os.Executable()
 	if err != nil {
 		logger.Panic("could not get executable path:", err)
+	}
+
+	if Environment == types.ENV.Dev && Home == "" {
+		if h, err := os.UserHomeDir(); err == nil {
+			Home = h
+		}
 	}
 
 	if ReverseProxy == "true" {
@@ -90,7 +96,6 @@ type ServerResp struct {
 
 // TODO: Work on SSR support for `/blog/{id}` page.
 // TODO: Work on Dynamic Metadata for blog post page.
-// TODO: Fix the bug on widths on blog related page.
 func main() {
 	defer db.Conn.Close()
 
