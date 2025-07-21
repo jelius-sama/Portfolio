@@ -1,7 +1,7 @@
 package api
 
 import (
-	"encoding/json"
+	"KazuFolio/util"
 	"net/http"
 )
 
@@ -11,15 +11,12 @@ type ErrorResponse struct {
 }
 
 func writeError(w http.ResponseWriter, statusCode int, errorText string, msg *string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-
 	resp := ErrorResponse{
 		Error:   errorText,
 		Message: msg,
 	}
 
-	json.NewEncoder(w).Encode(resp)
+	util.WriteJSON(w, statusCode, resp)
 }
 
 func BadRequest(w http.ResponseWriter, r *http.Request, msg *string) {

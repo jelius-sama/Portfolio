@@ -13,7 +13,8 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 const queryClient = new QueryClient()
 
 const Home = lazy(() => import("@/pages/home"))
-const Development = lazy(() => import("@/pages/development"))
+// const Development = lazy(() => import("@/pages/development"))
+const Blogs = lazy(() => import("@/pages/blogs"))
 const Links = lazy(() => import("@/pages/links"))
 const NotFound = lazy(() => import("@/pages/not-found"))
 
@@ -122,7 +123,7 @@ const Entry = () => {
                 <Route path='/' element={<App />}>
                   <Route path='/' element={<Home />} />
                   <Route path='/links' element={<Links />} />
-                  <Route path='/blogs' element={<Development />} />
+                  <Route path='/blogs' element={<Blogs />} />
                   <Route path='*' element={<NotFound />} />
                 </Route>
               </Routes>

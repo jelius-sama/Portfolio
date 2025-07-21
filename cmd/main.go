@@ -21,7 +21,7 @@ var (
 	Environment = "development"
 	DevPort     = "6969"
 	Version     string
-	Home        = "/home/ec2-user"
+	Home, _     = os.UserHomeDir()
 
 	ReverseProxy string
 	ProxyPort    string
@@ -89,9 +89,7 @@ type ServerResp struct {
 	Https error
 }
 
-// TODO: Work on `/blogs` page UI.
 // TODO: Work on SSR support for `/blog/{id}` page.
-// TODO: Work on upload interface for blog posts.
 func main() {
 	defer db.Conn.Close()
 

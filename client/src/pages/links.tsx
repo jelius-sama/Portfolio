@@ -1,4 +1,4 @@
-import { TerminalWindow } from "@/components/layout/terminal-window"
+import { TerminalWindow } from "@/components/ui/terminal-window"
 import { LinkCard } from "@/components/layout/link-card"
 import { Github, Linkedin, Twitter, Mail, FileText, Code, Rss, Youtube, Instagram } from "lucide-react"
 import { useConfig } from "@/contexts/config"
@@ -6,6 +6,7 @@ import { type JSX, Fragment } from "react"
 import { StaticMetadata } from "@/contexts/metadata"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { Footer } from "@/components/ui/footer"
 
 const iconMap: Record<string, JSX.Element> = {
   Github: <Github size={20} />,
@@ -152,12 +153,7 @@ export default function Links() {
             </div>
           </TerminalWindow>
 
-          {/* Footer */}
-          <div className="text-center text-gray-500 text-sm font-mono">
-            <div className="mb-2">Built with ❤️ using terminal aesthetics</div>
-            <div>Copyright © {new Date().getFullYear()} {me.first_name + " " + me.last_name}. All Rights Reserved.
-            </div>
-          </div>
+          <Footer leading={<div className="mb-2">Built with ❤️ using terminal aesthetics</div>} />
         </div>
       </main>
     </Fragment>

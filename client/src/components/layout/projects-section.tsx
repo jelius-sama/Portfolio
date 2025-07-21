@@ -1,4 +1,4 @@
-import { TerminalWindow } from "@/components/layout/terminal-window"
+import { TerminalWindow } from "@/components/ui/terminal-window"
 import { Github, ExternalLink } from "lucide-react"
 import { useConfig } from "@/contexts/config"
 

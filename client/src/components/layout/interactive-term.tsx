@@ -1,51 +1,286 @@
 import { useEffect, useState, useRef } from "react"
-import { TerminalWindow } from "@/components/layout/terminal-window"
+import { TerminalWindow } from "@/components/ui/terminal-window"
 import { useConfig } from "@/contexts/config"
 import { cn } from "@/lib/utils"
+
+type CommandHandler = {
+    requiresSudo: boolean
+    run: (
+        stdin: () => Promise<string>,
+        stdout: (line: string) => void,
+        ctx: { sudoToken: string }
+    ) => Promise<void>
+}
 
 export function InteractiveTerminal() {
     const { app: { portfolio: me } } = useConfig()
 
     const hasMountedRef = useRef(false)
+    const inputRef = useRef<HTMLInputElement>(null)
+    const scrollableContentRef = useRef<HTMLDivElement>(null)
+    const neofetchRef = useRef<HTMLDivElement>(null)
+    const inputWrapperRef = useRef<HTMLDivElement>(null)
+    const initialMaxHeight = useRef<string | null>(null)
+
     const [command, setCommand] = useState("")
     const [output, setOutput] = useState<string[]>([])
-    const inputRef = useRef<HTMLInputElement>(null)
-    const scrollableContentRef = useRef<HTMLDivElement>(null) // Ref for the new scrollable div
-    const neofetchRef = useRef<HTMLDivElement>(null);
-    const inputWrapperRef = useRef<HTMLDivElement>(null);
-    const initialMaxHeight = useRef<string | null>(null);
-    const [maxHeight, setMaxHeight] = useState("auto");
+    const [maxHeight, setMaxHeight] = useState("auto")
+    const [inputQueue, setInputQueue] = useState<((input: string) => void) | null>(null)
+    const [pendingSudoCommand, setPendingSudoCommand] = useState<string | null>(null)
+    const [pendingStdin, setPendingStdin] = useState<boolean>(false)
+
+    const stdout = (line: string) => setOutput(prev => [...prev, line])
 
     const verifySudoPassword = async (token: string): Promise<boolean> => {
         try {
             const response = await fetch("/api/sudo", {
                 method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            return response.ok;
-        } catch (error) {
-            return false;
-        }
-    };
-
-    const updateServer = async (token: string): Promise<boolean> => {
-        try {
-            const response = await fetch("/api/update_server", {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            return response.ok;
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            return response.ok
         } catch {
-            return false;
+            return false
         }
-    };
+    }
 
-    const [awaitingPassword, setAwaitingPassword] = useState(false);
-    const [pendingSudoCommand, setPendingSudoCommand] = useState<string | null>(null);
+    const COMMANDS: Record<string, CommandHandler> = {
+        "help": {
+            requiresSudo: false,
+            async run(_, stdout) {
+                stdout("Usage:")
+                Object.entries(COMMANDS).forEach(([key, val]) => {
+                    if (!val.requiresSudo) stdout(`-> ${key}`)
+                })
+            }
+        },
+
+        "version": {
+            requiresSudo: false,
+            async run(_, stdout) {
+                try {
+                    const res = await fetch("/api/version")
+                    const data = await res.json()
+                    stdout(`[INFO] Version: ${data.version}`)
+                } catch {
+                    stdout("[ERROR] Failed to fetch version")
+                }
+            }
+        },
+
+        "clear": {
+            requiresSudo: false,
+            async run() {
+                setOutput([])
+                if (neofetchRef.current) neofetchRef.current.innerHTML = ""
+            }
+        },
+
+        "neofetch": {
+            requiresSudo: false,
+            async run(_, stdout) {
+                stdout("[Error] Not enough screen real estate. Try piping to less.")
+            }
+        },
+
+        "neofetch | less": {
+            requiresSudo: false,
+            async run() {
+                setOutput([])
+                if (neofetchRef.current) {
+                    neofetchRef.current.innerHTML = `
+                        <div class="text-orange-400 mb-2">$ neofetch | less</div>
+                        <div class="flex w-full place-content-center gap-6 mb-6">
+                            <div class="flex-shrink-0">
+                                <div class="w-64 h-64 bg-[#1E1E1E] border border-orange-500/30 rounded flex items-center justify-center">
+                                    ${me.links["jelius.dev"]?.qr_code_link
+                            ? `<img src="${me.links["jelius.dev"]?.qr_code_link}" alt="QR Code" class="w-58 h-58 rounded object-cover" />`
+                            : `<span class="text-gray-500">QR Code not available</span>`}
+                                </div>
+                            </div>
+                        </div>
+                    `
+                }
+            }
+        },
+
+        "update-server": {
+            requiresSudo: true,
+            async run(_, stdout, ctx) {
+                const success = await fetch("/api/update_server", {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${ctx.sudoToken}` }
+                }).then(r => r.ok).catch(() => false)
+
+                stdout(success ? "[SUCCESS] Server will be updated shortly..." : "[ERROR] Failed to schedule server update.")
+            }
+        },
+
+        "post-blog": {
+            requiresSudo: true,
+            async run(stdin, stdout, ctx) {
+                setPendingStdin(true)
+                stdout("Enter blog title:")
+                const title = await stdin()
+
+                stdout("Enter blog summary:")
+                const summary = await stdin()
+
+                stdout("Select markdown file to upload...")
+
+                setPendingStdin(false)
+
+                const file = await new Promise<File | null>((resolve) => {
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.accept = ".md";
+
+                    let resolved = false;
+
+                    const handleChange = () => {
+                        resolved = true;
+                        cleanup();
+                        resolve(input.files?.[0] || null);
+                    };
+
+                    const handleFocus = () => {
+                        if (!resolved) {
+                            // Give the file dialog a bit of time to trigger onchange before resolving
+                            requestAnimationFrame(() => {
+                                if (!resolved) {
+                                    cleanup();
+                                    resolve(null); // user cancelled
+                                }
+                            });
+                        }
+                    };
+
+                    const cleanup = () => {
+                        input.removeEventListener("change", handleChange);
+                        window.removeEventListener("focus", handleFocus);
+                    };
+
+                    input.addEventListener("change", handleChange);
+                    window.addEventListener("focus", handleFocus, { once: true });
+
+                    input.click();
+                });
+
+                if (!file) {
+                    stdout("[ERROR] File selection canceled.")
+                    return
+                }
+
+                const formData = new FormData()
+                formData.append("title", title)
+                formData.append("summary", summary)
+                formData.append("content_file", file)
+                // TODO: Support `prequel`, `sequel` & `parts`.
+
+                const headers = new Headers()
+                headers.set("Authorization", `Bearer ${ctx.sudoToken}`)
+
+                const success = await fetch("/api/blog", {
+                    method: "POST",
+                    headers,
+                    body: formData
+                }).then(r => r.ok).catch(() => false)
+
+                stdout(success ? "[SUCCESS] Blog post uploaded successfully." : "[ERROR] Failed to upload blog post.")
+            }
+        },
+    }
+
+    const getStdin = (): (() => Promise<string>) => {
+        return () => new Promise(resolve => {
+            setInputQueue(() => {
+                return (input: string) => {
+                    setOutput(prev => [...prev, `-> ${input}`])
+                    setInputQueue(null)
+                    resolve(input)
+                }
+            })
+        })
+    }
+
+    const executeCommand = async (raw: string) => {
+        const cmd = raw.trim()
+        if (!cmd) return
+
+        if (inputQueue) {
+            inputQueue(cmd)
+            return
+        }
+
+        // Handling sudo flow
+        if (pendingSudoCommand) {
+            const verified = await verifySudoPassword(cmd)
+            if (!verified) {
+                stdout("[ERROR] Sorry, try again.")
+                return
+            }
+
+            const handler = COMMANDS[pendingSudoCommand]
+            await handler.run(getStdin(), stdout, { sudoToken: cmd })
+            setPendingSudoCommand(null)
+            return
+        }
+
+        stdout(`$ ${cmd}`)
+
+        if (cmd.startsWith("sudo ")) {
+            if (cmd.endsWith("help")) {
+                stdout("Root-only commands:")
+                Object.entries(COMMANDS).forEach(([key, val]) => {
+                    if (val.requiresSudo) stdout(`-> ${key}`)
+                })
+
+                return
+            }
+
+            const baseCmd = cmd.slice(5).trim()
+            const handler = COMMANDS[baseCmd]
+            if (!handler) {
+                stdout(`[ERROR] sudo: ${baseCmd}: command not found`)
+                return
+            }
+            if (!handler.requiresSudo) {
+                stdout(`[INFO] sudo: ${baseCmd}: command does not require sudo`)
+                return
+            }
+
+            setPendingSudoCommand(baseCmd)
+            return
+        }
+
+        const handler = COMMANDS[cmd]
+        if (!handler) {
+            stdout(`[ERROR] Command not found: ${cmd}`)
+            return
+        }
+
+        if (handler.requiresSudo) {
+            stdout(`[Error] not enough privileges. Try using 'sudo ${cmd}'.`)
+            return
+        }
+
+        await handler.run(getStdin(), stdout, { sudoToken: "" })
+    }
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            e.preventDefault()
+            void executeCommand(command)
+            setCommand("")
+        }
+
+        if (e.ctrlKey && e.key.toLowerCase() === "c") {
+            e.preventDefault()
+            setPendingSudoCommand(null)
+            setInputQueue(null)
+            stdout("^C")
+            setCommand("")
+        }
+    }
 
     useEffect(() => {
         if (!hasMountedRef.current) {
@@ -59,188 +294,29 @@ export function InteractiveTerminal() {
     }, [output])
 
     useEffect(() => {
-        if (
-            neofetchRef.current &&
-            inputWrapperRef.current &&
-            !initialMaxHeight.current
-        ) {
-            const neofetchHeight = neofetchRef.current.offsetHeight;
-            const inputHeight = inputWrapperRef.current.offsetHeight;
-            const totalHeight = `${neofetchHeight + inputHeight}px`;
-
-            initialMaxHeight.current = totalHeight;
-            setMaxHeight(totalHeight); // Sets height, not maxHeight
+        if (neofetchRef.current && inputWrapperRef.current && !initialMaxHeight.current) {
+            const totalHeight = `${neofetchRef.current.offsetHeight + inputWrapperRef.current.offsetHeight}px`
+            initialMaxHeight.current = totalHeight
+            setMaxHeight(totalHeight)
         }
-    }, []);
-
-    const executeCommand = async (cmd: string) => {
-        const lower = cmd.toLowerCase();
-
-        // Handle sudo password input
-        if (awaitingPassword) {
-            setAwaitingPassword(false);
-
-            const isValid = await verifySudoPassword(cmd || "");
-
-            if (!isValid) {
-                setOutput((prev) => [
-                    ...prev,
-                    "Sorry, try again.",
-                ]);
-                setPendingSudoCommand(null);
-                return;
-            }
-
-            if (pendingSudoCommand === "help") {
-                setOutput((prev) => [
-                    ...prev,
-                    "[sudo] password accepted",
-                    "Super User help options:",
-                    "- update-server: Updates Server to latest available version.",
-                ]);
-            } else if (pendingSudoCommand === "update-server") {
-                setOutput((prev) => [...prev, "[sudo] password accepted"]);
-
-                const success = await updateServer(cmd || "");
-
-                if (success) {
-                    setOutput((prev) => [
-                        ...prev,
-                        "Server will be updated shortly...",
-                    ]);
-                } else {
-                    setOutput((prev) => [
-                        ...prev,
-                        "Failed to schedule server update.",
-                    ]);
-                }
-            } else {
-                setOutput((prev) => [
-                    ...prev,
-                    "[sudo] password accepted",
-                    `sudo: ${pendingSudoCommand}: command not found`,
-                ]);
-            }
-
-            setPendingSudoCommand(null);
-            return;
-        }
-
-        // Handle sudo prefix
-        if (lower.startsWith("sudo ")) {
-            const sudoCmd = cmd.slice(5).trim();
-            setPendingSudoCommand(sudoCmd);
-            setAwaitingPassword(true);
-            return;
-        }
-
-        switch (lower) {
-            case "update-server":
-                setOutput((prev) => [
-                    ...prev,
-                    "Error: not enough privileges. Try using 'sudo update-server'.",
-                ]);
-                break;
-
-            case "version":
-                try {
-                    const res = await fetch("/api/version");
-                    if (!res.ok) throw new Error();
-                    const data = await res.json();
-                    setOutput((prev) => [...prev, `Version: ${data.version}`]);
-                } catch {
-                    setOutput((prev) => [...prev, "Failed to fetch version"]);
-                }
-                break;
-
-            case "help":
-                setOutput((prev) => [
-                    ...prev,
-                    "Usage:",
-                    "- help: Show this help message",
-                    "- version: Show the current server version",
-                    "- clear: Clear the terminal output",
-                    "- neofetch: Show system info",
-                    "More commands will be implemented soon..."
-                ]);
-                break;
-
-            case "clear":
-                setOutput([]);
-                if (neofetchRef.current) {
-                    neofetchRef.current.innerHTML = "";
-                }
-                break;
-
-            case "neofetch":
-                setOutput((prev) => [
-                    ...prev,
-                    "Error: Not enough screen real estate. Try piping to less.",
-                ]);
-                break;
-
-            case "neofetch | less":
-                setOutput([]);
-                if (neofetchRef.current) {
-                    neofetchRef.current.innerHTML = `
-                    <div class="text-orange-400 mb-2">$ neofetch | less</div>
-                    <div class="flex w-full place-content-center gap-6 mb-6">
-                        <div class="flex-shrink-0">
-                            <div class="w-64 h-64 bg-[#1E1E1E] border border-orange-500/30 rounded flex items-center justify-center">
-                                ${me.links["jelius.dev"]?.qr_code_link
-                            ? `<img src="${me.links["jelius.dev"]?.qr_code_link}" alt="QR Code to portfolio page" class="w-58 h-58 rounded object-cover" />`
-                            : `<span class="text-gray-500">QR Code not available</span>`
-                        }
-                            </div>
-                        </div>
-                    </div>
-                `;
-                }
-                break;
-
-            default:
-                setOutput((prev) => [...prev, `Command not found: ${cmd}`]);
-                break;
-        }
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const trimmedCommand = command.trim();
-
-            if (trimmedCommand) {
-                if (!awaitingPassword) {
-                    setOutput((prev) => [...prev, `$ ${trimmedCommand}`]);
-                }
-                void executeCommand(trimmedCommand);
-            }
-
-            setCommand("");
-        }
-
-        if (e.ctrlKey && e.key.toLowerCase() === "c") {
-            e.preventDefault();
-            setAwaitingPassword(false);
-            setPendingSudoCommand(null);
-            setOutput((prev) => [...prev, "^C"]);
-            setCommand("");
-        }
-    };
+    }, [])
 
     return (
         <TerminalWindow title="terminal">
-            <div ref={scrollableContentRef} className="overflow-y-auto pr-2" style={{ height: `calc(${maxHeight} + calc(var(--spacing) * 6))` }}>
+            <div
+                ref={scrollableContentRef}
+                className="overflow-y-auto pr-2"
+                style={{ height: `calc(${maxHeight} + calc(var(--spacing) * 6))` }}
+            >
                 <div id="neofetch" ref={neofetchRef} className="font-mono text-sm">
                     <div className="text-orange-400 mb-2">$ neofetch | less</div>
-
                     <div className="flex w-full place-content-center gap-6 mb-6">
                         <div className="flex-shrink-0">
                             <div className="w-64 h-64 bg-[#1E1E1E] border border-orange-500/30 rounded flex items-center justify-center">
                                 {me.links["jelius.dev"]?.qr_code_link ? (
                                     <img
                                         src={me.links["jelius.dev"]?.qr_code_link}
-                                        alt="QR Code to portfolio page"
+                                        alt="QR Code"
                                         className="w-58 h-58 rounded object-cover"
                                     />
                                 ) : (
@@ -251,16 +327,33 @@ export function InteractiveTerminal() {
                     </div>
                 </div>
 
-                {/* Output History */}
                 {output.map((line, index) => (
-                    <div key={index} className={cn(line.startsWith("$ ") ? "text-orange-400" : "text-gray-300")}>
+                    <div
+                        key={index}
+                        className={cn(
+                            line.startsWith("$ ")
+                                ? "text-orange-400"
+                                : line.startsWith("-> ")
+                                    ? "text-cyan-400"
+                                    : line.startsWith("[ERROR]")
+                                        ? "text-red-400"
+                                        : line.startsWith("[SUCCESS]")
+                                            ? "text-green-400"
+                                            : line.startsWith("[INFO]")
+                                                ? "text-blue-400"
+                                                : "text-gray-300"
+                        )}
+                    >
                         {line}
                     </div>
                 ))}
 
-                {/* Terminal Input */}
                 <div ref={inputWrapperRef} className="flex items-center mt-4">
-                    <span className="text-orange-400 mr-2">{awaitingPassword ? "[sudo] password for user:" : "$"}</span>
+                    {!pendingStdin && (
+                        <span className="text-orange-400 mr-2">
+                            {pendingSudoCommand ? "[sudo] password for user:" : "$"}
+                        </span>
+                    )}
                     <input
                         ref={inputRef}
                         type="text"

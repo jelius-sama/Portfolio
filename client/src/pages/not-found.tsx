@@ -1,4 +1,4 @@
-import { TerminalWindow } from "@/components/layout/terminal-window"
+import { TerminalWindow } from "@/components/ui/terminal-window"
 import { Home, LinkIcon } from "lucide-react"
 import { Fragment } from "react"
 import { StaticMetadata } from "@/contexts/metadata"

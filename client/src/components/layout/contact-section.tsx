@@ -1,9 +1,10 @@
-import { TerminalWindow } from "@/components/layout/terminal-window"
+import { TerminalWindow } from "@/components/ui/terminal-window"
 import { useConfig } from "@/contexts/config"
 import { Mail, Github, Linkedin, Twitter, LinkIcon } from "lucide-react"
 import { type JSX } from "react"
 import { Link } from "react-router-dom"
 import { InteractiveTerminal } from "@/components/layout/interactive-term"
+import { Footer } from "@/components/ui/footer"
 
 const iconMap: Record<string, JSX.Element> = {
     Email: <Mail className="text-orange-400" size={20} />,
@@ -81,9 +82,7 @@ export function ContactSection() {
                     </div>
                 </TerminalWindow>
 
-                <div className="text-center text-gray-500 text-sm font-mono">
-                    Copyright © {new Date().getFullYear()} {me.first_name + " " + me.last_name}. All Rights Reserved.
-                </div>
+                <Footer />
             </div>
         </section>
     )

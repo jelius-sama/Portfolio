@@ -1,4 +1,4 @@
-import { TerminalWindow } from "@/components/layout/terminal-window"
+import { TerminalWindow } from "@/components/ui/terminal-window"
 import { Github, Mail, Wrench } from "lucide-react"
 import { suggestions } from "@/pages/not-found"
 import { Link } from "react-router-dom"
@@ -101,7 +101,6 @@ export default function DevelopmentPage() {
             </div>
           </TerminalWindow>
 
-          {/* Footer */}
           <div className="flex flex-col justify-center items-center text-gray-500 text-sm font-mono">
             <div>Development Environment • Go 1.24.5</div>
             {isPending ? (

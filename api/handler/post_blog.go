@@ -23,6 +23,8 @@ func generateBlogID() string {
 
 // TODO: Send Email to admin for approval
 func PostBlog(w http.ResponseWriter, r *http.Request) {
+	util.VerifySudo(w, r)
+
 	mr, err := r.MultipartReader()
 	if err != nil {
 		http.Error(w, "Invalid multipart request: "+err.Error(), http.StatusBadRequest)
@@ -36,8 +38,9 @@ func PostBlog(w http.ResponseWriter, r *http.Request) {
 
 	// GitHub-style ID based on timestamp and UUID suffix
 	blog.ID = generateBlogID()
-	blog.CreatedAt = time.Now().String()
-	blog.UpdatedAt = blog.CreatedAt
+	now := time.Now().UTC().Format(time.RFC3339)
+	blog.CreatedAt = now
+	blog.UpdatedAt = now
 
 	// Parse multipart parts
 	for {
@@ -66,11 +69,17 @@ func PostBlog(w http.ResponseWriter, r *http.Request) {
 
 		case "prequel_id":
 			buf, _ := io.ReadAll(part)
-			blog.PrequelID = util.AddrOf(string(buf))
+			s := strings.TrimSpace(string(buf))
+			if s != "" {
+				blog.PrequelID = util.AddrOf(s)
+			}
 
 		case "sequel_id":
 			buf, _ := io.ReadAll(part)
-			blog.SequelID = util.AddrOf(string(buf))
+			s := strings.TrimSpace(string(buf))
+			if s != "" {
+				blog.SequelID = util.AddrOf(s)
+			}
 
 		case "parts":
 			buf, _ := io.ReadAll(part)
@@ -79,7 +88,7 @@ func PostBlog(w http.ResponseWriter, r *http.Request) {
 		case "content_file":
 			// Save uploaded file to ~/Blogs/{id}.md
 			home := os.Getenv("home")
-			if home == "" {
+			if len(home) == 0 {
 				http.Error(w, "Missing 'home' environment variable", http.StatusInternalServerError)
 				return
 			}
@@ -147,6 +156,5 @@ func PostBlog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(blog)
+	util.WriteJSON(w, http.StatusCreated, blog)
 }
