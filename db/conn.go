@@ -4,26 +4,57 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
 )
 
 var Conn *sql.DB
 
 // Initialize all tables and triggers
 func InitializeSchema(db *sql.DB) error {
-	// Enable foreign-key enforcement
-	if _, err := db.Exec(`PRAGMA foreign_keys = ON;`); err != nil {
-		return errors.New(fmt.Sprintf("enable foreign_keys: %v\n", err))
+	// Set PRAGMA settings to improve concurrency and reliability
+	pragmas := []string{
+		`PRAGMA journal_mode = WAL;`,  // concurrent read/write
+		`PRAGMA foreign_keys = ON;`,   // enforce FKs
+		`PRAGMA busy_timeout = 3000;`, // wait 3s if db is locked
 	}
 
-	// Analytics
+	for _, pragma := range pragmas {
+		if _, err := db.Exec(pragma); err != nil {
+			return fmt.Errorf("failed to set pragma %q: %w", pragma, err)
+		}
+	}
+
+	// Create analytics table
 	if _, err := db.Exec(CreateAnalyticsTable); err != nil {
-		return errors.New(fmt.Sprintf("create analytics table: %v\n", err))
+		return fmt.Errorf("create analytics table: %w", err)
 	}
 
-	// Blogs
+	// Create blogs table
 	if _, err := db.Exec(CreateBlogsTable); err != nil {
-		return errors.New(fmt.Sprintf("create blogs table: %v\n", err))
+		return fmt.Errorf("create blogs table: %w", err)
 	}
 
 	return nil
+}
+
+func WithRetryWrite(execFunc func() error) error {
+	const maxAttempts = 5
+	const retryDelay = 200 * time.Millisecond
+
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		err := execFunc()
+		if err == nil {
+			return nil
+		}
+
+		// Only retry if it's a SQLITE_BUSY error
+		if !strings.Contains(err.Error(), "database is locked") {
+			return err
+		}
+
+		time.Sleep(retryDelay)
+	}
+
+	return errors.New("write failed after retries")
 }
