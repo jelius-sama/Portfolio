@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 )
 
 // TODO: Send Email to admin for approval
@@ -13,7 +13,7 @@ func UpdateServer(w http.ResponseWriter, r *http.Request) {
 	util.VerifySudo(w, r)
 
 	// Execute update script (in background)
-	cmd := exec.Command("bash", path.Join(os.Getenv("home"), "/update_prod.sh"))
+	cmd := exec.Command("bash", filepath.Join(os.Getenv("home"), "/update_prod.sh"))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

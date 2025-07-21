@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS blogs (
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
     summary TEXT,
-    markdown_url TEXT NOT NULL,
 
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now')),

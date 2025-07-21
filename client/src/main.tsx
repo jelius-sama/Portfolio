@@ -15,6 +15,7 @@ const queryClient = new QueryClient()
 const Home = lazy(() => import("@/pages/home"))
 // const Development = lazy(() => import("@/pages/development"))
 const Blogs = lazy(() => import("@/pages/blogs"))
+const Blog = lazy(() => import("@/pages/blog"))
 const Links = lazy(() => import("@/pages/links"))
 const NotFound = lazy(() => import("@/pages/not-found"))
 
@@ -124,6 +125,7 @@ const Entry = () => {
                   <Route path='/' element={<Home />} />
                   <Route path='/links' element={<Links />} />
                   <Route path='/blogs' element={<Blogs />} />
+                  <Route path="/blog/:id" element={<Blog />} />
                   <Route path='*' element={<NotFound />} />
                 </Route>
               </Routes>

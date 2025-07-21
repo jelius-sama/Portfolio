@@ -1,10 +1,9 @@
 package types
 
 type Blog struct {
-	ID          string `json:"id"`          // e.g., "52a081c"
-	Title       string `json:"title"`       // Blog post title
-	Summary     string `json:"summary"`     // Short excerpt or summary
-	MarkdownURL string `json:"markdownUrl"` // Link to .md file (e.g. "/assets/blogs/52a081c.md")
+	ID      string `json:"id"`      // e.g., "52a081c"
+	Title   string `json:"title"`   // Blog post title
+	Summary string `json:"summary"` // Short excerpt or summary
 
 	CreatedAt string `json:"createdAt"` // ISO 8601 format (or use time.Time)
 	UpdatedAt string `json:"updatedAt"` // Optional

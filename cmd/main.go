@@ -13,7 +13,6 @@ import (
 	_ "modernc.org/sqlite"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 )
 
@@ -59,7 +58,7 @@ func init() {
 	os.Setenv("version", Version)
 	os.Setenv("env", Environment)
 	os.Setenv("home", Home)
-	os.Setenv("db_file", path.Join(Home, "/portfolio.db"))
+	os.Setenv("db_file", filepath.Join(Home, "/portfolio.db"))
 
 	db.Conn, err = sql.Open("sqlite", os.Getenv("db_file"))
 	if err != nil {

@@ -4,10 +4,46 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
+	"os"
 
 	"KazuFolio/db"
 	"KazuFolio/types"
+	"path/filepath"
+	"regexp"
 )
+
+// Regex to allow only alphanumeric characters, hyphens, and underscores
+var safeID = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
+
+func GetBlogFile(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "ID for the blog was not provided!", http.StatusBadRequest)
+		return
+	}
+
+	// Sanitize the ID: reject anything with unsafe characters
+	if !safeID.MatchString(id) {
+		http.Error(w, "Invalid blog ID format.", http.StatusBadRequest)
+		return
+	}
+
+	// Construct the path
+	blogsDir := filepath.Join(os.Getenv("home"), "Blogs")
+	blogFile := filepath.Join(blogsDir, id+".md")
+
+	// Open and serve the file
+	file, err := os.Open(blogFile)
+	if err != nil {
+		http.Error(w, "Could not find the blog file.", http.StatusNotFound)
+		return
+	}
+	defer file.Close()
+
+	// Set MIME type
+	w.Header().Set("Content-Type", "text/markdown")
+	http.ServeFile(w, r, blogFile)
+}
 
 func GetBlog(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
@@ -22,13 +58,12 @@ func GetBlog(w http.ResponseWriter, r *http.Request) {
 	)
 
 	query := `
-		SELECT id, title, summary, markdown_url, created_at, updated_at, prequel_id, sequel_id, parts
+		SELECT id, title, summary, created_at, updated_at, prequel_id, sequel_id, parts
 		FROM blogs WHERE id = ?`
 	err := db.Conn.QueryRow(query, id).Scan(
 		&blog.ID,
 		&blog.Title,
 		&blog.Summary,
-		&blog.MarkdownURL,
 		&blog.CreatedAt,
 		&blog.UpdatedAt,
 		&blog.PrequelID,

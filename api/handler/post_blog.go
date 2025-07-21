@@ -1,7 +1,10 @@
 package handler
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -10,19 +13,24 @@ import (
 	"time"
 
 	"KazuFolio/db"
+	"KazuFolio/logger"
 	"KazuFolio/types"
-
 	"KazuFolio/util"
-	"github.com/google/uuid"
 )
 
 func generateBlogID() string {
-	timestamp := time.Now().UTC().Format("060102150405") // YYMMDDHHMMSS
-	return timestamp + "-" + uuid.New().String()[:6]
+	// Create a unique string combining timestamp and some randomness
+	timestamp := time.Now().UTC().UnixNano()
+	unique := fmt.Sprintf("%d-%d", timestamp, time.Now().UTC().UnixMilli())
+
+	// Generate SHA1 hash and take first 7 characters (like GitHub)
+	hash := sha1.Sum([]byte(unique))
+	return hex.EncodeToString(hash[:])[:7]
 }
 
 // TODO: Send Email to admin for approval
 func PostBlog(w http.ResponseWriter, r *http.Request) {
+	// Verify sudo access
 	util.VerifySudo(w, r)
 
 	mr, err := r.MultipartReader()
@@ -33,10 +41,9 @@ func PostBlog(w http.ResponseWriter, r *http.Request) {
 
 	// Hold parsed form values
 	blog := types.Blog{}
-	var contentFilePath string
 	var parts []string
 
-	// GitHub-style ID based on timestamp and UUID suffix
+	// GitHub-style ID based on hash
 	blog.ID = generateBlogID()
 	now := time.Now().UTC().Format(time.RFC3339)
 	blog.CreatedAt = now
@@ -60,73 +67,107 @@ func PostBlog(w http.ResponseWriter, r *http.Request) {
 
 		switch name {
 		case "title":
-			buf, _ := io.ReadAll(part)
+			buf, err := io.ReadAll(part)
+			if err != nil {
+				http.Error(w, "Error reading title: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
 			blog.Title = string(buf)
 
 		case "summary":
-			buf, _ := io.ReadAll(part)
+			buf, err := io.ReadAll(part)
+			if err != nil {
+				http.Error(w, "Error reading summary: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
 			blog.Summary = string(buf)
 
 		case "prequel_id":
-			buf, _ := io.ReadAll(part)
+			buf, err := io.ReadAll(part)
+			if err != nil {
+				http.Error(w, "Error reading prequel_id: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
 			s := strings.TrimSpace(string(buf))
 			if s != "" {
 				blog.PrequelID = util.AddrOf(s)
 			}
 
 		case "sequel_id":
-			buf, _ := io.ReadAll(part)
+			buf, err := io.ReadAll(part)
+			if err != nil {
+				http.Error(w, "Error reading sequel_id: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
 			s := strings.TrimSpace(string(buf))
 			if s != "" {
 				blog.SequelID = util.AddrOf(s)
 			}
 
 		case "parts":
-			buf, _ := io.ReadAll(part)
-			parts = strings.Split(string(buf), ",")
+			buf, err := io.ReadAll(part)
+			if err != nil {
+				http.Error(w, "Error reading parts: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+			partsStr := strings.TrimSpace(string(buf))
+			if partsStr != "" {
+				parts = strings.Split(partsStr, ",")
+				// Trim whitespace from each part
+				for i, part := range parts {
+					parts[i] = strings.TrimSpace(part)
+				}
+			}
 
 		case "content_file":
 			// Save uploaded file to ~/Blogs/{id}.md
 			home := os.Getenv("home")
 			if len(home) == 0 {
-				http.Error(w, "Missing 'home' environment variable", http.StatusInternalServerError)
+				http.Error(w, "Something went wrong!", http.StatusInternalServerError)
+				logger.TimedPanic("Missing 'home' environment variable")
 				return
 			}
 			dir := filepath.Join(home, "Blogs")
 			if err := os.MkdirAll(dir, 0755); err != nil {
 				http.Error(w, "Failed to create Blogs directory: "+err.Error(), http.StatusInternalServerError)
+				logger.TimedPanic("Failed to create Blogs directory: " + err.Error())
 				return
 			}
 
-			contentFilePath = filepath.Join(dir, blog.ID+".md")
+			contentFilePath := filepath.Join(dir, blog.ID+".md")
 			out, err := os.Create(contentFilePath)
 			if err != nil {
 				http.Error(w, "Failed to create file: "+err.Error(), http.StatusInternalServerError)
+				logger.TimedError("Failed to create file: " + err.Error())
 				return
 			}
 			defer out.Close()
 
 			if _, err := io.Copy(out, part); err != nil {
 				http.Error(w, "Failed to save file: "+err.Error(), http.StatusInternalServerError)
+				logger.TimedError("Failed to save file: " + err.Error())
 				return
 			}
 		}
+
+		// Close the part to free resources
+		part.Close()
 	}
 
-	if contentFilePath == "" {
-		http.Error(w, "Missing blog content file", http.StatusBadRequest)
+	// Validation: Check required fields
+	if blog.Title == "" {
+		http.Error(w, "Blog title is required", http.StatusBadRequest)
 		return
 	}
 
-	blog.MarkdownURL = contentFilePath
 	blog.Parts = parts
 
 	// Insert blog into the database
 	stmt, err := db.Conn.Prepare(`
 		INSERT INTO blogs (
-			id, title, summary, markdown_url,
+			id, title, summary,
 			created_at, updated_at, prequel_id, sequel_id, parts
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 	`)
 	if err != nil {
 		http.Error(w, "Failed to prepare statement: "+err.Error(), http.StatusInternalServerError)
@@ -134,17 +175,21 @@ func PostBlog(w http.ResponseWriter, r *http.Request) {
 	}
 	defer stmt.Close()
 
-	partsJSON, err := json.Marshal(blog.Parts)
-	if err != nil {
-		http.Error(w, "Failed to encode parts list: "+err.Error(), http.StatusInternalServerError)
-		return
+	var partsJSON []byte
+	if len(blog.Parts) > 0 {
+		partsJSON, err = json.Marshal(blog.Parts)
+		if err != nil {
+			http.Error(w, "Failed to encode parts list: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		partsJSON = []byte("[]") // Empty JSON array for null parts
 	}
 
 	_, err = stmt.Exec(
 		blog.ID,
 		blog.Title,
 		blog.Summary,
-		blog.MarkdownURL,
 		blog.CreatedAt,
 		blog.UpdatedAt,
 		blog.PrequelID,

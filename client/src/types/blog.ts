@@ -2,7 +2,6 @@ export interface Blog {
     id: string
     title: string
     summary: string
-    markdownUrl: string
 
     createdAt: string
     updatedAt: string
