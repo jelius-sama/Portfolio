@@ -5,9 +5,11 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 )
 
+// TODO: Send Email to admin for approval
 func UpdateServer(w http.ResponseWriter, r *http.Request) {
 	authHeader := r.Header.Get("Authorization")
 	if !strings.HasPrefix(authHeader, "Bearer ") {
@@ -28,7 +30,7 @@ func UpdateServer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Execute update script (in background)
-	cmd := exec.Command("bash", "/home/ec2-user/update_prod.sh")
+	cmd := exec.Command("bash", path.Join(os.Getenv("home"), "/update_prod.sh"))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

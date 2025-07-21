@@ -12,4 +12,7 @@ var ApiRoutes = map[string]http.HandlerFunc{
 	"POST /update_server": handler.UpdateServer,
 	"GET /version":        handler.GetVersion,
 	"POST /analytics":     handler.SaveAnalytics,
+	"GET /blogs":          handler.GetBlogs,
+	"Get /blog":           handler.GetBlog,
+	"POST /blog":          handler.PostBlog,
 }

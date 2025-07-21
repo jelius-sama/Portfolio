@@ -20,5 +20,10 @@ func InitializeSchema(db *sql.DB) error {
 		return errors.New(fmt.Sprintf("create analytics table: %v\n", err))
 	}
 
+	// Blogs
+	if _, err := db.Exec(CreateBlogsTable); err != nil {
+		return errors.New(fmt.Sprintf("create blogs table: %v\n", err))
+	}
+
 	return nil
 }

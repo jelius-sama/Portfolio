@@ -27,6 +27,13 @@ var (
 	ProxyPort    string
 )
 
+// NOTE: Be sure to explicitly set the home path in the `../config/server.config.json` file.
+//   - This is important because if the server runs directly without a reverse proxy,
+//     it may require root privileges, in which case `os.UserHomeDir()` may not resolve
+//     to the intended user's home directory.
+//   - Conversely, if the server does not run with root privileges, it will be unable
+//     to bind to ports 443 or 80. This may force users to specify a port number
+//     in the URL when accessing your domain.
 func init() {
 	exePath, err := os.Executable()
 	if err != nil {
@@ -82,6 +89,9 @@ type ServerResp struct {
 	Https error
 }
 
+// TODO: Work on `/blogs` page UI.
+// TODO: Work on SSR support for `/blog/{id}` page.
+// TODO: Work on upload interface for blog posts.
 func main() {
 	defer db.Conn.Close()
 
