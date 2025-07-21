@@ -89,6 +89,7 @@ type ServerResp struct {
 }
 
 // TODO: Work on SSR support for `/blog/{id}` page.
+// TODO: Work on Dynamic Content Metadata.
 func main() {
 	defer db.Conn.Close()
 
