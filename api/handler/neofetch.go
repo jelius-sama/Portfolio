@@ -16,20 +16,20 @@ type InfoItem struct {
 }
 
 var (
-	cacheData     []InfoItem
-	cacheTime     time.Time
-	cacheDuration = 12 * time.Hour
-	cacheMutex    sync.Mutex
+	neofetchCacheData     []InfoItem
+	neofetchCacheTime     time.Time
+	neofetchCacheDuration = 12 * time.Hour
+	neofetchCacheMutex    sync.Mutex
 )
 
 func NeofetchInfo(w http.ResponseWriter, r *http.Request) {
-	cacheMutex.Lock()
-	defer cacheMutex.Unlock()
+	neofetchCacheMutex.Lock()
+	defer neofetchCacheMutex.Unlock()
 
 	// Serve from cache if still valid
-	if time.Since(cacheTime) < cacheDuration && cacheData != nil {
+	if time.Since(neofetchCacheTime) < neofetchCacheDuration && neofetchCacheData != nil {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(cacheData)
+		json.NewEncoder(w).Encode(neofetchCacheData)
 		return
 	}
 
@@ -68,8 +68,8 @@ func NeofetchInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Cache the result
-	cacheData = infoList
-	cacheTime = time.Now()
+	neofetchCacheData = infoList
+	neofetchCacheTime = time.Now()
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(infoList)

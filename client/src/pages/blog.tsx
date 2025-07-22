@@ -7,6 +7,7 @@ import { Footer } from "@/components/ui/footer"
 import { MarkdownRenderer } from "@/components/ui/markdown"
 
 // TODO: Integrate with server to do SSR
+// TODO: Test the different states of UI like loding and error.
 export default function BlogPostPage() {
   const [blog, setBlog] = useState<Blog | null>(null)
   const [markdownContent, setMarkdownContent] = useState<string>("")

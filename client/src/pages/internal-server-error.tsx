@@ -3,6 +3,9 @@ import { Home, Mail, RefreshCw, AlertTriangle } from "lucide-react"
 import { Fragment } from "react"
 import { useConfig } from "@/contexts/config"
 import { Link } from "react-router-dom"
+import { useQuery } from '@tanstack/react-query'
+import type { Healthz, ComponentStatus } from "@/types"
+import { cn } from "@/lib/utils"
 
 const REPORT_MECHANISM_IMPLEMENTED = false
 
@@ -12,6 +15,47 @@ export default function ServerErrorPage() {
     "Contact system administrator if issue persists",
   ]
   const { app } = useConfig()
+
+  const { isPending, error, data } = useQuery({
+    queryKey: ['latestCommit'],
+    queryFn: async () => {
+      const res = await fetch('/api/healthz')
+      if (!res.ok) {
+        const errMsg = "Failed to healthz!"
+        throw new Error(errMsg)
+      }
+      return res.json() as Promise<Healthz>
+    }
+  })
+
+  const statusDisplay: Record<ComponentStatus, { label: string; color: string; symbol: string }> = {
+    ok: { label: "OPERATIONAL", color: "text-green-400", symbol: "●" },
+    locked: { label: "DOWN", color: "text-red-400", symbol: "●" },
+    heavy_load: { label: "HEAVY LOAD", color: "text-yellow-400", symbol: "⚠" },
+    degraded: { label: "DEGRADED", color: "text-yellow-400", symbol: "⚠" }
+  };
+
+  const componentLabels: Record<keyof Healthz["components"], string> = {
+    webserver: "Web Server",
+    database: "Database",
+    api: "API",
+    load: "LOAD"
+  };
+
+  const formatTimestamp = (iso: string): string => {
+    const date = new Date(iso);
+
+    const pad = (n: number) => n.toString().padStart(2, '0');
+
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1); // months are 0-based
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
 
   return (
     <Fragment>
@@ -57,26 +101,42 @@ export default function ServerErrorPage() {
         </TerminalWindow>
 
         {/* System Status */}
-
         <TerminalWindow title="system-status" className="mb-8">
           <div className="font-mono text-sm">
-            <div className="text-orange-400 mb-4">
-              {`$ curl -s ${app.portfolio.links["jelius.dev"].link}/api/healthz`}
+            <div className="text-orange-400 mb-4 flex flex-wrap justify-between items-center">
+              <span>{`$ curl -s ${app.portfolio.links["jelius.dev"].link}/api/healthz`}</span>
+              {data && (
+                <span className={`${statusDisplay[data.status].color} font-mono`}>
+                  {statusDisplay[data.status].label} | {formatTimestamp(data.timestamp)}
+                </span>
+              )}
             </div>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-300">Web Server:</span>
-                <span className="text-red-400">● DOWN</span>
+            {isPending && <div className="text-gray-300">Running health checks...</div>}
+
+            {error && (
+              <Fragment>
+                <div className="text-red-400 mb-4">Error: {error.message}</div>
+                <div className="text-orange-400 mb-2">$ echo "Please try again later"</div>
+                <div className="text-gray-300">Please try again later</div>
+              </Fragment>
+            )}
+
+            {data && (
+              <div className="space-y-2">
+                {Object.entries(data.components).map(([key, value]) => {
+                  const label = componentLabels[key as keyof typeof componentLabels] || key;
+                  const display = statusDisplay[value];
+                  return (
+                    <div className="flex justify-between" key={key}>
+                      <span className="text-gray-300">{label}:</span>
+                      <span className={cn(display.color)}>
+                        {display.symbol} {display.label}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-300">Database:</span>
-                <span className="text-yellow-400">⚠ DEGRADED</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-300">Monitoring:</span>
-                <span className="text-green-400">● OPERATIONAL</span>
-              </div>
-            </div>
+            )}
 
             {REPORT_MECHANISM_IMPLEMENTED && (
               <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded">
@@ -94,7 +154,6 @@ export default function ServerErrorPage() {
             )}
           </div>
         </TerminalWindow>
-
 
         {/* Troubleshooting */}
         <TerminalWindow title="troubleshooting" className="mb-8">
