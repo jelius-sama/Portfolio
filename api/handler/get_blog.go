@@ -8,6 +8,7 @@ import (
 
 	"KazuFolio/db"
 	"KazuFolio/types"
+	"errors"
 	"path/filepath"
 	"regexp"
 )
@@ -45,13 +46,7 @@ func GetBlogFile(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, blogFile)
 }
 
-func GetBlog(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
-	if id == "" {
-		http.Error(w, "ID for the blog was not provided!", http.StatusBadRequest)
-		return
-	}
-
+func getBlog(id string) (*types.Blog, int, error) {
 	var (
 		blog  types.Blog
 		parts string // Will be parsed from JSON string into blog.Parts
@@ -71,16 +66,30 @@ func GetBlog(w http.ResponseWriter, r *http.Request) {
 		&parts,
 	)
 	if err == sql.ErrNoRows {
-		http.Error(w, "Blog not found", http.StatusNotFound)
-		return
+		return nil, http.StatusNotFound, errors.New("Blog not found")
 	} else if err != nil {
-		http.Error(w, "Database error: "+err.Error(), http.StatusInternalServerError)
-		return
+		return nil, http.StatusInternalServerError, errors.New("Database error: " + err.Error())
 	}
 
 	// Decode JSON-encoded parts list
 	if err := json.Unmarshal([]byte(parts), &blog.Parts); err != nil {
-		http.Error(w, "Failed to parse parts list: "+err.Error(), http.StatusInternalServerError)
+		return nil, http.StatusInternalServerError, errors.New("Failed to parse parts list: " + err.Error())
+	}
+
+	return &blog, http.StatusOK, nil
+}
+
+func GetBlog(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "ID for the blog was not provided!", http.StatusBadRequest)
+		return
+	}
+
+	blog, status, err := getBlog(id)
+
+	if err != nil {
+		http.Error(w, err.Error(), status)
 		return
 	}
 
@@ -89,4 +98,9 @@ func GetBlog(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(blog); err != nil {
 		http.Error(w, "Failed to encode blog as JSON: "+err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func GetBlogInternal(id string) (*types.Blog, int, error) {
+	blog, status, err := getBlog(id)
+	return blog, status, err
 }

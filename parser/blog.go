@@ -3,11 +3,10 @@ package parser
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
 	"strings"
 
+	"KazuFolio/api/handler"
 	"KazuFolio/types"
 )
 
@@ -20,24 +19,19 @@ func SSRBlogPage(fullPath string) (string, error) {
 	}
 
 	// Step 2: Call the internal API to get the blog data
-	resp, err := http.Get(fmt.Sprintf("http://localhost:%s/api/blog?id=", os.Getenv("port")) + id)
+	blog, status, err := handler.GetBlogInternal(id)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch blog data: %w", err)
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("API returned status %d", resp.StatusCode)
+	if status != http.StatusOK {
+		return "", fmt.Errorf("API returned status %d", status)
 	}
 
 	// Step 3: Decode the JSON into types.Blog
-	var blog types.Blog
-	body, err := io.ReadAll(resp.Body)
+	resp_body, err := json.Marshal(blog)
 	if err != nil {
 		return "", fmt.Errorf("failed to read API response: %w", err)
-	}
-	if err := json.Unmarshal(body, &blog); err != nil {
-		return "", fmt.Errorf("failed to unmarshal blog: %w", err)
 	}
 
 	// Step 4: Create metadata JSON (same structure as the static one)
@@ -151,7 +145,7 @@ func SSRBlogPage(fullPath string) (string, error) {
 	scriptPayload := map[string]any{
 		"path":     fullPath,
 		"metadata": metadata,
-		"api_resp": json.RawMessage(body),
+		"api_resp": json.RawMessage(resp_body),
 	}
 	scriptJSON, err := json.Marshal(scriptPayload)
 	if err != nil {
