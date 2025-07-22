@@ -1,18 +1,20 @@
-import { StrictMode } from 'react'
+import { StrictMode, useState } from 'react'
 import '@/index.css'
 import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/contexts/theme'
 import { createRoot } from 'react-dom/client'
 import { ConfigProvider } from '@/contexts/config'
-import { lazy, Suspense, useLayoutEffect, useEffect } from 'react'
+import { lazy, Suspense, useLayoutEffect, useEffect, type ReactNode } from 'react'
 import { Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { Header } from "@/components/layout/header"
+import { useConfig } from "@/contexts/config"
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 
 const queryClient = new QueryClient()
 
 const Home = lazy(() => import("@/pages/home"))
+const InternalServerError = lazy(() => import("@/pages/internal-server-error"))
 const Blogs = lazy(() => import("@/pages/blogs"))
 const Blog = lazy(() => import("@/pages/blog"))
 const Links = lazy(() => import("@/pages/links"))
@@ -111,34 +113,66 @@ const App = () => {
   )
 }
 
-const Entry = () => {
+const ErrorWrapper = ({ comp }: { comp: ReactNode }) => {
+  const [errorPath, setErrorPath] = useState<string | null>(null)
+  const { pathname } = useLocation()
+  const { setSSRData } = useConfig()
+  // INFO: The following state is to avoid race condition
+  const [isSSRLoaded, setIsSSRLoaded] = useState(false)
 
-  return (
-    <StrictMode>
-      <ConfigProvider>
-        <BrowserRouter>
-          <QueryClientProvider client={queryClient}>
-            <ThemeProvider defaultTheme="dark" storageKey="theme">
-              <Routes>
-                <Route path='/' element={<App />}>
-                  <Route path='/' element={<Home />} />
-                  <Route path='/links' element={<Links />} />
-                  <Route path='/blogs' element={<Blogs />} />
-                  <Route path="/blog/:id" element={<Blog />} />
-                  <Route path='*' element={<NotFound />} />
-                </Route>
-              </Routes>
-              <Toaster richColors={true} />
-            </ThemeProvider>
-          </QueryClientProvider>
-        </BrowserRouter>
-      </ConfigProvider>
-    </StrictMode>
-  )
+  useLayoutEffect(() => {
+    const script = document.getElementById('__SERVER_DATA__')
+    if (script && script.textContent) {
+      try {
+        const data = JSON.parse(script.textContent)
+        setSSRData(data)
+
+        // Identify if it's error data (you can refine this signature check)
+        if ("status" in data && data.status === 500) {
+          setErrorPath(pathname)
+        }
+
+        script.remove()
+      } catch (err) {
+        console.error('Failed to parse SSR data:', err)
+      }
+    }
+    setIsSSRLoaded(true)
+  }, [])
+
+  // Clear error when navigating to a different path
+  useEffect(() => {
+    if (errorPath && pathname !== errorPath) {
+      setErrorPath(null)
+    }
+  }, [pathname, errorPath])
+
+  return !isSSRLoaded ? null : errorPath === pathname ? <InternalServerError /> : comp
 }
 
 const reactRoot = createRoot(rootEl);
-reactRoot.render(<Entry />);
+reactRoot.render(
+  <StrictMode>
+    <ConfigProvider>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider defaultTheme="dark" storageKey="theme">
+            <Routes>
+              <Route path='/' element={<App />}>
+                <Route path='/' element={<ErrorWrapper comp={<Home />} />} />
+                <Route path='/links' element={<ErrorWrapper comp={<Links />} />} />
+                <Route path='/blogs' element={<ErrorWrapper comp={<Blogs />} />} />
+                <Route path="/blog/:id" element={<ErrorWrapper comp={<Blog />} />} />
+                <Route path='*' element={<ErrorWrapper comp={<NotFound />} />} />
+              </Route>
+            </Routes>
+            <Toaster richColors={true} />
+          </ThemeProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </ConfigProvider>
+  </StrictMode>
+);
 
 // Registering service worker
 if ('serviceWorker' in navigator) {

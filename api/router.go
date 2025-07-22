@@ -95,15 +95,26 @@ func HandleRouting() *http.ServeMux {
 			return
 		}
 
-		metadata, err := parser.ParseMetadata(r.URL.Path)
+		ssrData, err := parser.PerformSSR(r.URL.Path)
 		if err != nil {
-			InternalServerError(w, r, util.AddrOf("Failed to parse metadata of the page!"))
-			logger.Error("metadata parsing failed:\n    " + err.Error())
+			InternalServerError(w, r, util.AddrOf("Failed to perform SSR!"))
+			logger.Error("performing SSR failed:\n    " + err.Error())
 			return
 		}
 
-		// Replace marker in HTML
-		html = bytes.Replace(html, []byte("<!-- Server Props -->"), []byte(metadata), 1)
+		if len(ssrData) == 0 {
+			metadata, err := parser.ParseMetadata(r.URL.Path, nil)
+			if err != nil {
+				InternalServerError(w, r, util.AddrOf("Failed to parse metadata of the page!"))
+				logger.Error("metadata parsing failed:\n    " + err.Error())
+				return
+			}
+
+			// Replace marker in HTML
+			html = bytes.Replace(html, []byte("<!-- Server Props -->"), []byte(metadata), 1)
+		} else {
+			html = bytes.Replace(html, []byte("<!-- SSR Data -->"), []byte(ssrData), 1)
+		}
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusOK)

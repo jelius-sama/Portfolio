@@ -225,7 +225,7 @@
             },
             {
                 "name": "theme-color",
-                "content": "#FFFFFF"
+                "content": "#000b11"
             },
             {
                 "name": "apple-mobile-web-app-status-bar-style",
@@ -317,7 +317,7 @@
             },
             {
                 "name": "theme-color",
-                "content": "#FFFFFF"
+                "content": "#000b11"
             },
             {
                 "name": "apple-mobile-web-app-status-bar-style",
@@ -409,7 +409,7 @@
             },
             {
                 "name": "theme-color",
-                "content": "#FFFFFF"
+                "content": "#000b11"
             },
             {
                 "name": "apple-mobile-web-app-status-bar-style",

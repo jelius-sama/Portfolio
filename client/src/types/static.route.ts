@@ -1,5 +1,5 @@
 export interface MetaNameTag {
-    name: "description" | "keywords" | "author" | "viewport" | "theme-color" | "twitter:card" | "twitter:title" | "twitter:description" | "twitter:image" | "twitter:site" | "twitter:creator" | "apple-mobile-web-app-capable" | "apple-mobile-web-app-status-bar-style" | "mobile-web-app-capable" | "robots";
+    name: "description" | "format-detection" | "apple-mobile-web-app-title" | "application-name" | "keywords" | "author" | "viewport" | "theme-color" | "twitter:card" | "twitter:title" | "twitter:description" | "twitter:image" | "twitter:site" | "twitter:creator" | "apple-mobile-web-app-capable" | "apple-mobile-web-app-status-bar-style" | "mobile-web-app-capable" | "robots";
     content: string;
 }
 

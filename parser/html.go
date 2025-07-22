@@ -21,6 +21,7 @@ const DevHTMLShell string = `<!doctype html>
   <script type="module" src="http://localhost:5173/@vite/client"></script>
 
   <!-- Server Props -->
+  <!-- SSR Data -->
 </head>
 
 <body>

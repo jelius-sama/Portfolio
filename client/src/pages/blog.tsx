@@ -2,13 +2,53 @@ import { useState, useEffect, Fragment } from "react"
 import { TerminalWindow } from "@/components/ui/terminal-window"
 import { Calendar, Clock, ChevronLeft, ChevronRight, FileText } from "lucide-react"
 import type { Blog } from "@/types/blog"
-import { useParams, Link } from "react-router-dom"
+import { useParams, Link, useLocation } from "react-router-dom"
 import { Footer } from "@/components/ui/footer"
 import { MarkdownRenderer } from "@/components/ui/markdown"
+import { useConfig } from "@/contexts/config"
+import { DynamicMetadata } from "@/contexts/metadata"
+import { type StaticRoute } from "@/types/static.route"
 
-// TODO: Integrate with server to do SSR
-// TODO: Test the different states of UI like loding and error.
+export function generateBlogMetadata(blog: Blog, fullPath: string): StaticRoute {
+  const title = `${blog.title} | Jelius`;
+
+  return {
+    path: fullPath,
+    title,
+    meta: [
+      { name: "description", content: blog.summary },
+      { name: "application-name", content: "Jelius Basumatary" },
+      { name: "robots", content: "index, follow" },
+      { name: "format-detection", content: "telephone=no" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "Jelius Basumatary" },
+      { name: "theme-color", content: "#000b11" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+
+      { property: "og:title", content: title },
+      { property: "og:description", content: blog.summary },
+      { property: "og:url", content: "https://jelius.dev" + fullPath },
+      { property: "og:site_name", content: "Jelius Basumatary" },
+      { property: "og:image", content: "/assets/jelius.jpg" },
+      { property: "og:type", content: "article" },
+
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:site", content: "@jelius_sama" },
+      { name: "twitter:creator", content: "@jelius_sama" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: blog.summary },
+      { name: "twitter:image", content: "/assets/jelius.jpg" },
+    ],
+    link: [
+      { rel: "canonical", href: "https://jelius.dev" + fullPath }
+    ]
+  };
+}
+
 export default function BlogPostPage() {
+  const { ssrData } = useConfig()
+  const { pathname } = useLocation()
+
   const [blog, setBlog] = useState<Blog | null>(null)
   const [markdownContent, setMarkdownContent] = useState<string>("")
   const [loading, setLoading] = useState(true)
@@ -17,35 +57,49 @@ export default function BlogPostPage() {
 
   useEffect(() => {
     (async () => {
+      setLoading(true);
+      setError(null);
+
       try {
-        setLoading(true)
-        setError(null)
+        // Use SSR data if available and matches current path
+        if (ssrData?.path === pathname) {
+          setBlog(ssrData.api_resp);
 
-        const [blogRes, markdownRes] = await Promise.all([
-          fetch(`/api/blog?id=${id}`),
-          fetch(`/api/blog_file?id=${id}`)
-        ])
+          const markdownRes = await fetch(`/api/blog_file?id=${id}`);
+          if (!markdownRes.ok) {
+            throw new Error(`Failed to fetch markdown: ${markdownRes.status}`);
+          }
 
-        if (!blogRes.ok) {
-          throw new Error(`Failed to fetch blog: ${blogRes.status}`)
+          const markdownText = await markdownRes.text();
+          setMarkdownContent(markdownText);
+        } else {
+          // Fetch blog and markdown in parallel
+          const [blogRes, markdownRes] = await Promise.all([
+            fetch(`/api/blog?id=${id}`),
+            fetch(`/api/blog_file?id=${id}`)
+          ]);
+
+          if (!blogRes.ok) {
+            throw new Error(`Failed to fetch blog: ${blogRes.status}`);
+          }
+
+          if (!markdownRes.ok) {
+            throw new Error(`Failed to fetch markdown: ${markdownRes.status}`);
+          }
+
+          const blogData: Blog = await blogRes.json();
+          const markdownText = await markdownRes.text();
+
+          setBlog(blogData);
+          setMarkdownContent(markdownText);
         }
-
-        if (!markdownRes.ok) {
-          throw new Error(`Failed to fetch markdown: ${markdownRes.status}`)
-        }
-
-        const blogData: Blog = await blogRes.json()
-        const markdownText = await markdownRes.text()
-
-        setBlog(blogData)
-        setMarkdownContent(markdownText)
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred")
+        setError(err instanceof Error ? err.message : "An unexpected error occurred");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    })()
-  }, [id])
+    })();
+  }, [id, pathname]);
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -94,6 +148,7 @@ export default function BlogPostPage() {
 
   return (
     <Fragment>
+      <DynamicMetadata currentMeta={pathname === ssrData?.path ? ssrData.metadata : generateBlogMetadata(blog, pathname)} />
       <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 mt-12">
         {/* Blog Header */}
         <div className="mb-8">

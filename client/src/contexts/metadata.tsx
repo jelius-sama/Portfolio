@@ -6,7 +6,7 @@ import React, {
   useContext,
   useEffect
 } from "react";
-import type { MetaTag, LinkTag, ScriptTag } from "@/types/static.route";
+import type { MetaTag, LinkTag, ScriptTag, StaticRoute } from "@/types/static.route";
 import { useConfig } from "@/contexts/config";
 import { useLocation } from "react-router-dom";
 
@@ -110,6 +110,42 @@ export const StaticMetadata = () => {
   const currentMeta =
     staticRoute.find(route => route.path === location.pathname) ??
     staticRoute.find(route => route.path === "#not_found");
+
+  const mergedMeta = {
+    title: currentMeta?.title,
+    meta: [...(defaultMeta?.meta ?? []), ...(currentMeta?.meta ?? [])],
+    link: [...(defaultMeta?.link ?? []), ...(currentMeta?.link ?? [])],
+  };
+
+  return (
+    <Metadata>
+      {mergedMeta.title && <Title>{mergedMeta.title}</Title>}
+
+      {mergedMeta.meta?.map((meta, i) => {
+        if ("charset" in meta) return <Meta key={i} charset={meta.charset} />;
+        if ("name" in meta) return <Meta key={i} name={meta.name} content={meta.content} />;
+        if ("property" in meta) return <Meta key={i} property={meta.property} content={meta.content} />;
+        if ("http-equiv" in meta) return <Meta key={i} http-equiv={meta["http-equiv"]} content={meta.content} />;
+        return null;
+      })}
+
+      {mergedMeta.link?.map((link, i) => (
+        <Link key={i} {...link} />
+      ))}
+    </Metadata>
+  );
+};
+
+export const DynamicMetadata = ({ currentMeta }: { currentMeta: StaticRoute }) => {
+  const { staticRoute } = useConfig();
+  const location = useLocation();
+
+  useEffect(() => {
+    const serverSentMetadata = document.querySelectorAll('head [id="__SERVER_PROPS__"]');
+    serverSentMetadata.forEach((el) => el.remove());
+  }, [location]);
+
+  const defaultMeta = staticRoute.find(route => route.path === "*");
 
   const mergedMeta = {
     title: currentMeta?.title,

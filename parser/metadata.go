@@ -10,49 +10,76 @@ import (
 	"strings"
 )
 
-func ParseMetadata(path string) (string, error) {
-	data, err := os.ReadFile(filepath.Join(os.Getenv("ROOT_PATH"), "config", "static.route.json"))
+func ParseMetadata(path string, d *[]byte) (string, error) {
+	var err error
+
+	// Always load static config to get default (*) and #not_found routes
+	staticPath := filepath.Join(os.Getenv("ROOT_PATH"), "config", "static.route.json")
+	staticData, err := os.ReadFile(staticPath)
 	if err != nil {
-		return "", fmt.Errorf("failed to read metadata file: %w", err)
+		return "", fmt.Errorf("failed to read static metadata file: %w", err)
 	}
 
-	var routes []types.RouteMetadata
-	if err := json.Unmarshal(data, &routes); err != nil {
-		return "", fmt.Errorf("failed to parse JSON: %w", err)
+	var staticRoutes []types.RouteMetadata
+	if err := json.Unmarshal(staticData, &staticRoutes); err != nil {
+		return "", fmt.Errorf("failed to parse static metadata JSON: %w", err)
 	}
 
-	var defaultMeta, currentMeta, notFoundMeta *types.RouteMetadata
+	var defaultMeta, notFoundMeta *types.RouteMetadata
 
-	// Index the metadata by path
-	for i := range routes {
-		switch routes[i].Path {
+	for i := range staticRoutes {
+		switch staticRoutes[i].Path {
 		case "*":
-			defaultMeta = &routes[i]
-		case path:
-			currentMeta = &routes[i]
+			defaultMeta = &staticRoutes[i]
 		case "#not_found":
-			notFoundMeta = &routes[i]
+			notFoundMeta = &staticRoutes[i]
 		}
 	}
 
-	// Use #not_found if no match
+	// Load dynamic metadata if provided
+	var routes []types.RouteMetadata
+
+	if d != nil && *d != nil && len(*d) != 0 {
+		if err := json.Unmarshal(*d, &routes); err != nil {
+			return "", fmt.Errorf("failed to parse dynamic JSON: %w", err)
+		}
+	} else {
+		// If no dynamic metadata passed, use the static file again
+		routes = staticRoutes
+	}
+
+	// Find the route metadata for this path
+	var currentMeta *types.RouteMetadata
+	for i := range routes {
+		if routes[i].Path == path {
+			currentMeta = &routes[i]
+			break
+		}
+	}
+
 	if currentMeta == nil {
 		currentMeta = notFoundMeta
 	}
 
 	if currentMeta == nil {
-		// Still no metadata? Nothing to render
-		return "", nil
+		return "", nil // No metadata to render
 	}
 
-	// Merge defaultMeta + currentMeta
+	// Merge default + current
 	var mergedMeta = types.RouteMetadata{
 		Path:  currentMeta.Path,
 		Title: currentMeta.Title,
-		Meta:  append(defaultMeta.Meta, currentMeta.Meta...),
-		Link:  append(defaultMeta.Link, currentMeta.Link...),
 	}
 
+	if defaultMeta != nil {
+		mergedMeta.Meta = append(defaultMeta.Meta, currentMeta.Meta...)
+		mergedMeta.Link = append(defaultMeta.Link, currentMeta.Link...)
+	} else {
+		mergedMeta.Meta = currentMeta.Meta
+		mergedMeta.Link = currentMeta.Link
+	}
+
+	// Render HTML
 	var builder strings.Builder
 
 	if mergedMeta.Title != "" {
