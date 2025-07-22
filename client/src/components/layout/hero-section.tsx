@@ -6,7 +6,7 @@ export function HeroSection() {
     const { app: { portfolio: me } } = useConfig()
 
     return (
-        <section id="home" className="min-h-screen w-full text-center flex flex-col items-center justify-center px-6 pt-20">
+        <section id="home" className="min-h-screen w-full max-w-6xl text-center flex flex-col items-center justify-center mx-auto px-4 sm:px-6 pt-20">
             <div className="mb-8">
                 <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 p-1">
                     <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
@@ -33,7 +33,7 @@ export function HeroSection() {
                 </a>
             </div>
 
-            <TerminalWindow title="welcome" className="w-full max-w-6xl text-left">
+            <TerminalWindow title="welcome" className="w-full text-left">
                 <div className="font-mono text-sm">
                     <div className="text-orange-400 mb-2">$ whoami</div>
                     <div className="text-gray-300 mb-4">{me.introduction}</div>

@@ -59,34 +59,30 @@ export default function BlogPostPage() {
 
   if (loading) {
     return (
-      <section className="pt-20 pb-12 px-6">
-        <div className="max-w-6xl mx-auto">
-          <TerminalWindow title="loading">
-            <div className="font-mono text-sm text-center py-8">
-              <div className="text-orange-400 mb-2">$ curl -X GET /api/blog?id={id}</div>
-              <div className="text-gray-300 mb-4">Fetching blog data...</div>
-              <div className="text-orange-400 mb-2">$ curl -X GET /api/blog_file?id={id}</div>
-              <div className="text-gray-300">Loading markdown content...</div>
-            </div>
-          </TerminalWindow>
-        </div>
+      <section className="max-w-6xl mx-auto pt-20 pb-12 px-4 sm:px-6">
+        <TerminalWindow title="loading">
+          <div className="font-mono text-sm text-center py-8">
+            <div className="text-orange-400 mb-2">$ curl -X GET /api/blog?id={id}</div>
+            <div className="text-gray-300 mb-4">Fetching blog data...</div>
+            <div className="text-orange-400 mb-2">$ curl -X GET /api/blog_file?id={id}</div>
+            <div className="text-gray-300">Loading markdown content...</div>
+          </div>
+        </TerminalWindow>
       </section>
     )
   }
 
   if (error) {
     return (
-      <section className="pt-20 pb-12">
-        <div className="max-w-6xl mx-auto">
-          <TerminalWindow title="error">
-            <div className="font-mono text-sm">
-              <div className="text-orange-400 mb-2">$ curl -X GET /api/blog?id={id}</div>
-              <div className="text-red-400 mb-4">Error: {error}</div>
-              <div className="text-orange-400 mb-2">$ echo "Please try again later"</div>
-              <div className="text-gray-300">Please try again later</div>
-            </div>
-          </TerminalWindow>
-        </div>
+      <section className="max-w-6xl mx-auto pt-20 pb-12 px-4 sm:px-6">
+        <TerminalWindow title="error">
+          <div className="font-mono text-sm">
+            <div className="text-orange-400 mb-2">$ curl -X GET /api/blog?id={id}</div>
+            <div className="text-red-400 mb-4">Error: {error}</div>
+            <div className="text-orange-400 mb-2">$ echo "Please try again later"</div>
+            <div className="text-gray-300">Please try again later</div>
+          </div>
+        </TerminalWindow>
       </section>
     )
   }
@@ -97,7 +93,7 @@ export default function BlogPostPage() {
 
   return (
     <Fragment>
-      <div className="max-w-6xl mx-auto py-12 mt-12">
+      <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 mt-12">
         {/* Blog Header */}
         <div className="mb-8">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">

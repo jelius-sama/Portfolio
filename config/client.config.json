@@ -132,6 +132,7 @@
         ],
         "links": {
             "Email": {
+                "domain": "jelius.dev",
                 "username": "contact@jelius.dev",
                 "link": "mailto:contact@jelius.dev"
             },

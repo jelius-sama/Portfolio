@@ -13,7 +13,6 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 const queryClient = new QueryClient()
 
 const Home = lazy(() => import("@/pages/home"))
-// const Development = lazy(() => import("@/pages/development"))
 const Blogs = lazy(() => import("@/pages/blogs"))
 const Blog = lazy(() => import("@/pages/blog"))
 const Links = lazy(() => import("@/pages/links"))

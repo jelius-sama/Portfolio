@@ -18,8 +18,8 @@ export function ContactSection() {
     const { app: { portfolio: me } } = useConfig()
 
     return (
-        <section id="contact" className="py-20 px-6 bg-gray-900/50">
-            <div className="max-w-6xl mx-auto">
+        <section id="contact" className="bg-gray-900/50">
+            <div className="max-w-6xl mx-auto py-20 px-4 sm:px-6 ">
                 <h2 className="text-3xl font-bold text-center mb-12">
                     <span className="text-orange-400">|</span> <span className="text-white">Get in Touch</span>
                 </h2>
