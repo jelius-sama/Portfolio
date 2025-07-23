@@ -94,7 +94,6 @@ type ServerResp struct {
 	Https error
 }
 
-// TODO: Improve the md renderer for blog post page.
 func main() {
 	defer db.Conn.Close()
 
