@@ -11,27 +11,27 @@ import (
 )
 
 // ssrBlogPage fetches the blog data, generates metadata HTML + hydration script.
-func SSRBlogPage(fullPath string) (string, error) {
+func SSRBlogPage(fullPath string) (string, error, int) {
 	// Step 1: Extract blog ID from the path
 	id := strings.TrimPrefix(fullPath, "/blog/")
 	if id == "" {
-		return "", fmt.Errorf("no blog ID found in path")
+		return "", fmt.Errorf("no blog ID found in path"), http.StatusBadRequest
 	}
 
 	// Step 2: Call the internal API to get the blog data
 	blog, status, err := handler.GetBlogInternal(id)
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch blog data: %w", err)
+		return "", fmt.Errorf("failed to fetch blog data: %w", err), status
 	}
 
 	if status != http.StatusOK {
-		return "", fmt.Errorf("API returned status %d", status)
+		return "", fmt.Errorf("API returned status %d", status), status
 	}
 
 	// Step 3: Decode the JSON into types.Blog
 	resp_body, err := json.Marshal(blog)
 	if err != nil {
-		return "", fmt.Errorf("failed to read API response: %w", err)
+		return "", fmt.Errorf("failed to read API response: %w", err), http.StatusInternalServerError
 	}
 
 	// Step 4: Create metadata JSON (same structure as the static one)
@@ -131,14 +131,14 @@ func SSRBlogPage(fullPath string) (string, error) {
 	// Step 5: Marshal metadata into JSON for the parser
 	jsonData, err := json.Marshal([]types.RouteMetadata{metadata})
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal metadata JSON: %w", err)
+		return "", fmt.Errorf("failed to marshal metadata JSON: %w", err), http.StatusInternalServerError
 	}
 
 	// Step 6: Parse metadata and generate HTML
 	metaHTML, err := ParseMetadata(fullPath, &jsonData)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to parse metadata: %w", err)
+		return "", fmt.Errorf("failed to parse metadata: %w", err), http.StatusInternalServerError
 	}
 
 	// Step 7: Prepare final JSON for hydration script
@@ -149,13 +149,13 @@ func SSRBlogPage(fullPath string) (string, error) {
 	}
 	scriptJSON, err := json.Marshal(scriptPayload)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal script payload: %w", err)
+		return "", fmt.Errorf("failed to marshal script payload: %w", err), http.StatusInternalServerError
 	}
 
 	scriptHTML := `<script id="__SERVER_DATA__" type="application/json">` + htmlEscape(scriptJSON) + `</script>`
 
 	// Step 8: Return combined HTML
-	return scriptHTML + "\n" + metaHTML, nil
+	return scriptHTML + "\n" + metaHTML, nil, status
 }
 
 // htmlEscape makes sure the JSON inside the <script> doesn't break HTML parsing

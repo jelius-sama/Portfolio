@@ -6,7 +6,7 @@ import { useParams, Link, useLocation } from "react-router-dom"
 import { Footer } from "@/components/ui/footer"
 import { MarkdownRenderer } from "@/components/ui/markdown"
 import { useConfig } from "@/contexts/config"
-import { DynamicMetadata } from "@/contexts/metadata"
+import { DynamicMetadata, PathBasedMetadata } from "@/contexts/metadata"
 import { type StaticRoute } from "@/types/static.route"
 
 export function generateBlogMetadata(blog: Blog, fullPath: string): StaticRoute {
@@ -63,6 +63,9 @@ export default function BlogPostPage() {
       try {
         // Use SSR data if available and matches current path
         if (ssrData?.path === pathname) {
+          if ("status" in ssrData && ssrData.status === 404) {
+            throw new Error(`Blog with ID of "${id}" was not found!`)
+          }
           setBlog(ssrData.api_resp);
 
           const markdownRes = await fetch(`/api/blog_file?id=${id}`);
@@ -80,7 +83,11 @@ export default function BlogPostPage() {
           ]);
 
           if (!blogRes.ok) {
-            throw new Error(`Failed to fetch blog: ${blogRes.status}`);
+            if (blogRes.status === 404) {
+              throw new Error(`Blog with ID of "${id}" was not found!`)
+            } else {
+              throw new Error(`Failed to fetch blog: ${blogRes.status}`);
+            }
           }
 
           if (!markdownRes.ok) {
@@ -114,31 +121,39 @@ export default function BlogPostPage() {
 
   if (loading) {
     return (
-      <section className="max-w-6xl mx-auto pt-20 pb-12 px-4 sm:px-6">
-        <TerminalWindow title="loading">
-          <div className="font-mono text-sm text-center py-8">
-            <div className="text-orange-400 mb-2">$ curl -X GET /api/blog?id={id}</div>
-            <div className="text-gray-300 mb-4">Fetching blog data...</div>
-            <div className="text-orange-400 mb-2">$ curl -X GET /api/blog_file?id={id}</div>
-            <div className="text-gray-300">Loading markdown content...</div>
-          </div>
-        </TerminalWindow>
-      </section>
+      <Fragment>
+        <PathBasedMetadata paths={["*"]} />
+
+        <section className="max-w-6xl mx-auto pt-20 pb-12 px-4 sm:px-6">
+          <TerminalWindow title="loading">
+            <div className="font-mono text-sm text-center py-8">
+              <div className="text-orange-400 mb-2">$ curl -X GET /api/blog?id={id}</div>
+              <div className="text-gray-300 mb-4">Fetching blog data...</div>
+              <div className="text-orange-400 mb-2">$ curl -X GET /api/blog_file?id={id}</div>
+              <div className="text-gray-300">Loading markdown content...</div>
+            </div>
+          </TerminalWindow>
+        </section>
+      </Fragment>
     )
   }
 
   if (error) {
     return (
-      <section className="max-w-6xl mx-auto pt-20 pb-12 px-4 sm:px-6">
-        <TerminalWindow title="error">
-          <div className="font-mono text-sm">
-            <div className="text-orange-400 mb-2">$ curl -X GET /api/blog?id={id}</div>
-            <div className="text-red-400 mb-4">Error: {error}</div>
-            <div className="text-orange-400 mb-2">$ echo "Please try again later"</div>
-            <div className="text-gray-300">Please try again later</div>
-          </div>
-        </TerminalWindow>
-      </section>
+      <Fragment>
+        <PathBasedMetadata paths={["*", "#not_found"]} />
+
+        <section className="max-w-6xl mx-auto pt-20 pb-12 px-4 sm:px-6">
+          <TerminalWindow title="error">
+            <div className="font-mono text-sm">
+              <div className="text-orange-400 mb-2">$ curl -X GET /api/blog?id={id}</div>
+              <div className="text-red-400 mb-4">Error: {error}</div>
+              <div className="text-orange-400 mb-2">$ echo "Please try again later"</div>
+              <div className="text-gray-300">Please try again later</div>
+            </div>
+          </TerminalWindow>
+        </section>
+      </Fragment>
     )
   }
 

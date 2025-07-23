@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"net/http"
 	"strings"
 )
 
@@ -11,7 +12,7 @@ type RouteData struct {
 	Route    string
 }
 
-func PerformSSR(fullPath string) (string, error) {
+func PerformSSR(fullPath string) (string, error, int) {
 	var route RouteData
 
 	for _, DynamicRoute := range DynamicRoutes {
@@ -26,10 +27,10 @@ func PerformSSR(fullPath string) (string, error) {
 
 	switch route.Route {
 	case "/blog/":
-		ssrData, err := SSRBlogPage(route.FullPath)
-		return ssrData, err
+		ssrData, err, status := SSRBlogPage(route.FullPath)
+		return ssrData, err, status
 
 	default:
-		return "", nil
+		return "", nil, http.StatusNoContent
 	}
 }

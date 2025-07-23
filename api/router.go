@@ -30,7 +30,7 @@ func HandleRouting() *http.ServeMux {
 		path := strings.TrimPrefix(r.URL.Path, "/")
 		content, err := fs.ReadFile(vars.AssetsFS, path)
 		if err != nil {
-			NotFound(w, r, util.AddrOf("Requested Asset was not found"))
+			NotFoundAPI(w, r, util.AddrOf("Requested Asset was not found"))
 			return
 		}
 
@@ -61,7 +61,7 @@ func HandleRouting() *http.ServeMux {
 	router.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
 		if !strings.HasPrefix(r.URL.Path, "/api/") {
 			_, file, line, ok := runtime.Caller(1)
-			NotFound(w, r, util.AddrOf("Unreachable code reached!"))
+			NotFoundAPI(w, r, util.AddrOf("Unreachable code reached!"))
 			if ok {
 				logger.Error("Reached unreachable code in `", file, "` at line: ", line)
 			} else {
@@ -79,7 +79,7 @@ func HandleRouting() *http.ServeMux {
 			return
 		}
 
-		NotFound(w, r, util.AddrOf("API Route Not Found!"))
+		NotFoundAPI(w, r, util.AddrOf("API Route Not Found!"))
 	})
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -90,14 +90,20 @@ func HandleRouting() *http.ServeMux {
 
 		html, err := parser.GetHTML()
 		if err != nil {
-			InternalServerError(w, r, util.AddrOf("Something went wrong when getting html from FS!"))
+			InternalErrorPage(w, r, util.AddrOf("Something went wrong when getting html from FS!"))
 			logger.Error("failed to get html shell:\n    " + err.Error())
 			return
 		}
 
-		ssrData, err := parser.PerformSSR(r.URL.Path)
+		ssrData, err, status := parser.PerformSSR(r.URL.Path)
 		if err != nil {
-			InternalServerError(w, r, util.AddrOf("Failed to perform SSR!"))
+			if status == http.StatusNotFound {
+				NotFoundPage(w, r, util.AddrOf("Content of dynamic page could not be found!"))
+				return
+			}
+
+			// TODO: Implement dedicated error pages intead of generic 500 error.
+			InternalErrorPage(w, r, util.AddrOf("Failed to perform SSR!"))
 			logger.Error("performing SSR failed:\n    " + err.Error())
 			return
 		}
@@ -105,7 +111,7 @@ func HandleRouting() *http.ServeMux {
 		if len(ssrData) == 0 {
 			metadata, err := parser.ParseMetadata(r.URL.Path, nil)
 			if err != nil {
-				InternalServerError(w, r, util.AddrOf("Failed to parse metadata of the page!"))
+				InternalErrorPage(w, r, util.AddrOf("Failed to parse metadata of the page!"))
 				logger.Error("metadata parsing failed:\n    " + err.Error())
 				return
 			}
@@ -117,6 +123,14 @@ func HandleRouting() *http.ServeMux {
 		}
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if os.Getenv("env") == types.ENV.Prod {
+			w.Header().Set("X-Content-Type-Options", "nosniff")
+			w.Header().Set("X-Frame-Options", "DENY")
+			w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+			w.Header().Set("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+			w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'")
+			w.Header().Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
+		}
 		w.WriteHeader(http.StatusOK)
 		w.Write(html)
 	})
@@ -131,7 +145,7 @@ func HandleRouting() *http.ServeMux {
 			path := strings.TrimPrefix(r.URL.Path, "/")
 			content, err := fs.ReadFile(vars.ViteFS, "client/dist/"+path)
 			if err != nil {
-				NotFound(w, r, util.AddrOf("Requested Source file was not found!"))
+				NotFoundAPI(w, r, util.AddrOf("Requested Source file was not found!"))
 				return
 			}
 

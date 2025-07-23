@@ -6,6 +6,7 @@ import { Link } from "react-router-dom"
 import { useQuery } from '@tanstack/react-query'
 import type { Healthz, ComponentStatus } from "@/types"
 import { cn } from "@/lib/utils"
+import { PathBasedMetadata } from "@/contexts/metadata"
 
 const REPORT_MECHANISM_IMPLEMENTED = false
 
@@ -59,6 +60,8 @@ export default function ServerErrorPage() {
 
   return (
     <Fragment>
+      <PathBasedMetadata paths={["*", "#internal_server_error"]} />
+
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-12 pt-20">
         {/* Header */}
         <div className="text-center mb-8">

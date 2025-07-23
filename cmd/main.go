@@ -95,6 +95,7 @@ type ServerResp struct {
 }
 
 // TODO: Make proper navigation UI for mobile.
+// TODO: Improve the md renderer for blog post page.
 func main() {
 	defer db.Conn.Close()
 

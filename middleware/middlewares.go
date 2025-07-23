@@ -4,6 +4,7 @@ import (
 	"KazuFolio/api"
 	"KazuFolio/logger"
 	"net/http"
+	"strings"
 )
 
 func LoggingMiddleware(next http.Handler) http.Handler {
@@ -18,7 +19,22 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			if err := recover(); err != nil {
 				logger.TimedError("Encountered a panic, returning 500 to client and recovering the server!")
-				api.InternalServerError(w, r, nil)
+				if strings.HasPrefix(r.URL.Path, "/api/") {
+					api.InternalErrorAPI(w, r, nil)
+					return
+				}
+
+				if strings.HasPrefix(r.URL.Path, "/assets/") {
+					api.InternalErrorAPI(w, r, nil)
+					return
+				}
+
+				if strings.HasPrefix(r.URL.Path, "/src/") {
+					api.InternalErrorAPI(w, r, nil)
+					return
+				}
+
+				api.InternalErrorPage(w, r, nil)
 			}
 		}()
 		next.ServeHTTP(w, r)

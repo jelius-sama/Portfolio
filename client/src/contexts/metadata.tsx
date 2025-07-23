@@ -171,3 +171,42 @@ export const DynamicMetadata = ({ currentMeta }: { currentMeta: StaticRoute }) =
     </Metadata>
   );
 };
+
+export const PathBasedMetadata = ({ paths }: { paths: Array<string> }) => {
+  const { staticRoute } = useConfig();
+  const location = useLocation();
+
+  useEffect(() => {
+    const serverSentMetadata = document.querySelectorAll('head [id="__SERVER_PROPS__"]');
+    serverSentMetadata.forEach((el) => el.remove());
+  }, [location]);
+
+  // Only match explicitly passed paths — no default fallback
+  const matchedRoutes = paths
+    .map(path => staticRoute.find(route => route.path === path))
+    .filter(Boolean);
+
+  const mergedMeta = {
+    title: matchedRoutes.find(r => r?.title)?.title,
+    meta: matchedRoutes.flatMap(r => r?.meta ?? []),
+    link: matchedRoutes.flatMap(r => r?.link ?? []),
+  };
+
+  return (
+    <Metadata>
+      {mergedMeta.title && <Title>{mergedMeta.title}</Title>}
+
+      {mergedMeta.meta.map((meta, i) => {
+        if ("charset" in meta) return <Meta key={i} charset={meta.charset} />;
+        if ("name" in meta) return <Meta key={i} name={meta.name} content={meta.content} />;
+        if ("property" in meta) return <Meta key={i} property={meta.property} content={meta.content} />;
+        if ("http-equiv" in meta) return <Meta key={i} http-equiv={meta["http-equiv"]} content={meta.content} />;
+        return null;
+      })}
+
+      {mergedMeta.link.map((link, i) => (
+        <Link key={i} {...link} />
+      ))}
+    </Metadata>
+  );
+};
