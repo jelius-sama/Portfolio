@@ -148,7 +148,6 @@ export default function ServerErrorPage() {
                   <span className="font-bold">Incident Report</span>
                 </div>
                 <div className="text-gray-300 text-xs">
-                  <div>Incident ID: INC-{Math.random().toString(36).substr(2, 8).toUpperCase()}</div>
                   <div>Started: {new Date().toLocaleString()}</div>
                   <div>Status: Investigating</div>
                   <div>ETA: 15-30 minutes</div>
