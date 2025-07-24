@@ -478,5 +478,97 @@
     {
         "path": "#internal_server_error",
         "title": "Internal Server Error | Jelius"
+    },
+    {
+        "path": "/analytics",
+        "title": "Analytics | Jelius",
+        "meta": [
+            {
+                "name": "description",
+                "content": "Gain insights into user interactions and performance trends across Jelius's digital presence. This analytics dashboard provides a transparent overview of traffic, engagement, and usage patterns on the site."
+            },
+            {
+                "name": "application-name",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "name": "robots",
+                "content": "noindex, nofollow"
+            },
+            {
+                "name": "format-detection",
+                "content": "telephone=no"
+            },
+            {
+                "name": "apple-mobile-web-app-capable",
+                "content": "yes"
+            },
+            {
+                "name": "apple-mobile-web-app-title",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "name": "theme-color",
+                "content": "#000b11"
+            },
+            {
+                "name": "apple-mobile-web-app-status-bar-style",
+                "content": "default"
+            },
+            {
+                "property": "og:title",
+                "content": "Analytics | Jelius"
+            },
+            {
+                "property": "og:description",
+                "content": "Gain insights into user interactions and performance trends across Jelius's digital presence. This analytics dashboard provides a transparent overview of traffic, engagement, and usage patterns on the site."
+            },
+            {
+                "property": "og:url",
+                "content": "https://jelius.dev/analytics"
+            },
+            {
+                "property": "og:site_name",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "property": "og:image",
+                "content": "/assets/jelius.jpg"
+            },
+            {
+                "property": "og:type",
+                "content": "website"
+            },
+            {
+                "name": "twitter:card",
+                "content": "summary"
+            },
+            {
+                "name": "twitter:site",
+                "content": "@jelius_sama"
+            },
+            {
+                "name": "twitter:creator",
+                "content": "@jelius_sama"
+            },
+            {
+                "name": "twitter:title",
+                "content": "Analytics | Jelius"
+            },
+            {
+                "name": "twitter:description",
+                "content": "Gain insights into user interactions and performance trends across Jelius's digital presence. This analytics dashboard provides a transparent overview of traffic, engagement, and usage patterns on the site."
+            },
+            {
+                "name": "twitter:image",
+                "content": "/assets/jelius.jpg"
+            }
+        ],
+        "link": [
+            {
+                "rel": "canonical",
+                "href": "https://jelius.dev/analytics"
+            }
+        ]
     }
 ]
