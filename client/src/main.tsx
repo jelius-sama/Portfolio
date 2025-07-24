@@ -14,6 +14,7 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 const queryClient = new QueryClient()
 
 const Home = lazy(() => import("@/pages/home"))
+const Analytics = lazy(() => import("@/pages/analytics"))
 const InternalServerError = lazy(() => import("@/pages/internal-server-error"))
 const Blogs = lazy(() => import("@/pages/blogs"))
 const Blog = lazy(() => import("@/pages/blog"))
@@ -161,6 +162,7 @@ reactRoot.render(
               <Route path='/' element={<App />}>
                 <Route path='/' element={<ErrorWrapper comp={<Home />} />} />
                 <Route path='/links' element={<ErrorWrapper comp={<Links />} />} />
+                <Route path='/analytics' element={<ErrorWrapper comp={<Analytics />} />} />
                 <Route path='/blogs' element={<ErrorWrapper comp={<Blogs />} />} />
                 <Route path="/blog/:id" element={<ErrorWrapper comp={<Blog />} />} />
                 <Route path='*' element={<ErrorWrapper comp={<NotFound />} />} />
