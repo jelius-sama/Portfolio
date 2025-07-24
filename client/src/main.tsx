@@ -11,6 +11,7 @@ import { Header } from "@/components/layout/header"
 import { useConfig } from "@/contexts/config"
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import Loading from "@/pages/loading"
+import { ErrorBoundary } from "@/error-boundary"
 
 const queryClient = new QueryClient()
 
@@ -64,14 +65,15 @@ const App = () => {
   return (
     <Fragment>
       <Header />
-      <Suspense fallback={<Loading />}>
-        <Outlet />
-      </Suspense>
+      <ErrorBoundary fallback={<ClientError />}>
+        <Suspense fallback={<Loading />}>
+          <Outlet />
+        </Suspense>
+      </ErrorBoundary>
     </Fragment>
   )
 }
 
-// TODO: Implement client side Error Boundary component
 const ErrorWrapper = ({ comp }: { comp: ReactNode }) => {
   const [errorPath, setErrorPath] = useState<string | null>(null)
   const { pathname } = useLocation()
@@ -151,7 +153,6 @@ reactRoot.render(
               <Route path='/' element={<App />}>
                 <Route path='/' element={<ErrorWrapper comp={<Home />} />} />
                 <Route path='/links' element={<ErrorWrapper comp={<Links />} />} />
-                <Route path='/err' element={<ErrorWrapper comp={<ClientError />} />} />
                 <Route path='/:token' element={<ErrorWrapper comp={<Authenticate page={<Analytics />} />} />} />
                 <Route path='/blogs' element={<ErrorWrapper comp={<Blogs />} />} />
                 <Route path="/blog/:id" element={<ErrorWrapper comp={<Blog />} />} />
