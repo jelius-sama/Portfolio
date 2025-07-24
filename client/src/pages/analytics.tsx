@@ -54,7 +54,10 @@ const getLocationString = (record: AnalyticsRecord): string => {
   return parts.length > 0 ? parts.join(", ") : "Unknown Location"
 }
 
-// TODO: Work needed
+// TODO: Work needed:
+// - Authentication
+// - Static hardcoded information on this page
+// - Metadata
 export default function Analytics() {
   const [timeRange, setTimeRange] = useState<"24h" | "7d" | "30d" | "90d">("7d")
   const [eventFilter, setEventFilter] = useState<"all" | "page_view" | "click" | "error">("all")
