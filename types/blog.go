@@ -12,4 +12,6 @@ type Blog struct {
 	SequelID  *string `json:"sequelId"`  // Blog ID of sequel (nullable)
 
 	Parts []string `json:"parts"` // List of Blog IDs if this is part of a multipart series
+
+	Views uint `json:"views"` // This value is computed in the API and isn't stored in the database
 }

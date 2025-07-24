@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"KazuFolio/db"
+	"KazuFolio/logger"
 	"KazuFolio/types"
 	"errors"
 	"path/filepath"
@@ -46,37 +47,81 @@ func GetBlogFile(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, blogFile)
 }
 
-func getBlog(id string) (*types.Blog, int, error) {
-	var (
-		blog  types.Blog
-		parts string // Will be parsed from JSON string into blog.Parts
-	)
+func GetBlogInternal(id string) (*types.Blog, int, error) {
+	// Channel to receive blog data result
+	type blogResult struct {
+		blog   *types.Blog
+		status int
+		err    error
+	}
+	blogChan := make(chan blogResult, 1)
 
-	query := `
-		SELECT id, title, summary, created_at, updated_at, prequel_id, sequel_id, parts
-		FROM blogs WHERE id = ?`
-	err := db.Conn.QueryRow(query, id).Scan(
-		&blog.ID,
-		&blog.Title,
-		&blog.Summary,
-		&blog.CreatedAt,
-		&blog.UpdatedAt,
-		&blog.PrequelID,
-		&blog.SequelID,
-		&parts,
-	)
-	if err == sql.ErrNoRows {
-		return nil, http.StatusNotFound, errors.New("Blog not found")
-	} else if err != nil {
-		return nil, http.StatusInternalServerError, errors.New("Database error: " + err.Error())
+	// Channel to receive views result
+	type viewsResult struct {
+		views uint
+		err   error
+	}
+	viewsChan := make(chan viewsResult, 1)
+
+	// Goroutine to fetch blog data
+	go func() {
+		var (
+			blog  types.Blog
+			parts string // Will be parsed from JSON string into blog.Parts
+		)
+
+		query := `
+			SELECT id, title, summary, created_at, updated_at, prequel_id, sequel_id, parts
+			FROM blogs WHERE id = ?`
+		err := db.Conn.QueryRow(query, id).Scan(
+			&blog.ID,
+			&blog.Title,
+			&blog.Summary,
+			&blog.CreatedAt,
+			&blog.UpdatedAt,
+			&blog.PrequelID,
+			&blog.SequelID,
+			&parts,
+		)
+		if err == sql.ErrNoRows {
+			blogChan <- blogResult{nil, http.StatusNotFound, errors.New("Blog not found")}
+			return
+		} else if err != nil {
+			blogChan <- blogResult{nil, http.StatusInternalServerError, errors.New("Database error: " + err.Error())}
+			return
+		}
+
+		// Decode JSON-encoded parts list
+		if err := json.Unmarshal([]byte(parts), &blog.Parts); err != nil {
+			blogChan <- blogResult{nil, http.StatusInternalServerError, errors.New("Failed to parse parts list: " + err.Error())}
+			return
+		}
+
+		blogChan <- blogResult{&blog, http.StatusOK, nil}
+	}()
+
+	// Goroutine to fetch blog views
+	go func() {
+		path := "/blog/" + id
+		views, err := BlogViewsInternal(path)
+		viewsChan <- viewsResult{views, err}
+	}()
+
+	// Wait for blog data result
+	blogRes := <-blogChan
+	if blogRes.err != nil {
+		return blogRes.blog, blogRes.status, blogRes.err
 	}
 
-	// Decode JSON-encoded parts list
-	if err := json.Unmarshal([]byte(parts), &blog.Parts); err != nil {
-		return nil, http.StatusInternalServerError, errors.New("Failed to parse parts list: " + err.Error())
+	// Wait for views result
+	viewsRes := <-viewsChan
+	if viewsRes.err != nil {
+		logger.TimedError("Error fetching views for blog", id, ":", viewsRes.err)
+		// Views remains zero value on error
 	}
+	blogRes.blog.Views = viewsRes.views
 
-	return &blog, http.StatusOK, nil
+	return blogRes.blog, blogRes.status, nil
 }
 
 func GetBlog(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +131,7 @@ func GetBlog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blog, status, err := getBlog(id)
+	blog, status, err := GetBlogInternal(id)
 
 	if err != nil {
 		http.Error(w, err.Error(), status)
@@ -98,9 +143,4 @@ func GetBlog(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(blog); err != nil {
 		http.Error(w, "Failed to encode blog as JSON: "+err.Error(), http.StatusInternalServerError)
 	}
-}
-
-func GetBlogInternal(id string) (*types.Blog, int, error) {
-	blog, status, err := getBlog(id)
-	return blog, status, err
 }

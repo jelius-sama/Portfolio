@@ -1,16 +1,13 @@
 import { ArrowRight } from "lucide-react"
 import type { Blog } from "@/types/blog"
 import { Link } from "react-router-dom"
+import { formatDate, formatViews } from "@/lib/utils"
 
 interface BlogCardProps {
     blog: Blog
 }
 
 export function BlogCard({ blog }: BlogCardProps) {
-    const formatDate = (dateString: string) => {
-        const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" }
-        return new Date(dateString).toLocaleDateString(undefined, options)
-    }
 
     return (
         <Link to={`/blog/${blog.id}`} className="block p-4 bg-gray-800/50 border border-orange-500/30 rounded-lg hover:border-orange-500 hover:bg-gray-800/70 transition-all duration-200 group">
@@ -24,6 +21,9 @@ export function BlogCard({ blog }: BlogCardProps) {
             <div className="flex justify-between text-xs text-gray-500 font-mono">
                 <span>Published: {formatDate(blog.createdAt)}</span>
                 {blog.createdAt !== blog.updatedAt && <span>Updated: {formatDate(blog.updatedAt)}</span>}
+            </div>
+            <div className="flex justify-between text-xs text-gray-500 font-mono">
+                <span>Views: {formatViews(blog.views)}</span>
             </div>
         </Link>
     )

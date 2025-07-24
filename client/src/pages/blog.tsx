@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment } from "react"
 import { TerminalWindow } from "@/components/ui/terminal-window"
-import { Calendar, Clock, ChevronLeft, ChevronRight, FileText } from "lucide-react"
+import { Calendar, Clock, ChevronLeft, ChevronRight, FileText, EyeIcon } from "lucide-react"
 import type { Blog } from "@/types/blog"
 import { useParams, Link, useLocation } from "react-router-dom"
 import { Footer } from "@/components/ui/footer"
@@ -8,6 +8,7 @@ import { MarkdownRenderer } from "@/components/ui/markdown"
 import { useConfig } from "@/contexts/config"
 import { DynamicMetadata, PathBasedMetadata } from "@/contexts/metadata"
 import { type StaticRoute } from "@/types/static.route"
+import { formatViews, formatDate } from "@/lib/utils"
 
 export function generateBlogMetadata(blog: Blog, fullPath: string): StaticRoute {
   const title = `${blog.title} | Jelius`;
@@ -108,17 +109,6 @@ export default function BlogPostPage() {
     })();
   }, [id, pathname]);
 
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }
-    return new Date(dateString).toLocaleDateString(undefined, options)
-  }
-
   if (loading) {
     return (
       <Fragment>
@@ -189,6 +179,11 @@ export default function BlogPostPage() {
                   <span>Updated: {formatDate(blog.updatedAt)}</span>
                 </div>
               )}
+              <div className="flex items-center gap-2">
+                <EyeIcon size={16} className="text-orange-400" />
+                <span>Views: {formatViews(blog.views)}</span>
+              </div>
+
               <div>ID: {blog.id}</div>
               {blog.parts.length > 0 && <div>Series: {blog.parts.length} parts</div>}
             </div>

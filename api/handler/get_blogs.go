@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"KazuFolio/db"
+	"KazuFolio/logger"
 	"KazuFolio/types"
 )
 
@@ -31,7 +32,6 @@ type CacheEntry struct {
 type Cache struct {
 	mu      sync.RWMutex
 	entries map[string]CacheEntry
-	// Track ongoing requests to prevent duplicate DB calls
 	ongoing map[string]*sync.WaitGroup
 }
 
@@ -41,6 +41,17 @@ var cache = &Cache{
 }
 
 const CACHE_DURATION = 10 * time.Minute
+
+// Start background cleanup process
+func init() {
+	go func() {
+		ticker := time.NewTicker(5 * time.Minute)
+		defer ticker.Stop()
+		for range ticker.C {
+			cache.cleanExpiredEntries()
+		}
+	}()
+}
 
 // generateCacheKey creates a unique key for the request parameters
 func generateCacheKey(page, limit int, sortBy, order string) string {
@@ -112,12 +123,19 @@ func (c *Cache) finishRequest(key string) {
 	}
 }
 
+// Helper function to send JSON response with cache headers
+func sendJSONResponse(w http.ResponseWriter, data BlogsResponse, cacheStatus string) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Cache", cacheStatus)
+	return json.NewEncoder(w).Encode(data)
+}
+
 func fetchBlogsFromDB(page, limit int, sortBy, order string) (BlogsResponse, error) {
 	// Get total count for pagination
 	countQuery := "SELECT COUNT(*) FROM blogs"
 	var total int
 	if err := db.Conn.QueryRow(countQuery).Scan(&total); err != nil {
-		return BlogsResponse{}, fmt.Errorf("failed to get total count: %w", err)
+		return BlogsResponse{}, err
 	}
 
 	// Calculate pagination values
@@ -133,7 +151,7 @@ func fetchBlogsFromDB(page, limit int, sortBy, order string) (BlogsResponse, err
 
 	rows, err := db.Conn.Query(query, limit, offset)
 	if err != nil {
-		return BlogsResponse{}, fmt.Errorf("database query failed: %w", err)
+		return BlogsResponse{}, err
 	}
 	defer rows.Close()
 
@@ -152,20 +170,39 @@ func fetchBlogsFromDB(page, limit int, sortBy, order string) (BlogsResponse, err
 			&blog.PrequelID,
 			&blog.SequelID,
 			&parts); err != nil {
-			return BlogsResponse{}, fmt.Errorf("failed to scan blog: %w", err)
+			return BlogsResponse{}, err
 		}
 
 		if err := json.Unmarshal([]byte(parts), &blog.Parts); err != nil {
-			return BlogsResponse{}, fmt.Errorf("failed to parse parts: %w", err)
+			return BlogsResponse{}, err
 		}
 
 		blogs = append(blogs, blog)
 	}
 
 	if err := rows.Err(); err != nil {
-		return BlogsResponse{}, fmt.Errorf("row iteration failed: %w", err)
+		return BlogsResponse{}, err
 	}
 
+	// Add view counts concurrently
+	var wg sync.WaitGroup
+
+	for i := range blogs {
+		wg.Add(1)
+		go func(b *types.Blog) {
+			defer wg.Done()
+			path := fmt.Sprintf("/blog/%s", b.ID)
+			views, err := BlogViewsInternal(path)
+			if err != nil {
+				logger.TimedError("Error fetching views for blog", b.ID, ":", err)
+				// Views remains zero value on error
+				return
+			}
+			b.Views = views
+		}(&blogs[i])
+	}
+
+	wg.Wait()
 	return BlogsResponse{
 		Blogs:      blogs,
 		Total:      total,
@@ -175,10 +212,18 @@ func fetchBlogsFromDB(page, limit int, sortBy, order string) (BlogsResponse, err
 	}, nil
 }
 
-func GetBlogs(w http.ResponseWriter, r *http.Request) {
-	// Clean expired cache entries periodically
-	go cache.cleanExpiredEntries()
+// tryGetCachedResponse attempts to get cached data and sends response if found
+func tryGetCachedResponse(w http.ResponseWriter, cacheKey, cacheStatus string) bool {
+	if cachedResponse, found := cache.getCachedResponse(cacheKey); found {
+		if err := sendJSONResponse(w, cachedResponse, cacheStatus); err != nil {
+			http.Error(w, "Failed to encode JSON response", http.StatusInternalServerError)
+		}
+		return true
+	}
+	return false
+}
 
+func GetBlogs(w http.ResponseWriter, r *http.Request) {
 	// Default pagination values
 	page := 1
 	limit := 10
@@ -218,10 +263,7 @@ func GetBlogs(w http.ResponseWriter, r *http.Request) {
 	cacheKey := generateCacheKey(page, limit, sortBy, order)
 
 	// Try to get from cache first
-	if cachedResponse, found := cache.getCachedResponse(cacheKey); found {
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("X-Cache", "HIT")
-		json.NewEncoder(w).Encode(cachedResponse)
+	if tryGetCachedResponse(w, cacheKey, "HIT") {
 		return
 	}
 
@@ -232,10 +274,7 @@ func GetBlogs(w http.ResponseWriter, r *http.Request) {
 		// Another request is already fetching this data, wait for it
 		wg.Wait()
 		// Try cache again after waiting
-		if cachedResponse, found := cache.getCachedResponse(cacheKey); found {
-			w.Header().Set("Content-Type", "application/json")
-			w.Header().Set("X-Cache", "HIT-AFTER-WAIT")
-			json.NewEncoder(w).Encode(cachedResponse)
+		if tryGetCachedResponse(w, cacheKey, "HIT-AFTER-WAIT") {
 			return
 		}
 	}
@@ -247,7 +286,7 @@ func GetBlogs(w http.ResponseWriter, r *http.Request) {
 	cache.finishRequest(cacheKey)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Database error occurred", http.StatusInternalServerError)
 		return
 	}
 
@@ -255,9 +294,7 @@ func GetBlogs(w http.ResponseWriter, r *http.Request) {
 	cache.setCachedResponse(cacheKey, response)
 
 	// Return JSON response
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("X-Cache", "MISS")
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		http.Error(w, "Failed to encode JSON: "+err.Error(), http.StatusInternalServerError)
+	if err := sendJSONResponse(w, response, "MISS"); err != nil {
+		http.Error(w, "Failed to encode JSON response", http.StatusInternalServerError)
 	}
 }
