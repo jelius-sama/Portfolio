@@ -5,6 +5,7 @@ VERSION := $(shell jq -r '.references[].path' $(CONFIG_FILE) | xargs -I{} jq -r 
 APP_NAME := $(shell jq -r '.references[].path' $(CONFIG_FILE) | xargs -I{} jq -r 'select(has("title")) | .title' $(CONFIG_DIR){} )
 DEV_PORT := $(shell jq -r '.references[].path' $(CONFIG_FILE) | xargs -I{} jq -r 'select(has("dev_port")) | .dev_port' $(CONFIG_DIR){} )
 HOME_PATH := $(shell jq -r '.references[].path' $(CONFIG_FILE) | xargs -I{} jq -r 'select(has("home_path")) | .home_path' $(CONFIG_DIR){} )
+HOST := $(shell jq -r '.references[].path' $(CONFIG_FILE) | xargs -I{} jq -r 'select(has("host")) | .host' $(CONFIG_DIR){} )
 IS_REVERSE_PROXIED := $(shell \
   jq -r '.references[].path' $(CONFIG_FILE) | \
   xargs -I{} jq -er 'if has("is_behind_reverse_proxy") then .is_behind_reverse_proxy.statement_valid else empty end' $(CONFIG_DIR)/{} \
@@ -26,6 +27,7 @@ build:
 		    -s -w \
 		    -X main.Environment=$(ENV) \
 		    -X main.Home=$(HOME_PATH) \
+		    -X main.Host=$(HOST) \
 		    -X main.DevPort=$(DEV_PORT) \
 		    -X main.Version=$(VERSION) \
 		    -X main.ReverseProxy="$(IS_REVERSE_PROXIED)" \

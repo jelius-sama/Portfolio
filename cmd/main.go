@@ -21,6 +21,7 @@ var (
 	DevPort     = "6969"
 	Version     string
 	Home        string
+	Host        = "http://localhost"
 
 	ReverseProxy string
 	ProxyPort    string
@@ -64,6 +65,7 @@ func init() {
 	os.Setenv("version", Version)
 	os.Setenv("env", Environment)
 	os.Setenv("home", Home)
+	os.Setenv("host", Host)
 	os.Setenv("db_file", filepath.Join(Home, "/portfolio.db"))
 
 	db.Conn, err = sql.Open("sqlite", os.Getenv("db_file"))

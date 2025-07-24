@@ -2,6 +2,7 @@ package api
 
 import (
 	vars "KazuFolio"
+	"KazuFolio/api/handler"
 	"KazuFolio/logger"
 	"KazuFolio/parser"
 	"KazuFolio/types"
@@ -20,6 +21,8 @@ var getOnlyRoute = util.AddrOf("Only Request with GET Method are allowed!")
 
 func HandleRouting() *http.ServeMux {
 	router := http.NewServeMux()
+
+	router.HandleFunc("/sitemap.xml", handler.SitemapHandler)
 
 	router.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
