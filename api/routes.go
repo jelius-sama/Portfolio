@@ -18,4 +18,6 @@ var ApiRoutes = map[string]http.HandlerFunc{
 	"POST /blog":          handler.PostBlog,
 	"GET /blog_file":      handler.GetBlogFile,
 	"GET /analytics":      handler.GetAnalytics,
+	"POST /authenticate":  handler.Authenticate,
+	"GET /verify_auth":    handler.VerifyAuthStatus,
 }

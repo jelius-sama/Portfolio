@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/contexts/theme'
 import { createRoot } from 'react-dom/client'
 import { ConfigProvider } from '@/contexts/config'
 import { lazy, Suspense, useLayoutEffect, useEffect, type ReactNode } from 'react'
-import { Outlet, Route, Routes, useLocation } from 'react-router-dom'
+import { Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { Header } from "@/components/layout/header"
 import { useConfig } from "@/contexts/config"
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
@@ -34,63 +34,6 @@ if (!rootEl) {
   }
 }
 
-const generateSessionID = () => {
-  const id = crypto.randomUUID()
-  localStorage.setItem("session_id", id)
-  return id
-}
-
-const sendAnalytics = async () => {
-  const url = new URL(window.location.href)
-  const params = url.searchParams
-
-  const payload = {
-    session_id: localStorage.getItem("session_id") || generateSessionID(),
-    event_type: "page_view",
-    event_timestamp: new Date().toISOString(),
-    page_url: window.location.href,
-    referrer_url: document.referrer || undefined,
-    ip_address: undefined,
-    country: undefined,
-    region: undefined,
-    city: undefined,
-    user_agent: navigator.userAgent,
-    device_type: /Mobi|Android/.test(navigator.userAgent) ? "mobile" : "desktop",
-    browser_name: navigator.userAgent.split(" ")[0],
-    browser_version: undefined,
-    os_name: undefined,
-    os_version: undefined,
-    screen_width: window.screen.width,
-    screen_height: window.screen.height,
-    viewport_width: window.innerWidth,
-    viewport_height: window.innerHeight,
-    language: navigator.language,
-    utm_source: params.get("utm_source") || undefined,
-    utm_medium: params.get("utm_medium") || undefined,
-    utm_campaign: params.get("utm_campaign") || undefined,
-    utm_term: params.get("utm_term") || undefined,
-    utm_content: params.get("utm_content") || undefined,
-    page_load_time_ms: performance.timing.loadEventEnd - performance.timing.navigationStart,
-    time_on_page_sec: undefined,
-    scroll_depth_pct: undefined,
-    element_id: undefined,
-    error_message: undefined,
-    metadata: {}
-  }
-
-  try {
-    await fetch("/api/analytics", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    })
-  } catch (err) {
-    console.error("Failed to send analytics:", err)
-  }
-}
-
 const App = () => {
   const { pathname } = useLocation();
 
@@ -103,8 +46,18 @@ const App = () => {
   }, [pathname]);
 
   useEffect(() => {
-    sendAnalytics()
-  }, [pathname])
+    const timeout = setTimeout(() => {
+      import('@/analytics')
+        .then((module) => {
+          module.sendAnalytics();
+        })
+        .catch((err) => {
+          console.error("Error loading analytics function:", err);
+        });
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [pathname]);
 
   return (
     <Suspense>
@@ -114,6 +67,8 @@ const App = () => {
   )
 }
 
+// TODO: Implement client side Error Boundary component
+// TODO: Implement loading component when navigating between pages
 const ErrorWrapper = ({ comp }: { comp: ReactNode }) => {
   const [errorPath, setErrorPath] = useState<string | null>(null)
   const { pathname } = useLocation()
@@ -151,6 +106,37 @@ const ErrorWrapper = ({ comp }: { comp: ReactNode }) => {
   return !isSSRLoaded ? null : errorPath === pathname ? <InternalServerError /> : comp
 }
 
+export const Authenticate = ({ page }: { page: React.ReactNode }) => {
+  const { token } = useParams<{ token: string }>()
+  const [status, setStatus] = useState<"pending" | "success" | "expired" | "error">("pending")
+
+  useEffect(() => {
+    if (!token) return
+
+    fetch(`/api/verify_auth?token=${token}`, {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          setStatus("success")
+        } else if (res.status === 498) {
+          setStatus("expired")
+        } else {
+          setStatus("error")
+        }
+      })
+      .catch(() => {
+        setStatus("error")
+      })
+  }, [token])
+
+  if (status === "pending") return null
+  if (status !== "success") return <NotFound />
+
+  return page
+}
+
 const reactRoot = createRoot(rootEl);
 reactRoot.render(
   <StrictMode>
@@ -162,7 +148,7 @@ reactRoot.render(
               <Route path='/' element={<App />}>
                 <Route path='/' element={<ErrorWrapper comp={<Home />} />} />
                 <Route path='/links' element={<ErrorWrapper comp={<Links />} />} />
-                <Route path='/analytics' element={<ErrorWrapper comp={<Analytics />} />} />
+                <Route path='/:token' element={<ErrorWrapper comp={<Authenticate page={<Analytics />} />} />} />
                 <Route path='/blogs' element={<ErrorWrapper comp={<Blogs />} />} />
                 <Route path="/blog/:id" element={<ErrorWrapper comp={<Blog />} />} />
                 <Route path='*' element={<ErrorWrapper comp={<NotFound />} />} />

@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react"
 import { TerminalWindow } from "@/components/ui/terminal-window"
 import { useConfig } from "@/contexts/config"
+import { useNavigate } from "react-router-dom"
 import { cn } from "@/lib/utils"
 
 type CommandHandler = {
@@ -22,6 +23,7 @@ export function InteractiveTerminal() {
     const inputWrapperRef = useRef<HTMLDivElement>(null)
     const initialMaxHeight = useRef<string | null>(null)
 
+    const navigate = useNavigate()
     const [command, setCommand] = useState("")
     const [output, setOutput] = useState<string[]>([])
     const [maxHeight, setMaxHeight] = useState("auto")
@@ -120,6 +122,23 @@ export function InteractiveTerminal() {
                 }).then(r => r.ok).catch(() => false)
 
                 stdout(success ? "[SUCCESS] Server will be updated shortly..." : "[ERROR] Failed to schedule server update.")
+            }
+        },
+
+        "analytics": {
+            requiresSudo: true,
+            async run(_, stdout, ctx) {
+                const response = await fetch("/api/authenticate", {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${ctx.sudoToken}` }
+                })
+                const data = await response.json() as { token: string }
+                const success = response.ok
+
+                stdout(success ? "[SUCCESS] You will be redirected soon..." : "[ERROR] Failed to authenticate.")
+                if (success) {
+                    navigate(`/${data.token}`)
+                }
             }
         },
 

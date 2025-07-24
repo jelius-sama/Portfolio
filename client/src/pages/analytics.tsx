@@ -4,7 +4,7 @@ import { BarChart3, Globe, Monitor, Clock, Users, Eye, TrendingUp, Activity } fr
 import type { AnalyticsRecord, AnalyticsSummary } from "@/types/analytics"
 import { useEffect, useMemo, useState, Fragment } from "react"
 import { useConfig } from "@/contexts/config"
-import { StaticMetadata } from "@/contexts/metadata"
+import { PathBasedMetadata } from "@/contexts/metadata"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 
@@ -58,7 +58,6 @@ const getLocationString = (record: AnalyticsRecord): string => {
   return parts.length > 0 ? parts.join(", ") : "Unknown Location"
 }
 
-// TODO: Implement authentication
 export default function Analytics() {
   const [timeRange, setTimeRange] = useState<"24h" | "7d" | "30d" | "90d">("7d")
   const [eventFilter, setEventFilter] = useState<"all" | "page_view" | "click" | "error">("all")
@@ -241,7 +240,7 @@ export default function Analytics() {
 
   return (
     <Fragment>
-      <StaticMetadata />
+      <PathBasedMetadata paths={["*", "/analytics"]} />
 
       <section className="max-w-6xl mx-auto pt-20 pb-12 px-6">
         {/* Page Title */}
