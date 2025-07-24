@@ -1,4 +1,4 @@
-import { StrictMode, useState } from 'react'
+import { StrictMode, useState, Fragment } from 'react'
 import '@/index.css'
 import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
@@ -10,11 +10,13 @@ import { Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { Header } from "@/components/layout/header"
 import { useConfig } from "@/contexts/config"
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
+import Loading from "@/pages/loading"
 
 const queryClient = new QueryClient()
 
 const Home = lazy(() => import("@/pages/home"))
 const Analytics = lazy(() => import("@/pages/analytics"))
+const ClientError = lazy(() => import("@/pages/error"))
 const InternalServerError = lazy(() => import("@/pages/internal-server-error"))
 const Blogs = lazy(() => import("@/pages/blogs"))
 const Blog = lazy(() => import("@/pages/blog"))
@@ -60,15 +62,16 @@ const App = () => {
   }, [pathname]);
 
   return (
-    <Suspense>
+    <Fragment>
       <Header />
-      <Outlet />
-    </Suspense>
+      <Suspense fallback={<Loading />}>
+        <Outlet />
+      </Suspense>
+    </Fragment>
   )
 }
 
 // TODO: Implement client side Error Boundary component
-// TODO: Implement loading component when navigating between pages
 const ErrorWrapper = ({ comp }: { comp: ReactNode }) => {
   const [errorPath, setErrorPath] = useState<string | null>(null)
   const { pathname } = useLocation()
@@ -103,7 +106,7 @@ const ErrorWrapper = ({ comp }: { comp: ReactNode }) => {
     }
   }, [pathname, errorPath])
 
-  return !isSSRLoaded ? null : errorPath === pathname ? <InternalServerError /> : comp
+  return !isSSRLoaded ? <Loading /> : errorPath === pathname ? <InternalServerError /> : comp
 }
 
 export const Authenticate = ({ page }: { page: React.ReactNode }) => {
@@ -131,7 +134,7 @@ export const Authenticate = ({ page }: { page: React.ReactNode }) => {
       })
   }, [token])
 
-  if (status === "pending") return null
+  if (status === "pending") return <Loading />
   if (status !== "success") return <NotFound />
 
   return page
@@ -148,6 +151,7 @@ reactRoot.render(
               <Route path='/' element={<App />}>
                 <Route path='/' element={<ErrorWrapper comp={<Home />} />} />
                 <Route path='/links' element={<ErrorWrapper comp={<Links />} />} />
+                <Route path='/err' element={<ErrorWrapper comp={<ClientError />} />} />
                 <Route path='/:token' element={<ErrorWrapper comp={<Authenticate page={<Analytics />} />} />} />
                 <Route path='/blogs' element={<ErrorWrapper comp={<Blogs />} />} />
                 <Route path="/blog/:id" element={<ErrorWrapper comp={<Blog />} />} />

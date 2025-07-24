@@ -2,7 +2,7 @@ import { useState } from "react"
 import { TerminalWindow } from "@/components/ui/terminal-window"
 import { Home, RefreshCw, AlertTriangle, Bug, Code, Mail, ExternalLink } from "lucide-react"
 
-export function ClientErrorPage() {
+export default function ClientError() {
   const [errorCode] = useState(() => Math.random().toString(36).substr(2, 8).toUpperCase())
   const [timestamp] = useState(() => new Date().toISOString())
   const [retryCount, setRetryCount] = useState(0)
