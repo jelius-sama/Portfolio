@@ -1,7 +1,8 @@
-import { Fragment, useLayoutEffect, useState, useRef } from "react";
+import { Fragment, useLayoutEffect, useState, useRef, useEffect } from "react";
 import Loading from "@/pages/loading";
 import { useLocation, Outlet } from "react-router-dom";
 
+// TODO: Make it work like Suspense fallback on every navigation instead of initial load only.
 export function LoadingBoundary() {
   const { pathname } = useLocation();
   const [loaded, setLoaded] = useState(false);
@@ -28,6 +29,22 @@ export function LoadingBoundary() {
       }
     };
   }, [pathname]);
+
+  useEffect(() => {
+    if (!loaded) return;
+
+    const timeout = setTimeout(() => {
+      import('@/analytics')
+        .then((module) => {
+          module.sendAnalytics();
+        })
+        .catch((err) => {
+          console.error("Error loading analytics function:", err);
+        });
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [pathname, loaded]);
 
   return (
     <Fragment>

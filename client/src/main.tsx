@@ -1,7 +1,6 @@
 import { StrictMode, useState, Fragment } from 'react'
 import '@/index.css'
 import { BrowserRouter } from 'react-router-dom'
-import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/contexts/theme'
 import { createRoot } from 'react-dom/client'
 import { ConfigProvider } from '@/contexts/config'
@@ -24,6 +23,7 @@ const Blogs = lazy(() => import("@/pages/blogs"))
 const Blog = lazy(() => import("@/pages/blog"))
 const Links = lazy(() => import("@/pages/links"))
 const NotFound = lazy(() => import("@/pages/not-found"))
+const Toaster = lazy(() => import('@/components/ui/sonner'))
 
 let rootEl = document.getElementById('root') as HTMLDivElement | null;
 
@@ -50,20 +50,6 @@ const App = () => {
     });
   }, [pathname]);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      import('@/analytics')
-        .then((module) => {
-          module.sendAnalytics();
-        })
-        .catch((err) => {
-          console.error("Error loading analytics function:", err);
-        });
-    }, 3000);
-
-    return () => clearTimeout(timeout);
-  }, [pathname]);
-
   const isPriorityPath = priorityPaths.some(
     path => pathname.startsWith(path) || path === pathname
   );
@@ -80,7 +66,7 @@ const App = () => {
   )
 }
 
-const ErrorWrapper = ({ comp }: { comp: ReactNode }) => {
+const ServerErrorWrapper = ({ comp }: { comp: ReactNode }) => {
   const [errorPath, setErrorPath] = useState<string | null>(null)
   const { pathname } = useLocation()
   const { setSSRData } = useConfig()
@@ -157,15 +143,16 @@ reactRoot.render(
           <ThemeProvider defaultTheme="dark" storageKey="theme">
             <Routes>
               <Route path='/' element={<App />}>
-                <Route path='/' element={<ErrorWrapper comp={<Home />} />} />
-                <Route path='/links' element={<ErrorWrapper comp={<Links />} />} />
-                <Route path='/:token' element={<ErrorWrapper comp={<Authenticate page={<Analytics />} />} />} />
-                <Route path='/blogs' element={<ErrorWrapper comp={<Blogs />} />} />
-                <Route path="/blog/:id" element={<ErrorWrapper comp={<Blog />} />} />
-                <Route path='*' element={<ErrorWrapper comp={<NotFound />} />} />
+                <Route path='/' element={<ServerErrorWrapper comp={<Home />} />} />
+                <Route path='/links' element={<ServerErrorWrapper comp={<Links />} />} />
+                <Route path='/:token' element={<ServerErrorWrapper comp={<Authenticate page={<Analytics />} />} />} />
+                <Route path='/blogs' element={<ServerErrorWrapper comp={<Blogs />} />} />
+                <Route path="/blog/:id" element={<ServerErrorWrapper comp={<Blog />} />} />
+                <Route path='*' element={<ServerErrorWrapper comp={<NotFound />} />} />
               </Route>
             </Routes>
-            <Toaster richColors={true} />
+
+            <Suspense><Toaster richColors={true} /></Suspense>
           </ThemeProvider>
         </QueryClientProvider>
       </BrowserRouter>
