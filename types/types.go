@@ -1,5 +1,7 @@
 package types
 
+import "net/http"
+
 // Type of Server Environment
 type Environment struct {
 	Prod string
@@ -45,3 +47,5 @@ type RouteMetadata struct {
 	Meta  []MetaTag `json:"meta,omitempty"`
 	Link  []LinkTag `json:"link,omitempty"`
 }
+
+type Middleware func(http.Handler) http.Handler

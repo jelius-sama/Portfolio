@@ -20,4 +20,5 @@ var ApiRoutes = map[string]http.HandlerFunc{
 	"GET /analytics":      handler.GetAnalytics,
 	"POST /authenticate":  handler.Authenticate,
 	"GET /verify_auth":    handler.VerifyAuthStatus,
+	"POST /purge_cache":   handler.PurgeCache,
 }

@@ -79,7 +79,7 @@ func HandleRouting() *http.ServeMux {
 		lookupKey := method + " /" + path
 
 		if handler, exists := ApiRoutes[lookupKey]; exists {
-			NoCache(handler)
+			NoCache(handler)(w, r)
 			return
 		}
 

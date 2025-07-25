@@ -12,46 +12,32 @@ import (
 	"os"
 )
 
-type ErrorResponse struct {
-	Error   string  `json:"error"`
-	Message *string `json:"message"`
-}
-
-func writeError(w http.ResponseWriter, statusCode int, errorText string, msg *string) {
-	resp := ErrorResponse{
-		Error:   errorText,
-		Message: msg,
-	}
-
-	util.WriteJSON(w, statusCode, resp)
-}
-
 func BadRequest(w http.ResponseWriter, r *http.Request, msg *string) {
-	writeError(w, http.StatusBadRequest, "400 Bad Request", msg)
+	util.WriteError(w, http.StatusBadRequest, "400 Bad Request", msg)
 }
 
 func Unauthorized(w http.ResponseWriter, r *http.Request, msg *string) {
-	writeError(w, http.StatusUnauthorized, "401 Unauthorized", msg)
+	util.WriteError(w, http.StatusUnauthorized, "401 Unauthorized", msg)
 }
 
 func Forbidden(w http.ResponseWriter, r *http.Request, msg *string) {
-	writeError(w, http.StatusForbidden, "403 Forbidden", msg)
+	util.WriteError(w, http.StatusForbidden, "403 Forbidden", msg)
 }
 
 func NotFoundAPI(w http.ResponseWriter, r *http.Request, msg *string) {
-	writeError(w, http.StatusNotFound, "404 Not Found", msg)
+	util.WriteError(w, http.StatusNotFound, "404 Not Found", msg)
 }
 
 func MethodNotAllowed(w http.ResponseWriter, r *http.Request, msg *string) {
-	writeError(w, http.StatusMethodNotAllowed, "405 Method Not Allowed", msg)
+	util.WriteError(w, http.StatusMethodNotAllowed, "405 Method Not Allowed", msg)
 }
 
 func RequestTimeout(w http.ResponseWriter, r *http.Request, msg *string) {
-	writeError(w, http.StatusRequestTimeout, "408 Request Timeout", msg)
+	util.WriteError(w, http.StatusRequestTimeout, "408 Request Timeout", msg)
 }
 
 func InternalErrorAPI(w http.ResponseWriter, r *http.Request, msg *string) {
-	writeError(w, http.StatusInternalServerError, "500 Internal Server Error", msg)
+	util.WriteError(w, http.StatusInternalServerError, "500 Internal Server Error", msg)
 }
 
 func InternalErrorPage(w http.ResponseWriter, r *http.Request, msg *string) {

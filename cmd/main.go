@@ -108,9 +108,9 @@ func main() {
 	startServer := func() (ServerResp, string) {
 		respChan := make(chan ServerResp, 2)
 
-		routeHandler := api.Chain(api.MiddlewareChain{
+		routeHandler := util.Chain(util.MiddlewareChain{
 			Handler: api.HandleRouting(),
-			Middlewares: []api.Middleware{
+			Middlewares: []types.Middleware{
 				api.RecoveryMiddleware,
 				api.LoggingMiddleware,
 			},
