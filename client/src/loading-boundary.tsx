@@ -33,7 +33,7 @@ export function LoadingBoundary() {
     <Fragment>
       {/* Overlay loading screen */}
       {!loaded && (
-        <div className="fixed inset-0 z-50 overflow-auto transition-opacity duration-500 opacity-100">
+        <div className="fixed inset-0 overflow-auto transition-opacity duration-500 opacity-100">
           <Loading />
         </div>
       )}
