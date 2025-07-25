@@ -58,6 +58,7 @@ func HandleRouting() *http.ServeMux {
 		}
 
 		w.Header().Set("Content-Type", mimeType)
+		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 		w.Write(content)
 	})
 
@@ -78,7 +79,7 @@ func HandleRouting() *http.ServeMux {
 		lookupKey := method + " /" + path
 
 		if handler, exists := ApiRoutes[lookupKey]; exists {
-			handler(w, r)
+			NoCache(handler)
 			return
 		}
 
@@ -126,6 +127,11 @@ func HandleRouting() *http.ServeMux {
 		}
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if len(ssrData) == 0 {
+			w.Header().Set("Cache-Control", "public, max-age=86400")
+		} else {
+			w.Header().Set("Cache-Control", "public, max-age=3600")
+		}
 		if os.Getenv("env") == types.ENV.Prod {
 			w.Header().Set("X-Content-Type-Options", "nosniff")
 			w.Header().Set("X-Frame-Options", "DENY")
@@ -159,6 +165,7 @@ func HandleRouting() *http.ServeMux {
 			}
 
 			w.Header().Set("Content-Type", mimeType)
+			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 			w.Write(content)
 		})
 	}

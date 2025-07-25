@@ -5,7 +5,6 @@ import (
 	"KazuFolio/api"
 	"KazuFolio/db"
 	"KazuFolio/logger"
-	m "KazuFolio/middleware"
 	"KazuFolio/types"
 	"KazuFolio/util"
 	"database/sql"
@@ -109,11 +108,11 @@ func main() {
 	startServer := func() (ServerResp, string) {
 		respChan := make(chan ServerResp, 2)
 
-		routeHandler := m.Chain(m.MiddlewareChain{
+		routeHandler := api.Chain(api.MiddlewareChain{
 			Handler: api.HandleRouting(),
-			Middlewares: []m.Middleware{
-				m.RecoveryMiddleware,
-				m.LoggingMiddleware,
+			Middlewares: []api.Middleware{
+				api.RecoveryMiddleware,
+				api.LoggingMiddleware,
 			},
 		})
 

@@ -1,8 +1,8 @@
-package middleware
+package api
 
 import (
-	"KazuFolio/api"
 	"KazuFolio/logger"
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -20,23 +20,39 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 			if err := recover(); err != nil {
 				logger.TimedError("Encountered a panic, returning 500 to client and recovering the server!")
 				if strings.HasPrefix(r.URL.Path, "/api/") {
-					api.InternalErrorAPI(w, r, nil)
+					InternalErrorAPI(w, r, nil)
 					return
 				}
 
 				if strings.HasPrefix(r.URL.Path, "/assets/") {
-					api.InternalErrorAPI(w, r, nil)
+					InternalErrorAPI(w, r, nil)
 					return
 				}
 
 				if strings.HasPrefix(r.URL.Path, "/src/") {
-					api.InternalErrorAPI(w, r, nil)
+					InternalErrorAPI(w, r, nil)
 					return
 				}
 
-				api.InternalErrorPage(w, r, nil)
+				InternalErrorPage(w, r, nil)
 			}
 		}()
 		next.ServeHTTP(w, r)
 	})
+}
+
+func NoCache(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
+		w.Header().Set("Pragma", "no-cache") // for HTTP/1.0 proxies
+		w.Header().Set("Expires", "0")       // for older caches
+		next(w, r)
+	}
+}
+
+func Cacheable(maxAge int, next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", maxAge))
+		next(w, r)
+	}
 }
