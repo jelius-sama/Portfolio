@@ -2,7 +2,6 @@ bin
 tmp
 client/node_modules
 client/dist
-build
 
 # Ignore everything in the assets folder
 assets/*
