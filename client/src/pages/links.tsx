@@ -2,7 +2,7 @@ import { TerminalWindow } from "@/components/ui/terminal-window"
 import { LinkCard } from "@/components/layout/link-card"
 import { Github, Linkedin, Twitter, Mail, FileText, Code, Rss, Youtube, Instagram } from "lucide-react"
 import { useConfig } from "@/contexts/config"
-import { type JSX, Fragment } from "react"
+import { type JSX, Fragment, useEffect } from "react"
 import { StaticMetadata } from "@/contexts/metadata"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -35,6 +35,15 @@ export default function Links() {
       return res.json() as Promise<Array<{ label: string, value: string }>>
     }
   })
+
+  useEffect(() => {
+    if (!isPending) {
+      const event = new CustomEvent("PageLoaded", {
+        detail: { pathname: window.location.pathname },
+      });
+      window.dispatchEvent(event);
+    }
+  }, [isPending]);
 
   const neofetch: undefined | Array<{ label: string, value: string }> = isPending ? undefined : error ? me.neofetch : data && data
 

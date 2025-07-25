@@ -109,6 +109,15 @@ export default function BlogPostPage() {
     })();
   }, [id, pathname]);
 
+  useEffect(() => {
+    if (!loading) {
+      const event = new CustomEvent("PageLoaded", {
+        detail: { pathname: window.location.pathname },
+      });
+      window.dispatchEvent(event);
+    }
+  }, [loading]);
+
   if (loading) {
     return (
       <Fragment>

@@ -35,6 +35,15 @@ export default function BlogListPage() {
     { value: "updated", label: "Sort by: Last Updated" },
   ]
 
+  useEffect(() => {
+    if (!loading) {
+      const event = new CustomEvent("PageLoaded", {
+        detail: { pathname: window.location.pathname },
+      });
+      window.dispatchEvent(event);
+    }
+  }, [loading]);
+
   const fetchBlogs = async (page: number, isNewSort = false) => {
     try {
       if (page === 1) {

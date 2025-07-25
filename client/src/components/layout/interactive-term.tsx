@@ -339,6 +339,7 @@ export function InteractiveTerminal() {
                                 {me.links["jelius.dev"]?.qr_code_link ? (
                                     <img
                                         src={me.links["jelius.dev"]?.qr_code_link}
+                                        id="slow-af"
                                         alt="QR Code"
                                         className="w-58 h-58 rounded object-cover"
                                     />

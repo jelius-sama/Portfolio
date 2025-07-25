@@ -24,7 +24,6 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: any) {
     console.error("Uncaught error:", error, errorInfo);
-    // You could log this to a service like Sentry here
   }
 
   render() {

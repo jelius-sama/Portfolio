@@ -12,6 +12,7 @@ import { useConfig } from "@/contexts/config"
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import Loading from "@/pages/loading"
 import { ErrorBoundary } from "@/error-boundary"
+import { LoadingBoundary } from "@/loading-boundary"
 
 const queryClient = new QueryClient()
 
@@ -39,6 +40,7 @@ if (!rootEl) {
 
 const App = () => {
   const { pathname } = useLocation();
+  const priorityPaths = ["/", "/links", "/blogs", "/blog/"]
 
   useLayoutEffect(() => {
     document.documentElement.scrollTo({
@@ -62,12 +64,16 @@ const App = () => {
     return () => clearTimeout(timeout);
   }, [pathname]);
 
+  const isPriorityPath = priorityPaths.some(
+    path => pathname.startsWith(path) || path === pathname
+  );
+
   return (
     <Fragment>
-      <Header />
       <ErrorBoundary fallback={<ClientError />}>
-        <Suspense fallback={<Loading />}>
-          <Outlet />
+        <Header />
+        <Suspense fallback={isPriorityPath ? null : <Loading />}>
+          {isPriorityPath ? <LoadingBoundary /> : <Outlet />}
         </Suspense>
       </ErrorBoundary>
     </Fragment>
