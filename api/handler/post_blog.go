@@ -31,7 +31,9 @@ func generateBlogID() string {
 // TODO: Send Email to admin for approval
 func PostBlog(w http.ResponseWriter, r *http.Request) {
 	// Verify sudo access
-	util.VerifySudo(w, r)
+	if !VerifySudo(w, r) {
+		return
+	}
 
 	mr, err := r.MultipartReader()
 	if err != nil {

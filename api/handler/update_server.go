@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"KazuFolio/util"
 	"net/http"
 	"os"
 	"os/exec"
@@ -10,7 +9,9 @@ import (
 
 // TODO: Send Email to admin for approval
 func UpdateServer(w http.ResponseWriter, r *http.Request) {
-	util.VerifySudo(w, r)
+	if !VerifySudo(w, r) {
+		return
+	}
 
 	// Execute update script (in background)
 	cmd := exec.Command("bash", filepath.Join(os.Getenv("home"), "/update_prod.sh"))

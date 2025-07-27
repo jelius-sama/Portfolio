@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"sync"
 	"time"
-
-	"KazuFolio/util"
 )
 
 const tokenValidity = 30 * time.Minute
@@ -55,7 +53,9 @@ func generateSecureToken(nBytes int) (string, error) {
 
 // Authenticate creates and stores a token, sets it as a cookie, and sends it to the client
 func Authenticate(w http.ResponseWriter, r *http.Request) {
-	util.VerifySudo(w, r)
+	if !VerifySudo(w, r) {
+		return
+	}
 
 	token, err := generateSecureToken(32)
 	if err != nil {

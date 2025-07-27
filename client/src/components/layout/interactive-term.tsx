@@ -148,8 +148,8 @@ export function InteractiveTerminal() {
                 setPendingStdin(true)
                 stdout("Enter relative paths(separated by comma):")
                 try {
-                    const raw = await stdin()
-                    const paths = raw.split(",").map(p => p.trim());
+                    const rawDawg = await stdin()
+                    const paths = rawDawg.split(",").map(p => p.trim());
 
                     const response = await fetch("/api/purge_cache", {
                         method: "POST",
@@ -161,20 +161,48 @@ export function InteractiveTerminal() {
                     });
 
                     if (!response.ok) {
-                        const error = await response.text();
+                        const error = await response.json();
                         console.error("Failed to purge cache:", error);
                         stdout("[ERROR] Failed to purge cache.")
                         return
                     }
 
-                    const data = await response.json();
-                    console.log("Cache purged successfully:", data);
                     stdout("[SUCCESS] Successfully to purge cache.")
                 } catch (err) {
                     console.error("Error purging cache:", err);
                     stdout("[ERROR] Failed to purge cache.")
                 } finally {
                     setPendingStdin(false)
+                }
+            }
+        },
+
+        "purge-all-cache": {
+            requiresSudo: true,
+            async run(_, stdout, ctx) {
+                setPendingStdin(true)
+                try {
+                    const response = await fetch("/api/purge_all_cache", {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${ctx.sudoToken}`,
+                            "Content-Type": "application/json",
+                        },
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        console.error("Failed to purge all cache:", error);
+                        stdout("[ERROR] Failed to purge all cache.")
+                        return;
+                    }
+
+                    stdout("[SUCCESS] Successfully purged all cache.")
+                } catch (err) {
+                    console.error("Error purging all cache:", err);
+                    stdout("[ERROR] Failed to purge all cache.")
+                } finally {
+                    setPendingStdin(false);
                 }
             }
         },
