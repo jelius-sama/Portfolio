@@ -23,7 +23,6 @@ func PurgeCache(w http.ResponseWriter, r *http.Request) {
 	}
 
 	base := os.Getenv("host")
-
 	for i, path := range body.Paths {
 		if !strings.HasPrefix(path, "/") {
 			path = "/" + path
@@ -31,15 +30,31 @@ func PurgeCache(w http.ResponseWriter, r *http.Request) {
 		body.Paths[i] = base + path
 	}
 
-	payload, _ := json.Marshal(map[string][]string{"files": body.Paths})
-	req, _ := http.NewRequest("POST",
+	payload, err := json.Marshal(map[string][]string{"files": body.Paths})
+	if err != nil {
+		util.WriteError(w, http.StatusInternalServerError, "500 Internal Server Error", util.AddrOf("failed to marshal payload"))
+		return
+	}
+
+	req, err := http.NewRequest("POST",
 		"https://api.cloudflare.com/client/v4/zones/"+os.Getenv("CF_ZONE_ID")+"/purge_cache",
 		bytes.NewBuffer(payload))
+	if err != nil {
+		util.WriteError(w, http.StatusInternalServerError, "500 Internal Server Error", util.AddrOf("failed to create request"))
+		return
+	}
+
 	req.Header.Set("Authorization", "Bearer "+os.Getenv("CF_API_TOKEN"))
 	req.Header.Set("Content-Type", "application/json")
 
 	res, err := http.DefaultClient.Do(req)
-	if err != nil || res.StatusCode != 200 {
+	if err != nil {
+		util.WriteError(w, http.StatusInternalServerError, "500 Internal Server Error", util.AddrOf("failed to send request"))
+		return
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
 		util.WriteError(w, http.StatusInternalServerError, "500 Internal Server Error", util.AddrOf("cache purge failed"))
 		return
 	}

@@ -142,6 +142,43 @@ export function InteractiveTerminal() {
             }
         },
 
+        "purge-cache": {
+            requiresSudo: true,
+            async run(stdin, stdout, ctx) {
+                setPendingStdin(true)
+                stdout("Enter relative paths(separated by comma):")
+                try {
+                    const raw = await stdin()
+                    const paths = raw.split(",").map(p => p.trim());
+
+                    const response = await fetch("/api/purge_cache", {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${ctx.sudoToken}`,
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ paths }),
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.text();
+                        console.error("Failed to purge cache:", error);
+                        stdout("[ERROR] Failed to purge cache.")
+                        return
+                    }
+
+                    const data = await response.json();
+                    console.log("Cache purged successfully:", data);
+                    stdout("[SUCCESS] Successfully to purge cache.")
+                } catch (err) {
+                    console.error("Error purging cache:", err);
+                    stdout("[ERROR] Failed to purge cache.")
+                } finally {
+                    setPendingStdin(false)
+                }
+            }
+        },
+
         "post-blog": {
             requiresSudo: true,
             async run(stdin, stdout, ctx) {
