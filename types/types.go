@@ -2,25 +2,40 @@ package types
 
 import "net/http"
 
-// Type of Server Environment
+// INFO: RobotsRule represents the rules for a specific user-agent
+type RobotsRule struct {
+	UserAgent  string
+	Disallow   []string
+	Allow      []string
+	CrawlDelay *int
+}
+
+// INFO: RobotsConfig holds the entire robots.txt configuration
+type RobotsConfig struct {
+	Rules    []RobotsRule
+	Host     string
+	Sitemaps []string
+}
+
+// INFO: Type of Server Environment
 type Environment struct {
 	Prod string
 	Dev  string
 }
 
-// Enum of Server ENvironment
+// INFO: Enum of Server ENvironment
 var ENV = Environment{
 	Prod: "production",
 	Dev:  "development",
 }
 
-// Type representing reverse proxy status and settings
+// INFO: Type representing reverse proxy status and settings
 type BehindReverseProxy struct {
 	StatementValid bool
 	Port           string
 }
 
-// Type related to static page metadata
+// INFO: Type related to static page metadata
 type MetaTag struct {
 	Charset   string `json:"charset,omitempty"`
 	Name      string `json:"name,omitempty"`

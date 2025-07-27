@@ -22,7 +22,8 @@ var getOnlyRoute = util.AddrOf("Only Request with GET Method are allowed!")
 func HandleRouting() *http.ServeMux {
 	router := http.NewServeMux()
 
-	router.HandleFunc("/sitemap.xml", handler.SitemapHandler)
+	router.HandleFunc("/sitemap.xml", handler.GenerateSitemap)
+	router.HandleFunc("/robots.txt", handler.GenerateRobots)
 
 	router.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {

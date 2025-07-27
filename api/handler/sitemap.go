@@ -21,7 +21,7 @@ type urlSet struct {
 	URLs    []urlEntry `xml:"url"`
 }
 
-func SitemapHandler(w http.ResponseWriter, r *http.Request) {
+func GenerateSitemap(w http.ResponseWriter, r *http.Request) {
 	baseURL := os.Getenv("host")
 	now := time.Now().Format("2006-01-02")
 
