@@ -109,7 +109,7 @@ func NotFoundPage(w http.ResponseWriter, r *http.Request, msg *string) {
 	// Create the SSR data as JSON
 	payload := map[string]interface{}{
 		"status":  404,
-		"message": "Dynamic content not found",
+		"message": "Page not found",
 		"path":    r.URL.Path,
 	}
 	if msg != nil {

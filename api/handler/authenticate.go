@@ -4,7 +4,7 @@ import (
 	"KazuFolio/logger"
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -51,7 +51,7 @@ func generateSecureToken(nBytes int) (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-// Authenticate creates and stores a token, sets it as a cookie, and sends it to the client
+// Authenticate creates and stores a token, sets it as a cookie
 func Authenticate(w http.ResponseWriter, r *http.Request) {
 	if !VerifySudo(w, r) {
 		return
@@ -78,53 +78,60 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 	})
 
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(map[string]string{
-		"token": token,
-	})
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Authenticated"))
 }
 
-// VerifyAuthStatus validates token from cookie and query param, renews if valid
+// Internal function to verify auth token
+func VerifyAuthToken(token string) error {
+	authTokens.RLock()
+	expiry, exists := authTokens.store[token]
+	authTokens.RUnlock()
+
+	if !exists {
+		return fmt.Errorf("token not found")
+	}
+
+	if time.Now().After(expiry) {
+		authTokens.Lock()
+		delete(authTokens.store, token)
+		authTokens.Unlock()
+		return fmt.Errorf("token expired")
+	}
+
+	// Renew token
+	newExpiry := time.Now().Add(tokenValidity)
+	authTokens.Lock()
+	authTokens.store[token] = newExpiry
+	authTokens.Unlock()
+
+	return nil
+}
+
+// HTTP handler that uses the internal function
 func VerifyAuthStatus(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("auth_token")
 	if err != nil {
 		http.Error(w, "Missing auth token", http.StatusForbidden)
 		return
 	}
-	cookieToken := cookie.Value
+	token := cookie.Value
 
-	queryToken := r.URL.Query().Get("token")
-	if queryToken == "" || queryToken != cookieToken {
-		http.Error(w, "Token mismatch", http.StatusForbidden)
+	err = VerifyAuthToken(token)
+	if err != nil {
+		if err.Error() == "token expired" {
+			http.Error(w, err.Error(), 498)
+		} else {
+			http.Error(w, err.Error(), http.StatusForbidden)
+		}
 		return
 	}
 
-	authTokens.RLock()
-	expiry, exists := authTokens.store[cookieToken]
-	authTokens.RUnlock()
-
-	if !exists {
-		http.Error(w, "Token not found", http.StatusForbidden)
-		return
-	}
-
-	if time.Now().After(expiry) {
-		authTokens.Lock()
-		delete(authTokens.store, cookieToken)
-		authTokens.Unlock()
-		http.Error(w, "Token expired", 498)
-		return
-	}
-
-	// Renew token
+	// Renewed cookie
 	newExpiry := time.Now().Add(tokenValidity)
-	authTokens.Lock()
-	authTokens.store[cookieToken] = newExpiry
-	authTokens.Unlock()
-
 	http.SetCookie(w, &http.Cookie{
 		Name:     "auth_token",
-		Value:    cookieToken,
+		Value:    token,
 		Expires:  newExpiry,
 		Path:     "/",
 		HttpOnly: true,

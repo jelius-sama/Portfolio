@@ -114,11 +114,36 @@ func HandleRouting() *http.ServeMux {
 		}
 
 		if len(ssrData) == 0 {
-			metadata, err := parser.ParseMetadata(r.URL.Path, nil)
-			if err != nil {
-				InternalErrorPage(w, r, util.AddrOf("Failed to parse metadata of the page!"))
-				logger.Error("metadata parsing failed:\n    " + err.Error())
-				return
+			var metadata string
+
+			defaultCase := func() {
+				metadata, err = parser.ParseMetadata(r.URL.Path, nil)
+				if err != nil {
+					InternalErrorPage(w, r, util.AddrOf("Failed to parse metadata of the page!"))
+					logger.Error("metadata parsing failed:\n    " + err.Error())
+					return
+				}
+			}
+
+			switch r.URL.Path {
+			case "/analytics":
+				cookie, err := r.Cookie("auth_token")
+				if err != nil {
+					NotFoundPage(w, r, nil)
+					return
+				}
+				token := cookie.Value
+
+				if err := handler.VerifyAuthToken(token); err != nil {
+					NotFoundPage(w, r, nil)
+					return
+				}
+
+				defaultCase()
+				break
+			default:
+				defaultCase()
+				break
 			}
 
 			// Replace marker in HTML

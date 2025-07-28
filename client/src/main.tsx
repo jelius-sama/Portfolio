@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/contexts/theme'
 import { createRoot } from 'react-dom/client'
 import { ConfigProvider } from '@/contexts/config'
 import { lazy, Suspense, useLayoutEffect, useEffect, type ReactNode } from 'react'
-import { Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom'
+import { Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { Header } from "@/components/layout/header"
 import { useConfig } from "@/contexts/config"
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
@@ -50,9 +50,16 @@ const App = () => {
     });
   }, [pathname]);
 
-  const isPriorityPath = priorityPaths.some(
-    path => pathname.startsWith(path) || path === pathname
-  );
+
+  const isPriorityPath = priorityPaths.some((path) => {
+    if (path.endsWith("/*")) {
+      // INFO: Remove the '*' but keep the '/'
+      const basePath = path.slice(0, -1);
+      return pathname.startsWith(basePath);
+    } else {
+      return pathname === path;
+    }
+  });
 
   return (
     <Fragment>
@@ -104,13 +111,10 @@ const ServerErrorWrapper = ({ comp }: { comp: ReactNode }) => {
 }
 
 export const Authenticate = ({ page }: { page: React.ReactNode }) => {
-  const { token } = useParams<{ token: string }>()
-  const [status, setStatus] = useState<"pending" | "success" | "expired" | "error">("pending")
+  const [status, setStatus] = useState<"pending" | "success" | "error">("pending")
 
   useEffect(() => {
-    if (!token) return
-
-    fetch(`/api/verify_auth?token=${token}`, {
+    fetch(`/api/verify_auth`, {
       method: "GET",
       credentials: "include",
     })
@@ -118,7 +122,8 @@ export const Authenticate = ({ page }: { page: React.ReactNode }) => {
         if (res.status === 200) {
           setStatus("success")
         } else if (res.status === 498) {
-          setStatus("expired")
+          // INFO: Expired token
+          setStatus("error")
         } else {
           setStatus("error")
         }
@@ -126,10 +131,10 @@ export const Authenticate = ({ page }: { page: React.ReactNode }) => {
       .catch(() => {
         setStatus("error")
       })
-  }, [token])
+  }, [])
 
   if (status === "pending") return <Loading />
-  if (status !== "success") return <NotFound />
+  if (status === "error") return <NotFound />
 
   return page
 }
@@ -145,7 +150,7 @@ reactRoot.render(
               <Route path='/' element={<App />}>
                 <Route path='/' element={<ServerErrorWrapper comp={<Home />} />} />
                 <Route path='/links' element={<ServerErrorWrapper comp={<Links />} />} />
-                <Route path='/:token' element={<ServerErrorWrapper comp={<Authenticate page={<Analytics />} />} />} />
+                <Route path='/analytics' element={<ServerErrorWrapper comp={<Authenticate page={<Analytics />} />} />} />
                 <Route path='/blogs' element={<ServerErrorWrapper comp={<Blogs />} />} />
                 <Route path="/blog/:id" element={<ServerErrorWrapper comp={<Blog />} />} />
                 <Route path='*' element={<ServerErrorWrapper comp={<NotFound />} />} />

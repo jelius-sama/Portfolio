@@ -1,7 +1,7 @@
 import { TerminalWindow } from "@/components/ui/terminal-window"
 import { Home, LinkIcon } from "lucide-react"
 import { Fragment } from "react"
-import { StaticMetadata } from "@/contexts/metadata"
+import { PathBasedMetadata } from "@/contexts/metadata"
 import { useLocation, Link } from "react-router-dom"
 
 export const suggestions = [
@@ -14,7 +14,7 @@ export default function NotFoundPage() {
 
   return (
     <Fragment>
-      <StaticMetadata />
+      <PathBasedMetadata paths={["*", "#not_found"]} />
 
       <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
         <div className="text-center my-8">

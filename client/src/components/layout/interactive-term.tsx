@@ -132,12 +132,11 @@ export function InteractiveTerminal() {
                     method: "POST",
                     headers: { Authorization: `Bearer ${ctx.sudoToken}` }
                 })
-                const data = await response.json() as { token: string }
                 const success = response.ok
 
                 stdout(success ? "[SUCCESS] You will be redirected soon..." : "[ERROR] Failed to authenticate.")
                 if (success) {
-                    navigate(`/${data.token}`)
+                    navigate(`/analytics`)
                 }
             }
         },
