@@ -8,6 +8,7 @@ import (
 	"KazuFolio/types"
 	"KazuFolio/util"
 	"bytes"
+	"fmt"
 	"io/fs"
 	"mime"
 	"net/http"
@@ -116,13 +117,12 @@ func HandleRouting() *http.ServeMux {
 		if len(ssrData) == 0 {
 			var metadata string
 
-			defaultCase := func() {
+			defaultCase := func() error {
 				metadata, err = parser.ParseMetadata(r.URL.Path, nil)
 				if err != nil {
-					InternalErrorPage(w, r, util.AddrOf("Failed to parse metadata of the page!"))
-					logger.Error("metadata parsing failed:\n    " + err.Error())
-					return
+					return fmt.Errorf("metadata parsing failed: %w", err)
 				}
+				return nil
 			}
 
 			switch r.URL.Path {
@@ -139,11 +139,17 @@ func HandleRouting() *http.ServeMux {
 					return
 				}
 
-				defaultCase()
-				break
+				if err := defaultCase(); err != nil {
+					InternalErrorPage(w, r, util.AddrOf("Failed to parse metadata of the page!"))
+					logger.Error(err.Error())
+					return
+				}
 			default:
-				defaultCase()
-				break
+				if err := defaultCase(); err != nil {
+					InternalErrorPage(w, r, util.AddrOf("Failed to parse metadata of the page!"))
+					logger.Error(err.Error())
+					return
+				}
 			}
 
 			// Replace marker in HTML
