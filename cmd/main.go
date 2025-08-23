@@ -95,6 +95,7 @@ type ServerResp struct {
 	Https error
 }
 
+// TODO: Implement automatic cache purge when a new build is detected.
 func main() {
 	defer db.Conn.Close()
 

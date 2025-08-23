@@ -47,7 +47,7 @@ export function generateBlogMetadata(blog: Blog, fullPath: string): StaticRoute 
 }
 
 export default function BlogPostPage() {
-  const { ssrData } = useConfig()
+  const { ssrData, app: { portfolio: me } } = useConfig()
   const { pathname } = useLocation()
 
   const [blog, setBlog] = useState<Blog | null>(null)
@@ -268,7 +268,7 @@ export default function BlogPostPage() {
             Share this post:{" "}
             <a
               href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
-                `https://yourname.dev/blog/${blog.id}`,
+                `https://${me.links["jelius.dev"].link}/blog/${blog.id}`,
               )}&text=${encodeURIComponent(blog.title)}`}
               target="_blank"
               rel="noopener noreferrer"

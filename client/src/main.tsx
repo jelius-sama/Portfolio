@@ -40,7 +40,7 @@ if (!rootEl) {
 
 const App = () => {
   const { pathname } = useLocation();
-  const priorityPaths = ["/", "/links", "/blogs", "/blog/"]
+  const priorityPaths = ["/", "/links", "/blogs", "/blog/*"]
 
   useLayoutEffect(() => {
     document.documentElement.scrollTo({
@@ -49,7 +49,6 @@ const App = () => {
       behavior: "instant",
     });
   }, [pathname]);
-
 
   const isPriorityPath = priorityPaths.some((path) => {
     if (path.endsWith("/*")) {
@@ -60,6 +59,22 @@ const App = () => {
       return pathname === path;
     }
   });
+
+  useEffect(() => {
+    if (isPriorityPath) return;
+
+    const timeout = setTimeout(() => {
+      import('@/analytics')
+        .then((module) => {
+          module.sendAnalytics();
+        })
+        .catch((err) => {
+          console.error("Error loading analytics function:", err);
+        });
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [pathname]);
 
   return (
     <Fragment>
