@@ -161,6 +161,7 @@ func main() {
 			logger.Info("Production server started on port :" + portToStart)
 
 			go func() {
+				// TODO: Hot reload the certificates in case it expires there is no downtime.
 				err := http.ListenAndServeTLS(":"+portToStart, fullchain, privkey, routeHandler)
 				respChan <- ServerResp{Https: err}
 			}()
