@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var DynamicRoutes []string = []string{"/blog/"}
+var DynamicRoutes []string = []string{"/blog/", "/achievements"}
 
 type RouteData struct {
 	FullPath string
@@ -28,6 +28,10 @@ func PerformSSR(fullPath string) (string, error, int) {
 	switch route.Route {
 	case "/blog/":
 		ssrData, err, status := SSRBlogPage(route.FullPath)
+		return ssrData, err, status
+
+	case "/achievements":
+		ssrData, err, status := SSRAchievementsPage(route.FullPath)
 		return ssrData, err, status
 
 	default:

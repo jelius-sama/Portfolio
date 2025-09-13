@@ -24,7 +24,7 @@ function SmartLink({ type, to, href, item, index, className, ...rest }: { type: 
 };
 
 export function Header() {
-    const navItems = ["Home", "About", "Skills", "Experience", "Projects", "Contact", "Blogs", "Links"]
+    const navItems = ["Home", "About", "Skills", "Experience", "Projects", "Contact", "Blogs", "Achievements", "Links"]
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const location = useLocation()
     const params = useParams()
@@ -44,15 +44,15 @@ export function Header() {
                                 jelius.dev
                                 {location.pathname.startsWith("/blog/") && params?.id
                                     ? `/${params.id}`
-                                    : ["/links", "/blogs"].includes(location.pathname)
+                                    : ["/links", "/blogs", "/achievements"].includes(location.pathname)
                                         ? location.pathname
                                         : ""}
                             </span>
                         </div>
 
-                        <nav className="hidden md:flex items-center gap-8">
+                        <nav className="hidden lg:flex items-center gap-8">
                             {location.pathname === "/" ? (
-                                navItems.map((item, index) => item === "Links" || item === "Blogs" ? (
+                                navItems.map((item, index) => item === "Links" || item === "Blogs" || item === "Achievements" ? (
                                     <Link key={index} to={"/" + item.toLowerCase()} className="text-gray-300 hover:text-orange-400 transition-colors font-mono text-sm"> {item} </Link>
                                 ) : (
                                     <a key={index} href={`#${item.toLowerCase()}`} className="text-gray-300 hover:text-orange-400 transition-colors font-mono text-sm">{item}</a>
@@ -69,6 +69,12 @@ export function Header() {
                                         </Link>
                                     )}
 
+                                    {location.pathname !== "/achievements" && (
+                                        <Link to="/achievements" className="text-gray-300 hover:text-orange-400 transition-colors font-mono text-sm flex items-center gap-x-2">
+                                            Achievements
+                                        </Link>
+                                    )}
+
                                     {location.pathname !== "/links" && (
                                         <Link to="/links" className="text-gray-300 hover:text-orange-400 transition-colors font-mono text-sm flex items-center gap-x-2">
                                             Links
@@ -78,7 +84,7 @@ export function Header() {
                             )}
                         </nav>
 
-                        <div className="md:hidden flex items-center gap-2">
+                        <div className="lg:hidden flex items-center gap-2">
                             <button
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                                 className="p-2 text-gray-400 hover:text-orange-400 transition-colors"
@@ -92,7 +98,7 @@ export function Header() {
 
             {/* Mobile Navigation Menu */}
             {mobileMenuOpen && (
-                <div className="fixed inset-0 z-40 md:hidden">
+                <div className="fixed inset-0 z-40 lg:hidden">
                     {/* Backdrop */}
                     <div className="fixed inset-0 bg-gray-950/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
 
@@ -116,7 +122,7 @@ export function Header() {
                                     {location.pathname === "/" ? (
                                         navItems.map((item, index) => (
                                             <Fragment>
-                                                {item === "Links" || item === "Blogs" ? (
+                                                {item === "Links" || item === "Blogs" || item === "Achievements" ? (
                                                     <SmartLink type="link" key={index} index={index} item={item} onClick={handleNavClick} to={"/" + item.toLowerCase()} />
                                                 ) : (
                                                     <SmartLink type="a" key={index} index={index} item={item} onClick={handleNavClick} href={"#" + item.toLowerCase()} />
@@ -128,6 +134,7 @@ export function Header() {
                                             {[
                                                 { path: "/", label: "Portfolio" },
                                                 { path: "/blogs", label: "Blogs" },
+                                                { path: "/achievements", label: "Achievements" },
                                                 { path: "/links", label: "Links" },
                                             ]
                                                 .filter((item) => item.path === "/" || location.pathname !== item.path)

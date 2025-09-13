@@ -103,7 +103,7 @@ func GetBlogInternal(id string) (*types.Blog, int, error) {
 	// Goroutine to fetch blog views
 	go func() {
 		path := "/blog/" + id
-		views, err := BlogViewsInternal(path)
+		views, err := PageViewsInternal(path)
 		viewsChan <- viewsResult{views, err}
 	}()
 

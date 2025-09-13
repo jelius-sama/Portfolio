@@ -1,7 +1,7 @@
 {
     "dev_port": "6969",
     "is_behind_reverse_proxy": {
-        "statement_valid": false,
+        "statement_valid": true,
         "port_to_use": "3000"
     },
     "home_path": "/home/kazuma",

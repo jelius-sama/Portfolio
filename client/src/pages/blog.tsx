@@ -157,7 +157,7 @@ export default function BlogPostPage() {
   }
 
   if (!blog) {
-    return null
+    throw new Error("Something went wrong!")
   }
 
   return (
@@ -174,7 +174,7 @@ export default function BlogPostPage() {
         </div>
 
         {/* Blog Meta */}
-        <TerminalWindow title="blog-meta" className="mb-8">
+        <TerminalWindow title="blog-metadata" className="mb-8">
           <div className="font-mono text-sm">
             <div className="text-orange-400 mb-2">$ cat blog-metadata.json</div>
             <div className="text-gray-300 space-y-1">
@@ -263,7 +263,7 @@ export default function BlogPostPage() {
         )}
 
 
-        <Footer className=" mt-12" leading={
+        <Footer className="mt-12" leading={
           <div>
             Share this post:{" "}
             <a
@@ -274,7 +274,7 @@ export default function BlogPostPage() {
               rel="noopener noreferrer"
               className="text-orange-400 hover:underline"
             >
-              Twitter
+              X
             </a>
           </div>
 

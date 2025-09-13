@@ -16,6 +16,7 @@ import { LoadingBoundary } from "@/loading-boundary"
 const queryClient = new QueryClient()
 
 const Home = lazy(() => import("@/pages/home"))
+const Achievements = lazy(() => import("@/pages/achievements"))
 const Analytics = lazy(() => import("@/pages/analytics"))
 const ClientError = lazy(() => import("@/pages/error"))
 const InternalServerError = lazy(() => import("@/pages/internal-server-error"))
@@ -40,7 +41,7 @@ if (!rootEl) {
 
 const App = () => {
   const { pathname } = useLocation();
-  const priorityPaths = ["/", "/links", "/blogs", "/blog/*"]
+  const priorityPaths = ["/", "/achievements", "/links", "/blogs", "/blog/*"]
 
   useLayoutEffect(() => {
     document.documentElement.scrollTo({
@@ -154,9 +155,30 @@ export const Authenticate = ({ page }: { page: React.ReactNode }) => {
   return page
 }
 
+const LDJson = () => {
+  return <script
+    type="application/ld+json"
+    data-aria-hidden="true"
+    aria-hidden="true"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Person",
+        name: "Jelius",
+        url: "https://jelius.dev",
+        sameAs: [
+          "https://www.linkedin.com/in/jelius-basumatary-485044339/",
+          "https://github.com/jelius-sama"
+        ]
+      }),
+    }}
+  />
+}
+
 const reactRoot = createRoot(rootEl);
 reactRoot.render(
   <StrictMode>
+    <LDJson />
     <ConfigProvider>
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
@@ -164,6 +186,7 @@ reactRoot.render(
             <Routes>
               <Route path='/' element={<App />}>
                 <Route path='/' element={<ServerErrorWrapper comp={<Home />} />} />
+                <Route path='/achievements' element={<ServerErrorWrapper comp={<Achievements />} />} />
                 <Route path='/links' element={<ServerErrorWrapper comp={<Links />} />} />
                 <Route path='/analytics' element={<ServerErrorWrapper comp={<Authenticate page={<Analytics />} />} />} />
                 <Route path='/blogs' element={<ServerErrorWrapper comp={<Blogs />} />} />

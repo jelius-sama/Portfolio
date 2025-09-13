@@ -36,24 +36,6 @@ export default function Home() {
     <Fragment>
       <StaticMetadata />
 
-      <script
-        type="application/ld+json"
-        data-aria-hidden="true"
-        aria-hidden="true"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Person",
-            name: "Jelius",
-            url: "https://jelius.dev",
-            sameAs: [
-              "https://www.linkedin.com/in/jelius-basumatary-485044339/",
-              "https://github.com/jelius-sama"
-            ]
-          }),
-        }}
-      />
-
       <HeroSection />
       <AboutSection />
       <SkillsSection />

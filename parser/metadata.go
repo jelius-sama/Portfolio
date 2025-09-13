@@ -132,17 +132,17 @@ func ParseMetadata(path string, d *[]byte) (string, error) {
 	return builder.String(), nil
 }
 
-func ParseStaticMetadataForPaths(paths []string) (string, error) {
+func ParseStaticMetadataForPaths(paths []string) (string, types.RouteMetadata, error) {
 	// Load static metadata
 	staticPath := filepath.Join(os.Getenv("ROOT_PATH"), "config", "static.route.json")
 	staticData, err := os.ReadFile(staticPath)
 	if err != nil {
-		return "", fmt.Errorf("failed to read static metadata file: %w", err)
+		return "", types.RouteMetadata{}, fmt.Errorf("failed to read static metadata file: %w", err)
 	}
 
 	var staticRoutes []types.RouteMetadata
 	if err := json.Unmarshal(staticData, &staticRoutes); err != nil {
-		return "", fmt.Errorf("failed to parse static metadata JSON: %w", err)
+		return "", types.RouteMetadata{}, fmt.Errorf("failed to parse static metadata JSON: %w", err)
 	}
 
 	// Filter routes for only explicitly provided paths
@@ -211,5 +211,5 @@ func ParseStaticMetadataForPaths(paths []string) (string, error) {
 		builder.WriteString(`>` + "\n")
 	}
 
-	return builder.String(), nil
+	return builder.String(), mergedMeta, nil
 }

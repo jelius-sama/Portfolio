@@ -192,7 +192,7 @@ func fetchBlogsFromDB(page, limit int, sortBy, order string) (BlogsResponse, err
 		go func(b *types.Blog) {
 			defer wg.Done()
 			path := fmt.Sprintf("/blog/%s", b.ID)
-			views, err := BlogViewsInternal(path)
+			views, err := PageViewsInternal(path)
 			if err != nil {
 				logger.TimedError("Error fetching views for blog", b.ID, ":", err)
 				// Views remains zero value on error

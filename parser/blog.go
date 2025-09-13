@@ -8,6 +8,7 @@ import (
 
 	"KazuFolio/api/handler"
 	"KazuFolio/types"
+	"KazuFolio/util"
 )
 
 // ssrBlogPage fetches the blog data, generates metadata HTML + hydration script.
@@ -152,17 +153,8 @@ func SSRBlogPage(fullPath string) (string, error, int) {
 		return "", fmt.Errorf("failed to marshal script payload: %w", err), http.StatusInternalServerError
 	}
 
-	scriptHTML := `<script id="__SERVER_DATA__" type="application/json">` + htmlEscape(scriptJSON) + `</script>`
+	scriptHTML := `<script id="__SERVER_DATA__" type="application/json">` + util.HTMLEscape(scriptJSON) + `</script>`
 
 	// Step 8: Return combined HTML
 	return scriptHTML + "\n" + metaHTML, nil, status
-}
-
-// htmlEscape makes sure the JSON inside the <script> doesn't break HTML parsing
-func htmlEscape(data []byte) string {
-	s := string(data)
-	s = strings.ReplaceAll(s, "<", "\\u003c")
-	s = strings.ReplaceAll(s, ">", "\\u003e")
-	s = strings.ReplaceAll(s, "&", "\\u0026")
-	return s
 }

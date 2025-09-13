@@ -472,6 +472,98 @@
         ]
     },
     {
+        "path": "/achievements",
+        "title": "Achievements | Jelius",
+        "meta": [
+            {
+                "name": "description",
+                "content": "A chronological showcase of my software development achievements, including academic milestones, professional projects, certifications, and awards."
+            },
+            {
+                "name": "application-name",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "name": "robots",
+                "content": "index, follow"
+            },
+            {
+                "name": "format-detection",
+                "content": "telephone=no"
+            },
+            {
+                "name": "apple-mobile-web-app-capable",
+                "content": "yes"
+            },
+            {
+                "name": "apple-mobile-web-app-title",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "name": "theme-color",
+                "content": "#000b11"
+            },
+            {
+                "name": "apple-mobile-web-app-status-bar-style",
+                "content": "default"
+            },
+            {
+                "property": "og:title",
+                "content": "Achievements | Jelius"
+            },
+            {
+                "property": "og:description",
+                "content": "A chronological showcase of my software development achievements, including academic milestones, professional projects, certifications, and awards."
+            },
+            {
+                "property": "og:url",
+                "content": "https://jelius.dev/achievements"
+            },
+            {
+                "property": "og:site_name",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "property": "og:image",
+                "content": "/assets/jelius.jpg"
+            },
+            {
+                "property": "og:type",
+                "content": "website"
+            },
+            {
+                "name": "twitter:card",
+                "content": "summary"
+            },
+            {
+                "name": "twitter:site",
+                "content": "@jelius_sama"
+            },
+            {
+                "name": "twitter:creator",
+                "content": "@jelius_sama"
+            },
+            {
+                "name": "twitter:title",
+                "content": "Achievements | Jelius"
+            },
+            {
+                "name": "twitter:description",
+                "content": "A chronological showcase of my software development achievements, including academic milestones, professional projects, certifications, and awards."
+            },
+            {
+                "name": "twitter:image",
+                "content": "/assets/jelius.jpg"
+            }
+        ],
+        "link": [
+            {
+                "rel": "canonical",
+                "href": "https://jelius.dev/achievements"
+            }
+        ]
+    },
+    {
         "path": "#not_found",
         "title": "Not Found | Jelius"
     },

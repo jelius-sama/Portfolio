@@ -66,7 +66,7 @@ func InternalErrorPage(w http.ResponseWriter, r *http.Request, msg *string) {
 		return
 	}
 
-	serverProps, err := parser.ParseStaticMetadataForPaths([]string{"*", "#internal_server_error"})
+	serverProps, _, err := parser.ParseStaticMetadataForPaths([]string{"*", "#internal_server_error"})
 	if err != nil {
 		http.Error(w, "Something went wrong!", http.StatusInternalServerError)
 		logger.Error("failed to parse metadata for server props:\n    " + err.Error())
@@ -123,7 +123,7 @@ func NotFoundPage(w http.ResponseWriter, r *http.Request, msg *string) {
 		return
 	}
 
-	serverProps, err := parser.ParseStaticMetadataForPaths([]string{"*", "#not_found"})
+	serverProps, _, err := parser.ParseStaticMetadataForPaths([]string{"*", "#not_found"})
 	if err != nil {
 		InternalErrorPage(w, r, util.AddrOf("Something went wrong!"))
 		logger.Error("failed to parse metadata for server props:\n    " + err.Error())

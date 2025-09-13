@@ -7,8 +7,8 @@ import (
 	"KazuFolio/db"
 )
 
-// BlogViewsInternal returns the number of visits for a given relative path.
-func BlogViewsInternal(path string) (uint, error) {
+// PageViewsInternal returns the number of visits for a given relative path.
+func PageViewsInternal(path string) (uint, error) {
 	databaseConn := db.Conn
 
 	query := `

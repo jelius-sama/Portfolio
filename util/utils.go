@@ -5,10 +5,19 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // AddrOf takes a value and returns its address as a pointer.
 func AddrOf[T any](literal T) *T { return &literal }
+
+func HTMLEscape(data []byte) string {
+	s := string(data)
+	s = strings.ReplaceAll(s, "<", "\\u003c")
+	s = strings.ReplaceAll(s, ">", "\\u003e")
+	s = strings.ReplaceAll(s, "&", "\\u0026")
+	return s
+}
 
 func IsValidPort(portStr string) bool {
 	port, err := strconv.Atoi(portStr)

@@ -37,7 +37,7 @@ export function useTimeAgo(dateString?: string): string | null {
     return value
 }
 
-export const formatDate = (dateString: string) => {
+export const formatDate = (dateInput: string | number) => {
     const options: Intl.DateTimeFormatOptions = {
         year: "numeric",
         month: "long",
@@ -45,7 +45,18 @@ export const formatDate = (dateString: string) => {
         hour: "2-digit",
         minute: "2-digit",
     }
-    return new Date(dateString).toLocaleDateString(undefined, options)
+
+    let date: Date
+
+    if (typeof dateInput === "number") {
+        // Treat input as Unix timestamp (seconds since epoch)
+        date = new Date(dateInput * 1000)
+    } else {
+        // Assume ISO 8601 string or similar
+        date = new Date(dateInput)
+    }
+
+    return date.toLocaleDateString(undefined, options)
 }
 
 export function formatViews(num: number): string {
