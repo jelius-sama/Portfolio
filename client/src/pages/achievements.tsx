@@ -128,7 +128,10 @@ export default function Achievements() {
             <AwardIcon absoluteStrokeWidth className="text-black" size={24} />
           </div>
           <h1 className="text-3xl font-bold text-white text-center mb-4">Achievements</h1>
-          <p className="text-gray-400 text-center mb-6">A chronological showcase of my software development achievements, including academic milestones, professional projects, certifications, and awards.</p>
+          <p className="text-gray-400 text-center mb-6 flex flex-col">
+            <span>A chronological record of my academic, professional, and personal achievements.</span>
+            <span>This page will be continuously updated as I progress through my journey.</span>
+          </p>
         </div>
 
         {/* Achievement Metadata */}
