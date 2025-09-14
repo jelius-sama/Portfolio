@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	"syscall"
 
 	"path/filepath"
 )
@@ -49,10 +48,11 @@ func GetAchievementsStatsInternal() AchievementsStats {
 		// Always trust mtime for UpdatedAt
 		stats.UpdatedAt = fi.ModTime().Unix()
 
+		// NOTE: Does not work reliably on every Linux Distribution.
 		// Try to extract a "creation-ish" time
-		if stat, ok := fi.Sys().(*syscall.Stat_t); ok && stat.Ctim.Sec != 0 {
-			stats.CreatedAt = stat.Ctim.Sec
-		}
+		// if stat, ok := fi.Sys().(*syscall.Stat_t); ok && stat.Ctim.Sec != 0 {
+		// 	stats.CreatedAt = stat.Ctim.Sec
+		// }
 	}
 
 	return stats
