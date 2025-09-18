@@ -118,22 +118,10 @@
                 "liveUrl": "https://pixelle.jelius.dev"
             },
             {
-                "id": "local-dex",
-                "title": "LocalDex",
-                "description": "NAS Client & Server, Full-Fledge NAS Software that lets you manage your contents in your NAS.",
-                "image": "/assets/local-dex.png",
-                "technologies": [
-                    "Go",
-                    "React",
-                    "SQLite"
-                ],
-                "codeUrl": "https://github.com/jelius-sama/LocalDex"
-            },
-            {
                 "id": "vps-watch-dog",
                 "title": "VPS Watch Dog",
-                "description": "A watch dog program that monitors your VPS's system usage and send alert emails.",
-                "image": "",
+                "description": "A watch dog program that monitors your VPS's system usage and alert via mail if usage is running high.",
+                "image": "/assets/VPSWatchDog.png",
                 "technologies": [
                     "Go",
                     "SMTP Protocol",
@@ -144,8 +132,8 @@
             {
                 "id": "storage-watch-dog",
                 "title": "Storage Watch Dog",
-                "description": "A program that watches a specific directory and if the storage space is running low notifies via mails.",
-                "image": "",
+                "description": "A program that watches a specific directory and if the storage space is running low alerts via mails.",
+                "image": "/assets/StorageWatchDog.png",
                 "technologies": [
                     "Go",
                     "SMTP Protocol"
@@ -156,7 +144,7 @@
                 "id": "aws-mail-parser",
                 "title": "AWSMailParser",
                 "description": "Polls your AWS SQS and when a new mail event is detected fetches that mail from S3 bucket and saves it to your maildir after parsing it.",
-                "image": "",
+                "image": "/assets/AWSMailParser.png",
                 "technologies": [
                     "Go",
                     "AWS",
@@ -197,8 +185,10 @@
             }
         },
         "logs": [
-            "[2025-07-16] INFO: Re-designing my Personal Portfolio site from scratch - Tags: Go/React, AWS EC2/Hosting, UI/UX Design",
-            "[2025-07-11] INFO: Better NAS Client: Building a Full-Fledge NAS Client - Tags: Go/React, Networking, Database"
+            "[2025-09-17] INFO: Build a program to fetch mail from S3, parse and save to your mail dir - Tags: Go, IMAP, IMF, Parsing",
+            "[2025-09-16] INFO: Built a Storage Watchdog program to watch over a directory's storage usage - Tags: Go, SMTP Protocol",
+            "[2025-09-15] INFO: Built a VPS Watchdog program to alert if VPS is running hot - Tags: Go, SMTP Protocol, POSIX API",
+            "[2025-07-16] INFO: Re-designing my Personal Portfolio site from scratch - Tags: Go/React, AWS EC2/Hosting, UI/UX Design"
         ],
         "linktree": [
             {
