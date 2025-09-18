@@ -1,5 +1,5 @@
 {
-    "version": "1.2.0",
+    "version": "1.2.1",
     "title": "Portfolio",
     "portfolio": {
         "first_name": "Jelius",
@@ -128,6 +128,43 @@
                     "SQLite"
                 ],
                 "codeUrl": "https://github.com/jelius-sama/LocalDex"
+            },
+            {
+                "id": "vps-watch-dog",
+                "title": "VPS Watch Dog",
+                "description": "A watch dog program that monitors your VPS's system usage and send alert emails.",
+                "image": "",
+                "technologies": [
+                    "Go",
+                    "SMTP Protocol",
+                    "POSIX API"
+                ],
+                "codeUrl": "https://github.com/jelius-sama/VPSWatchDog"
+            },
+            {
+                "id": "storage-watch-dog",
+                "title": "Storage Watch Dog",
+                "description": "A program that watches a specific directory and if the storage space is running low notifies via mails.",
+                "image": "",
+                "technologies": [
+                    "Go",
+                    "SMTP Protocol"
+                ],
+                "codeUrl": "https://github.com/jelius-sama/StorageWatchDog"
+            },
+            {
+                "id": "aws-mail-parser",
+                "title": "AWSMailParser",
+                "description": "Polls your AWS SQS and when a new mail event is detected fetches that mail from S3 bucket and saves it to your maildir after parsing it.",
+                "image": "",
+                "technologies": [
+                    "Go",
+                    "AWS",
+                    "IMF Protocol",
+                    "File Parsing",
+                    "IMAP Protocol"
+                ],
+                "codeUrl": "https://github.com/jelius-sama/AWSMailParser"
             }
         ],
         "links": {

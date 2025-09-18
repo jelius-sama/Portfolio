@@ -16,13 +16,15 @@ export function ProjectsSection() {
                     <TerminalWindow key={project.id} title={`project-${project.id}`} className="h-full">
                         <div className="flex flex-col h-full">
                             {/* Project Image/Mockup */}
-                            <div className="mb-4 bg-gray-800 rounded border border-orange-500/20 overflow-hidden">
-                                <img
-                                    src={project.image}
-                                    alt={project.title}
-                                    className="w-full aspect-video object-cover"
-                                />
-                            </div>
+                            {project.image.length > 0 && (
+                                <div className="mb-4 bg-gray-800 rounded border border-orange-500/20 overflow-hidden">
+                                    <img
+                                        src={project.image}
+                                        alt={project.title}
+                                        className="w-full aspect-video object-cover"
+                                    />
+                                </div>
+                            )}
 
                             {/* Project Info */}
                             <div className="flex-1">
