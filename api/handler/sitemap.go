@@ -28,6 +28,7 @@ func GenerateSitemap(w http.ResponseWriter, r *http.Request) {
 	// Static routes
 	urls := []urlEntry{
 		{Loc: baseURL + "/", LastMod: now, ChangeFreq: "daily", Priority: "1.0"},
+		{Loc: baseURL + "/achievements", LastMod: now, ChangeFreq: "daily", Priority: "1"},
 		{Loc: baseURL + "/blogs", LastMod: now, ChangeFreq: "daily", Priority: "0.8"},
 		{Loc: baseURL + "/links", LastMod: now, ChangeFreq: "monthly", Priority: "0.6"},
 	}
