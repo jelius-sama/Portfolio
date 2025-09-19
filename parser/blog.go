@@ -90,7 +90,7 @@ func SSRBlogPage(fullPath string) (string, error, int) {
 			},
 			{
 				Property: "og:image",
-				Content:  "/assets/jelius.jpg",
+				Content:  "/assets/compressed/jelius.webp",
 			},
 			{
 				Property: "og:type",
@@ -118,7 +118,7 @@ func SSRBlogPage(fullPath string) (string, error, int) {
 			},
 			{
 				Name:    "twitter:image",
-				Content: "/assets/jelius.jpg",
+				Content: "/assets/compressed/jelius.webp",
 			},
 		},
 		Link: []types.LinkTag{

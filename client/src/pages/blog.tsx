@@ -30,7 +30,7 @@ export function generateBlogMetadata(blog: Blog, fullPath: string): StaticRoute 
       { property: "og:description", content: blog.summary },
       { property: "og:url", content: "https://jelius.dev" + fullPath },
       { property: "og:site_name", content: "Jelius Basumatary" },
-      { property: "og:image", content: "/assets/jelius.jpg" },
+      { property: "og:image", content: "/assets/compressed/jelius.webp" },
       { property: "og:type", content: "article" },
 
       { name: "twitter:card", content: "summary" },
@@ -38,7 +38,7 @@ export function generateBlogMetadata(blog: Blog, fullPath: string): StaticRoute 
       { name: "twitter:creator", content: "@jelius_sama" },
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: blog.summary },
-      { name: "twitter:image", content: "/assets/jelius.jpg" },
+      { name: "twitter:image", content: "/assets/compressed/jelius.webp" },
     ],
     link: [
       { rel: "canonical", href: "https://jelius.dev" + fullPath }

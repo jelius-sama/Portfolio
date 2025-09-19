@@ -101,14 +101,14 @@
             }
         ],
         "pictures": [
-            "/assets/jelius.jpg"
+            "/assets/compressed/jelius.webp"
         ],
         "projects": [
             {
                 "id": "pixelle",
                 "title": "Pixelle",
                 "description": "An anime image gallery application with collections of illustrations and photography.",
-                "image": "/assets/project-pixelle.png",
+                "image": "/assets/compressed/project-pixelle.webp",
                 "technologies": [
                     "Next.js",
                     "TypeScript",
@@ -121,7 +121,7 @@
                 "id": "vps-watch-dog",
                 "title": "VPS Watch Dog",
                 "description": "A watch dog program that monitors your VPS's system usage and alert via mail if usage is running high.",
-                "image": "/assets/VPSWatchDog.png",
+                "image": "/assets/compressed/VPSWatchDog.webp",
                 "technologies": [
                     "Go",
                     "SMTP Protocol",
@@ -133,7 +133,7 @@
                 "id": "storage-watch-dog",
                 "title": "Storage Watch Dog",
                 "description": "A program that watches a specific directory and if the storage space is running low alerts via mails.",
-                "image": "/assets/StorageWatchDog.png",
+                "image": "/assets/compressed/StorageWatchDog.webp",
                 "technologies": [
                     "Go",
                     "SMTP Protocol"
@@ -144,7 +144,7 @@
                 "id": "aws-mail-parser",
                 "title": "AWSMailParser",
                 "description": "Polls your AWS SQS and when a new mail event is detected fetches that mail from S3 bucket and saves it to your maildir after parsing it.",
-                "image": "/assets/AWSMailParser.png",
+                "image": "/assets/compressed/AWSMailParser.webp",
                 "technologies": [
                     "Go",
                     "AWS",
@@ -176,12 +176,12 @@
             "jelius.dev": {
                 "username": "jelius.dev",
                 "link": "https://jelius.dev",
-                "qr_code_link": "/assets/jelius-dev-dark.png"
+                "qr_code_link": "/assets/compressed/jelius-dev-dark.webp"
             },
             "jelius.dev/links": {
                 "username": "jelius.dev/links",
                 "link": "https://jelius.dev/links",
-                "qr_code_link": "/assets/links.png"
+                "qr_code_link": "/assets/compressed/links.webp"
             }
         },
         "logs": [

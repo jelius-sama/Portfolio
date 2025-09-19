@@ -13,7 +13,7 @@
         "link": [
             {
                 "rel": "icon",
-                "href": "/assets/jelius.jpg"
+                "href": "/assets/compressed/jelius.webp"
             },
             {
                 "rel": "manifest",
@@ -249,7 +249,7 @@
             },
             {
                 "property": "og:image",
-                "content": "/assets/jelius.jpg"
+                "content": "/assets/compressed/jelius.webp"
             },
             {
                 "property": "og:type",
@@ -277,7 +277,7 @@
             },
             {
                 "name": "twitter:image",
-                "content": "/assets/jelius.jpg"
+                "content": "/assets/compressed/jelius.webp"
             }
         ],
         "link": [
@@ -341,7 +341,7 @@
             },
             {
                 "property": "og:image",
-                "content": "/assets/jelius.jpg"
+                "content": "/assets/compressed/jelius.webp"
             },
             {
                 "property": "og:type",
@@ -369,7 +369,7 @@
             },
             {
                 "name": "twitter:image",
-                "content": "/assets/jelius.jpg"
+                "content": "/assets/compressed/jelius.webp"
             }
         ],
         "link": [
@@ -433,7 +433,7 @@
             },
             {
                 "property": "og:image",
-                "content": "/assets/jelius.jpg"
+                "content": "/assets/compressed/jelius.webp"
             },
             {
                 "property": "og:type",
@@ -461,7 +461,7 @@
             },
             {
                 "name": "twitter:image",
-                "content": "/assets/jelius.jpg"
+                "content": "/assets/compressed/jelius.webp"
             }
         ],
         "link": [
@@ -525,7 +525,7 @@
             },
             {
                 "property": "og:image",
-                "content": "/assets/jelius.jpg"
+                "content": "/assets/compressed/jelius.webp"
             },
             {
                 "property": "og:type",
@@ -553,7 +553,7 @@
             },
             {
                 "name": "twitter:image",
-                "content": "/assets/jelius.jpg"
+                "content": "/assets/compressed/jelius.webp"
             }
         ],
         "link": [
@@ -625,7 +625,7 @@
             },
             {
                 "property": "og:image",
-                "content": "/assets/jelius.jpg"
+                "content": "/assets/compressed/jelius.webp"
             },
             {
                 "property": "og:type",
@@ -653,7 +653,7 @@
             },
             {
                 "name": "twitter:image",
-                "content": "/assets/jelius.jpg"
+                "content": "/assets/compressed/jelius.webp"
             }
         ],
         "link": [

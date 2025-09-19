@@ -2,7 +2,7 @@ const CACHE_NAME = "jelius-pwa-cache-v1";
 
 const urlsToCache = [
   "/",
-  "/assets/jelius.jpg",
+  "/assets/compressed/jelius.webp",
   "/assets/manifest.json",
   "/assets/icons/apple-icon-180.png",
   "/assets/icons/apple-splash-2048-2732.jpg",
@@ -38,52 +38,56 @@ const urlsToCache = [
   "/assets/icons/apple-splash-750-1334.jpg",
   "/assets/icons/apple-splash-1334-750.jpg",
   "/assets/icons/apple-splash-640-1136.jpg",
-  "/assets/icons/apple-splash-1136-640.jpg"
+  "/assets/icons/apple-splash-1136-640.jpg",
 ];
 
 // Install event — pre-cache important files
-self.addEventListener("install", event => {
+self.addEventListener("install", (event) => {
   self.skipWaiting(); // Force activation after install
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
-      .catch(err => console.error("Cache install failed", err))
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(urlsToCache))
+      .catch((err) => console.error("Cache install failed", err)),
   );
 });
 
 // Activate event — clean up old caches
-self.addEventListener("activate", event => {
+self.addEventListener("activate", (event) => {
   clients.claim(); // Take control of pages ASAP
   event.waitUntil(
-    caches.keys().then(cacheNames =>
+    caches.keys().then((cacheNames) =>
       Promise.all(
-        cacheNames.map(name => {
+        cacheNames.map((name) => {
           if (name !== CACHE_NAME) {
             return caches.delete(name);
           }
-        })
-      )
-    )
+        }),
+      ),
+    ),
   );
 });
 
 // Fetch event — try cache first, fall back to network
-self.addEventListener("fetch", event => {
+self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      return cached || fetch(event.request)
-        .then(response => {
-          const cloned = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, cloned);
-          });
-          return response;
-        })
-        .catch(() => {
-          // Optional: return a fallback offline page here
-        });
-    })
+    caches.match(event.request).then((cached) => {
+      return (
+        cached ||
+        fetch(event.request)
+          .then((response) => {
+            const cloned = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, cloned);
+            });
+            return response;
+          })
+          .catch(() => {
+            // Optional: return a fallback offline page here
+          })
+      );
+    }),
   );
 });
