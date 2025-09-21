@@ -141,6 +141,20 @@
                 "codeUrl": "https://github.com/jelius-sama/StorageWatchDog"
             },
             {
+                "id": "aws-mail-parser",
+                "title": "AWSMailParser",
+                "description": "Polls your AWS SQS and when a new mail event is detected fetches that mail from S3 bucket and saves it to your maildir after parsing it.",
+                "image": "/assets/compressed/AWSMailParser.webp",
+                "technologies": [
+                    "Go",
+                    "AWS",
+                    "IMF Protocol",
+                    "File Parsing",
+                    "IMAP Protocol"
+                ],
+                "codeUrl": "https://github.com/jelius-sama/AWSMailParser"
+            },
+            {
                 "id": "convert-cbz",
                 "title": "Convert CBZ",
                 "description": "A high-performance, concurrent tool for converting folders containing images into CBZ (Comic Book Archive) files. Built in Go for speed and reliability.",
@@ -183,7 +197,8 @@
             }
         },
         "logs": [
-            "[2025-09-17] INFO: Build a program to fetch mail from S3, parse and save to your mail dir - Tags: Go, IMAP, IMF, Parsing",
+            "[2025-09-21] INFO: Built a CLI App to convert a directory full of folders into CBZ Archives. - Tags: Go, Archive, Concurrency",
+            "[2025-09-17] INFO: Built a program to fetch mail from S3, parse and save to your mail dir - Tags: Go, IMAP, IMF, Parsing",
             "[2025-09-16] INFO: Built a Storage Watchdog program to watch over a directory's storage usage - Tags: Go, SMTP Protocol",
             "[2025-09-15] INFO: Built a VPS Watchdog program to alert if VPS is running hot - Tags: Go, SMTP Protocol, POSIX API",
             "[2025-07-16] INFO: Re-designing my Personal Portfolio site from scratch - Tags: Go/React, AWS EC2/Hosting, UI/UX Design"
