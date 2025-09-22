@@ -1,9 +1,18 @@
 import { TerminalWindow } from "@/components/ui/terminal-window"
 import { useConfig } from "@/contexts/config"
-import { toast } from "sonner"
 
 export function HeroSection() {
     const { app: { portfolio: me } } = useConfig()
+
+
+    const handleDownload = ({ url, filename }: { url: string, filename: string | null }) => {
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename || url.split("/").pop() || "download";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     return (
         <section id="home" className="min-h-screen w-full max-w-6xl text-center flex flex-col items-center justify-center mx-auto px-4 sm:px-6 pt-20">
@@ -25,7 +34,7 @@ export function HeroSection() {
             </div>
 
             <div className="flex flex-wrap gap-4 justify-center mb-8">
-                <button onClick={() => toast.info("CV Not Available")} className="px-6 py-3 bg-orange-500 text-black font-medium rounded hover:bg-orange-400 transition-colors">
+                <button onClick={() => handleDownload({ url: "https://jelius.dev/assets/README.pdf", filename: "CV.pdf" })} className="px-6 py-3 bg-orange-500 text-black font-medium rounded hover:bg-orange-400 transition-colors">
                     Download CV
                 </button>
                 <a href="#contact" className="px-6 py-3 border border-orange-500 text-orange-400 font-medium rounded hover:bg-orange-500/10 transition-colors">
