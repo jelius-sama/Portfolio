@@ -1,9 +1,16 @@
 import { TerminalWindow } from "@/components/ui/terminal-window"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 import { useConfig } from "@/contexts/config"
 
 export function HeroSection() {
     const { app: { portfolio: me } } = useConfig()
-
 
     const handleDownload = ({ url, filename }: { url: string, filename: string | null }) => {
         const link = document.createElement("a");
@@ -34,9 +41,35 @@ export function HeroSection() {
             </div>
 
             <div className="flex flex-wrap gap-4 justify-center mb-8">
-                <button onClick={() => handleDownload({ url: "https://jelius.dev/assets/README.pdf", filename: "CV.pdf" })} className="px-6 py-3 bg-orange-500 text-black font-medium rounded hover:bg-orange-400 transition-colors">
-                    Download CV
-                </button>
+                <Dialog>
+                    <DialogTrigger asChild={true}>
+                        <button className="px-6 py-3 bg-orange-500 text-black font-medium rounded hover:bg-orange-400 transition-colors">
+                            Download CV
+                        </button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Download</DialogTitle>
+                            <DialogDescription>
+                                Choose your preferred file format for download: Markdown or PDF.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="flex space-x-20 justify-center">
+                            {/* MD button with note */}
+                            <div className="flex flex-col items-start space-y-1">
+                                <span className="text-sm text-gray-500">*Preferred</span>
+                                <button onClick={() => handleDownload({ url: "https://jelius.dev/assets/README.md", filename: "CV.md" })} className="px-6 py-2 bg-orange-500 text-black font-medium rounded hover:bg-orange-400 transition-colors">Markdown</button>
+                            </div>
+
+                            {/* PDF button in its own flex-col to align properly */}
+                            <div className="flex flex-col items-center justify-end">
+                                <button onClick={() => handleDownload({ url: "https://jelius.dev/assets/README.pdf", filename: "CV.pdf" })} className="px-6 py-2 border border-orange-500 text-orange-400 font-medium rounded hover:bg-orange-500/10 transition-colors">PDF</button>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
                 <a href="#contact" className="px-6 py-3 border border-orange-500 text-orange-400 font-medium rounded hover:bg-orange-500/10 transition-colors">
                     Contact Info
                 </a>
