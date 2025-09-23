@@ -17,6 +17,7 @@ const queryClient = new QueryClient()
 
 const Home = lazy(() => import("@/pages/home"))
 const Achievements = lazy(() => import("@/pages/achievements"))
+const MusicEasterEgg = lazy(() => import("@/pages/music-easter-egg"))
 const Analytics = lazy(() => import("@/pages/analytics"))
 const ClientError = lazy(() => import("@/pages/error"))
 const InternalServerError = lazy(() => import("@/pages/internal-server-error"))
@@ -187,6 +188,7 @@ reactRoot.render(
               <Route path='/' element={<App />}>
                 <Route path='/' element={<ServerErrorWrapper comp={<Home />} />} />
                 <Route path='/achievements' element={<ServerErrorWrapper comp={<Achievements />} />} />
+                <Route path='/music' element={<ServerErrorWrapper comp={<MusicEasterEgg />} />} />
                 <Route path='/links' element={<ServerErrorWrapper comp={<Links />} />} />
                 <Route path='/analytics' element={<ServerErrorWrapper comp={<Authenticate page={<Analytics />} />} />} />
                 <Route path='/blogs' element={<ServerErrorWrapper comp={<Blogs />} />} />

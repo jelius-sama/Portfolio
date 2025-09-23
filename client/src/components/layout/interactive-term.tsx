@@ -356,8 +356,20 @@ export function InteractiveTerminal() {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
             e.preventDefault()
-            void executeCommand(command)
-            setCommand("")
+
+            switch (command) {
+                // INFO: Easter eggs
+                case "music":
+                    setCommand("")
+                    sessionStorage.setItem('did_come_from_terminal', 'yes');
+                    navigate("/music")
+                    break
+
+                default:
+                    void executeCommand(command)
+                    setCommand("")
+                    break
+            }
         }
 
         if (e.ctrlKey && e.key.toLowerCase() === "c") {

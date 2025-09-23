@@ -572,6 +572,98 @@
         "title": "Internal Server Error | Jelius"
     },
     {
+        "path": "#music_easter_egg",
+        "title": "Music | Jelius",
+        "meta": [
+            {
+                "name": "description",
+                "content": "Discovered a hidden Easter egg page featuring my top 3 favorite songs – a personal playlist packed with meaning, memories, and great vibes."
+            },
+            {
+                "name": "application-name",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "name": "robots",
+                "content": "noindex, nofollow"
+            },
+            {
+                "name": "format-detection",
+                "content": "telephone=no"
+            },
+            {
+                "name": "apple-mobile-web-app-capable",
+                "content": "yes"
+            },
+            {
+                "name": "apple-mobile-web-app-title",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "name": "theme-color",
+                "content": "#000b11"
+            },
+            {
+                "name": "apple-mobile-web-app-status-bar-style",
+                "content": "default"
+            },
+            {
+                "property": "og:title",
+                "content": "Music | Jelius"
+            },
+            {
+                "property": "og:description",
+                "content": "Discovered a hidden Easter egg page featuring my top 3 favorite songs – a personal playlist packed with meaning, memories, and great vibes."
+            },
+            {
+                "property": "og:url",
+                "content": "https://jelius.dev/music"
+            },
+            {
+                "property": "og:site_name",
+                "content": "Jelius Basumatary"
+            },
+            {
+                "property": "og:image",
+                "content": "/assets/compressed/jelius.webp"
+            },
+            {
+                "property": "og:type",
+                "content": "website"
+            },
+            {
+                "name": "twitter:card",
+                "content": "summary"
+            },
+            {
+                "name": "twitter:site",
+                "content": "@jelius_sama"
+            },
+            {
+                "name": "twitter:creator",
+                "content": "@jelius_sama"
+            },
+            {
+                "name": "twitter:title",
+                "content": "Music | Jelius"
+            },
+            {
+                "name": "twitter:description",
+                "content": "Discovered a hidden Easter egg page featuring my top 3 favorite songs – a personal playlist packed with meaning, memories, and great vibes."
+            },
+            {
+                "name": "twitter:image",
+                "content": "/assets/compressed/jelius.webp"
+            }
+        ],
+        "link": [
+            {
+                "rel": "canonical",
+                "href": "https://jelius.dev/music"
+            }
+        ]
+    },
+    {
         "path": "/analytics",
         "title": "Analytics | Jelius",
         "meta": [

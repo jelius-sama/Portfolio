@@ -12,7 +12,7 @@ var config types.RobotsConfig = types.RobotsConfig{
 		{
 			UserAgent: "*",
 			Allow:     []string{"/"},
-			Disallow:  []string{"/analytics"},
+			Disallow:  []string{"/analytics", "/music"},
 		},
 	},
 	Host: "https://jelius.dev",
