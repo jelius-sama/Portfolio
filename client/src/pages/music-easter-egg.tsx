@@ -61,7 +61,7 @@ function EasterEggFooter() {
       {/* Main Footer Content */}
       <div className="text-center space-y-2">
         {/* Music Icon and Message */}
-        <div className="flex items-start justify-center md:gap-2 text-gray-300">
+        <div className="flex items-start justify-center gap-2 text-gray-300">
           <Music className="text-orange-400" size={20} />
           <span className="font-mono text-sm">
             Music is the soundtrack to life's debugging sessions

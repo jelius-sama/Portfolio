@@ -13,7 +13,7 @@ interface MusicPlayerProps {
  * Known Issues:
  * 
  * Safari:
- * - Audio playback is unreliable — the track often stops prematurely or loops back
+ * - Audio playback is unreliable — the track often stops prematurely and loops back
  *   near the beginning (around the first ~5 seconds).
  * - The `audio.duration` property frequently returns `NaN` or `0`, preventing
  *   accurate display of total track length.
