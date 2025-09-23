@@ -9,11 +9,21 @@ interface MusicPlayerProps {
     duration?: string;
 }
 
-// NOTE: Lot's of issues in Safari - Apple's toy browser
-// -> While playing, mostly the song never plays till end, it just stops playing or starts to loop the same sequence of song mostly from start till around 5 sec.
-// -> I could not get it to display the audio duration
+/**
+ * Known Issues:
+ * 
+ * Safari:
+ * - Audio playback is unreliable — the track often stops prematurely or loops back
+ *   near the beginning (around the first ~5 seconds).
+ * - The `audio.duration` property frequently returns `NaN` or `0`, preventing
+ *   accurate display of total track length.
+ * 
+ * Chrome & Firefox:
+ * - Playback seems limited to the initially buffered portion of the file.
+ *   After the buffered segment finishes, playback stops and resets to the "idle" state.
+ * - This behavior suggests incomplete or partial loading of the audio source.
+ */
 
-// INFO: Chrome and Firefox probably JUST WORKS.
 export default function MusicPlayer({
     title,
     artist,
@@ -48,10 +58,9 @@ export default function MusicPlayer({
         };
 
         const handleCanPlay = () => {
-            // Remove auto-play logic for Safari compatibility
-            if (playerState === 'loading') {
-                // Don't auto-play, let user interaction handle it
-            }
+            // Safari-specific note:
+            // Avoid triggering autoplay here; Safari blocks programmatic playback
+            // without a direct user gesture. Leave playback initiation to handlePlayPause().
         };
 
         audio.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -75,7 +84,8 @@ export default function MusicPlayer({
             if (playerState === 'idle' || playerState === 'paused') {
                 if (playerState === 'idle') {
                     setPlayerState('loading');
-                    // Safari fix: Don't call load(), just play directly
+                    // Safari compatibility: don't explicitly call audio.load(),
+                    // just play directly after user interaction.
                     const playPromise = audio.play();
                     if (playPromise !== undefined) {
                         await playPromise;
@@ -211,4 +221,3 @@ export default function MusicPlayer({
         </div>
     );
 }
-
