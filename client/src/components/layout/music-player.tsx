@@ -139,7 +139,7 @@ export default function MusicPlayer({
 
     return (
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 w-full mx-auto">
-            <audio ref={audioRef} src={audioSrc} preload="none" />
+            <audio ref={audioRef} src={audioSrc} preload="auto" />
 
             <div className="flex items-center gap-4">
                 {/* Album Art */}
