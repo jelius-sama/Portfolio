@@ -17,14 +17,6 @@ interface MusicPlayerProps {
  *   near the beginning (around the first ~5 seconds).
  * - The `audio.duration` property frequently returns `NaN` or `0`, preventing
  *   accurate display of total track length.
- * 
- * Firefox:
- * - Playback seems limited to the initially buffered portion of the file.
- *   After the buffered segment finishes, playback stops and resets to the "idle" state.
- * - This behavior suggests incomplete or partial loading of the audio source.
- *
- * Chrome:
- * - JUST WORKS
  */
 
 export default function MusicPlayer({
