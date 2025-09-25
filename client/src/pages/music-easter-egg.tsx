@@ -23,7 +23,7 @@ export default function Achievements() {
 
       <section className="max-w-6xl mx-auto pt-20 px-4 sm:px-6 font-mono flex flex-col w-full h-screen">
         <h2 className="text-white text-2xl font-bold">Easter egg</h2>
-        <p className="text-muted-foreground text-md mb-6">My top 3 favorite songs</p>
+        <p className="text-muted-foreground text-md mb-6">My top 4 favorite songs</p>
 
         <div className="w-full flex flex-col gap-y-4">
           <MusicPlayer
@@ -51,7 +51,7 @@ export default function Achievements() {
             title="ハレハレヤ | Harehare Ya - mix ver."
             artist="Kityod x keita x sou"
             albumArt="/assets/easter eggs/harehareya.jpg"
-            audioSrc="/assets/easter eggs/[Lyrics] 《ハレハレヤ》Harehare Ya mix ver. [ Kityod x keita x sou ].mp3"
+            audioSrc="/assets/easter eggs/Harehare Ya mix ver.mp3"
           />
         </div>
 
