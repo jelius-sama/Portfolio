@@ -47,6 +47,12 @@ export default function Achievements() {
             audioSrc="/assets/easter eggs/ref_rain.mp3"
           />
 
+          <MusicPlayer
+            title="ハレハレヤ | Harehare Ya - mix ver."
+            artist="Kityod x keita x sou"
+            albumArt="/assets/easter eggs/harehareya.jpg"
+            audioSrc="/assets/easter eggs/[Lyrics] 《ハレハレヤ》Harehare Ya mix ver. [ Kityod x keita x sou ].mp3"
+          />
         </div>
 
         <Footer className="mt-auto max-w-6xl mx-auto px-4 sm:px-6 py-8" leading={<EasterEggFooter />} trailing={<p className="mt-1 text-gray-600">Thanks for finding this hidden gem 🎵</p>} />
