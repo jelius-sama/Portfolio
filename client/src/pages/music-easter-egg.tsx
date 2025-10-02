@@ -8,6 +8,39 @@ import { TerminalWindow } from "@/components/ui/terminal-window"
 const NotFoundPage = lazy(() => import("@/pages/not-found"))
 const MusicPlayer = lazy(() => import("@/components/layout/music-player"))
 
+const MUSICS = [
+  {
+    title: "Sun",
+    artist: "ヨルシカ",
+    albumArt: "/assets/easter eggs/600x600bb-60.jpg",
+    audioSrc: "/assets/easter eggs/Yorushika - Sun.mp3",
+  },
+  {
+    title: "アンコール",
+    artist: "YOASOBI",
+    albumArt: "/assets/easter eggs/encore.jpg",
+    audioSrc: "/assets/easter eggs/アンコール.mp3",
+  },
+  {
+    title: "だから僕は音楽を辞めた",
+    artist: "ヨルシカ",
+    albumArt: "/assets/easter eggs/だから僕は音楽を辞めた.jpg",
+    audioSrc: "/assets/easter eggs/だから僕は音楽を辞めた.mp3",
+  },
+  {
+    title: "Ref：rain",
+    artist: "Aimer",
+    albumArt: "/assets/easter eggs/ref_rain.jpg",
+    audioSrc: "/assets/easter eggs/ref_rain.mp3",
+  },
+  {
+    title: "ハレハレヤ | Harehare Ya - mix ver.",
+    artist: "Kityod x keita x sou",
+    albumArt: "/assets/easter eggs/harehareya.jpg",
+    audioSrc: "/assets/easter eggs/Harehare Ya mix ver.mp3",
+  }
+]
+
 export default function Achievements() {
   const location = useLocation()
   const [shouldAllow, setShouldAllow] = useState(false)
@@ -23,36 +56,10 @@ export default function Achievements() {
 
       <section className="max-w-6xl mx-auto pt-20 px-4 sm:px-6 font-mono flex flex-col w-full h-screen">
         <h2 className="text-white text-2xl font-bold">Easter egg</h2>
-        <p className="text-muted-foreground text-md mb-6">My top 4 favorite songs</p>
+        <p className="text-muted-foreground text-md mb-6">My top {MUSICS.length} favorite songs</p>
 
         <div className="w-full flex flex-col gap-y-4">
-          <MusicPlayer
-            title="だから僕は音楽を辞めた"
-            artist="ヨルシカ"
-            albumArt="/assets/easter eggs/だから僕は音楽を辞めた.jpg"
-            audioSrc="/assets/easter eggs/だから僕は音楽を辞めた.mp3"
-          />
-
-          <MusicPlayer
-            title="アンコール"
-            artist="YOASOBI"
-            albumArt="/assets/easter eggs/encore.jpg"
-            audioSrc="/assets/easter eggs/アンコール.mp3"
-          />
-
-          <MusicPlayer
-            title="Ref：rain"
-            artist="Aimer"
-            albumArt="/assets/easter eggs/ref_rain.jpg"
-            audioSrc="/assets/easter eggs/ref_rain.mp3"
-          />
-
-          <MusicPlayer
-            title="ハレハレヤ | Harehare Ya - mix ver."
-            artist="Kityod x keita x sou"
-            albumArt="/assets/easter eggs/harehareya.jpg"
-            audioSrc="/assets/easter eggs/Harehare Ya mix ver.mp3"
-          />
+          {MUSICS.map(music => <MusicPlayer key={music.title} {...music} />)}
         </div>
 
         <Footer className="mt-auto max-w-6xl mx-auto px-4 sm:px-6 py-8" leading={<EasterEggFooter />} trailing={<p className="mt-1 text-gray-600">Thanks for finding this hidden gem 🎵</p>} />
