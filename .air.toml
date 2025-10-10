@@ -5,9 +5,9 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./tmp/Portfolio"
-  cmd = "go build -o ./tmp/Portfolio ./cmd/"
+  cmd = "make dev_build"
   delay = 1000
-  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  exclude_dir = ["assets", "tmp", "vendor", "testdata", "client", "bin", "build"]
   exclude_file = []
   exclude_regex = ["_test.go"]
   exclude_unchanged = false

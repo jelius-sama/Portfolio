@@ -18,7 +18,7 @@ PORT := $(shell \
 BIN_DIR := ./bin
 ENV := production
 
-.PHONY: build dev archive_prod
+.PHONY: build dev_build dev archive_prod
 
 build:
 	(cd client && bun run build)
@@ -28,11 +28,19 @@ build:
 		    -X main.Environment=$(ENV) \
 		    -X main.Home=$(HOME_PATH) \
 		    -X main.Host=$(HOST) \
-		    -X main.DevPort=$(DEV_PORT) \
 		    -X main.Version=$(VERSION) \
 		    -X main.ReverseProxy="$(IS_REVERSE_PROXIED)" \
 		    -X main.ProxyPort=$(PORT)" \
 		    -trimpath -buildvcs=false -o $(BIN_DIR)/$(APP_NAME)-$(VERSION) ./cmd
+
+dev_build:
+	CGO_ENABLED=0 go build -ldflags "\
+		    -s -w \
+		    -X main.Environment=development \
+		    -X main.Host=$(HOST) \
+		    -X main.DevPort=$(DEV_PORT) \
+		    -X main.Version=$(VERSION)" \
+		    -trimpath -buildvcs=false -o ./tmp/$(APP_NAME) ./cmd
 
 dev:
 	@echo "Starting development servers..."
