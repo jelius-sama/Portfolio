@@ -63,6 +63,7 @@ func init() {
 	os.Setenv("ROOT_PATH", filepath.Dir(filepath.Dir(exePath)))
 	os.Setenv("version", Version)
 	os.Setenv("env", Environment)
+	logger.Configure("env", "development")
 	os.Setenv("home", Home)
 	os.Setenv("host", Host)
 	os.Setenv("db_file", filepath.Join(Home, "/portfolio.db"))
