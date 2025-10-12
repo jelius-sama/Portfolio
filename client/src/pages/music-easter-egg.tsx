@@ -10,6 +10,12 @@ const MusicPlayer = lazy(() => import("@/components/layout/music-player"))
 
 const MUSICS = [
   {
+    title: "JANE DOE",
+    artist: "Kenshi Yonezu, Hikaru Utada",
+    albumArt: "/assets/easter eggs/jane doe.webp",
+    audioSrc: "/assets/easter eggs/JANE DOE.mp3",
+  },
+  {
     title: "Sun",
     artist: "ヨルシカ",
     albumArt: "/assets/easter eggs/600x600bb-60.jpg",
@@ -38,7 +44,7 @@ const MUSICS = [
     artist: "Kityod x keita x sou",
     albumArt: "/assets/easter eggs/harehareya.jpg",
     audioSrc: "/assets/easter eggs/Harehare Ya mix ver.mp3",
-  }
+  },
 ]
 
 export default function Achievements() {
