@@ -1,6 +1,6 @@
 import { TerminalWindow } from "@/components/ui/terminal-window"
 import { LinkCard } from "@/components/layout/link-card"
-import { Github, Linkedin, Twitter, Mail, FileText, Code, Rss, Youtube, Instagram, Briefcase as Fiverr } from "lucide-react"
+import { Github, Linkedin, Twitter, Mail, FileText, Code, Rss, Youtube, Instagram, Briefcase as Freelance } from "lucide-react"
 import { useConfig } from "@/contexts/config"
 import { type JSX, Fragment, useEffect } from "react"
 import { StaticMetadata } from "@/contexts/metadata"
@@ -9,7 +9,7 @@ import { toast } from "sonner"
 import { Footer } from "@/components/ui/footer"
 
 const iconMap: Record<string, JSX.Element> = {
-  Fiverr: <Fiverr size={20} />,
+  Freelance: <Freelance size={20} />,
   Github: <Github size={20} />,
   Linkedin: <Linkedin size={20} />,
   Code: <Code size={20} />,

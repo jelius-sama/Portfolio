@@ -218,10 +218,10 @@
                 "icon": "Github"
             },
             {
-                "title": "Fiverr",
+                "title": "Freelance",
                 "description": "Hire me for freelance projects and collaborations",
-                "url": "http://www.fiverr.com/s/99akgjK",
-                "icon": "Fiverr"
+                "url": "mailto:contact@jelius.dev?subject=Freelance%20Project%20Inquiry",
+                "icon": "Freelance"
             },
             {
                 "title": "LinkedIn",
