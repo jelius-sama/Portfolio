@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"KazuFolio/db"
-	"KazuFolio/logger"
 	"KazuFolio/types"
+	"github.com/jelius-sama/logger"
 )
 
 type BlogsResponse struct {

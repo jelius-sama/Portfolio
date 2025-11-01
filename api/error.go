@@ -1,13 +1,13 @@
 package api
 
 import (
-	"KazuFolio/logger"
 	"KazuFolio/parser"
 	"KazuFolio/types"
 	"KazuFolio/util"
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/jelius-sama/logger"
 	"net/http"
 	"os"
 )

@@ -1,8 +1,8 @@
 package api
 
 import (
-	"KazuFolio/logger"
 	"fmt"
+	"github.com/jelius-sama/logger"
 	"net/http"
 	"strings"
 )

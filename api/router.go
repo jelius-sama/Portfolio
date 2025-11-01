@@ -3,12 +3,12 @@ package api
 import (
 	vars "KazuFolio"
 	"KazuFolio/api/handler"
-	"KazuFolio/logger"
 	"KazuFolio/parser"
 	"KazuFolio/types"
 	"KazuFolio/util"
 	"bytes"
 	"fmt"
+	"github.com/jelius-sama/logger"
 	"io/fs"
 	"mime"
 	"net/http"

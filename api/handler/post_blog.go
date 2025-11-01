@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"KazuFolio/db"
-	"KazuFolio/logger"
 	"KazuFolio/types"
 	"KazuFolio/util"
+	"github.com/jelius-sama/logger"
 )
 
 func generateBlogID() string {

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"KazuFolio/logger"
+	"github.com/jelius-sama/logger"
 )
 
 func SaveAnalytics(w http.ResponseWriter, r *http.Request) {

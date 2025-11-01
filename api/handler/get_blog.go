@@ -7,9 +7,9 @@ import (
 	"os"
 
 	"KazuFolio/db"
-	"KazuFolio/logger"
 	"KazuFolio/types"
 	"errors"
+	"github.com/jelius-sama/logger"
 	"path/filepath"
 	"regexp"
 )

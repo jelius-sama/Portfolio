@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"KazuFolio/logger"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"github.com/jelius-sama/logger"
 	"net/http"
 	"sync"
 	"time"
