@@ -18,7 +18,7 @@ PORT := $(shell \
 BIN_DIR := ./bin
 ENV := production
 
-.PHONY: build dev_build dev archive_prod
+.PHONY: build dev_build dev archive_prod clean
 
 build:
 	(cd client && bun run build)
@@ -80,6 +80,11 @@ INCLUDE_FILES = \
 	README.md \
 
 archive_prod:
+	@make clean
 	@make build -B
 	@mkdir -p ./build
 	@tar -czf ./build/$(APP_NAME)-$(VERSION).tar.gz $(INCLUDE_FILES)
+
+clean:
+	@rm -rf ./build
+	@rm -rf $(BIN_DIR)
