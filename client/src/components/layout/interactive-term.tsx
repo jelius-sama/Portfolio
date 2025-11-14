@@ -456,12 +456,17 @@ export function InteractiveTerminal() {
                     )}
                     <input
                         ref={inputRef}
-                        type="text"
-                        value={pendingSudoCommand ? "∙".repeat(command.length) : command}
+                        type={pendingSudoCommand && !CSS.supports("-webkit-text-security", "disc") ? "password" : "text"}
+                        value={command}
                         onChange={(e) => setCommand(e.target.value)}
                         onKeyDown={handleKeyDown}
                         className="flex-1 bg-transparent text-white outline-none caret-orange-400"
-                        spellCheck="false"
+                        style={
+                            CSS.supports("-webkit-text-security", "disc") && pendingSudoCommand
+                                ? { WebkitTextSecurity: "disc" } as React.CSSProperties
+                                : undefined
+                        }
+                        spellCheck={false}
                         autoCapitalize="off"
                         autoComplete="off"
                         aria-label="Terminal command input"
