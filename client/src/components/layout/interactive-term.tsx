@@ -457,7 +457,7 @@ export function InteractiveTerminal() {
                     <input
                         ref={inputRef}
                         type="text"
-                        value={command}
+                        value={pendingSudoCommand ? "∙".repeat(command.length) : command}
                         onChange={(e) => setCommand(e.target.value)}
                         onKeyDown={handleKeyDown}
                         className="flex-1 bg-transparent text-white outline-none caret-orange-400"
