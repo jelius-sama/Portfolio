@@ -3,7 +3,7 @@ module KazuFolio
 go 1.24.5
 
 require (
-	github.com/jelius-sama/logger v1.3.0
+	github.com/jelius-sama/logger v1.4.4
 	github.com/shirou/gopsutil/v3 v3.24.5
 	modernc.org/sqlite v1.38.0
 )

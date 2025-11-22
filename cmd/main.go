@@ -12,7 +12,9 @@ import (
 	_ "modernc.org/sqlite"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 )
 
 var (
@@ -63,7 +65,13 @@ func init() {
 	os.Setenv("ROOT_PATH", filepath.Dir(filepath.Dir(exePath)))
 	os.Setenv("version", Version)
 	os.Setenv("env", Environment)
-	logger.Configure("env", "development", nil)
+	logger.Configure(logger.Cnf{
+		IsDev: logger.IsDev{
+			EnvironmentVariable: logger.StringPtr("env"),
+			ExpectedValue:       logger.StringPtr("development"),
+		},
+		UseSyslog: true,
+	})
 	os.Setenv("home", Home)
 	os.Setenv("host", Host)
 	os.Setenv("db_file", filepath.Join(Home, "/portfolio.db"))
@@ -76,6 +84,17 @@ func init() {
 	if err = db.InitializeSchema(db.Conn); err != nil {
 		logger.Panic(err)
 	}
+}
+
+func initGracefulShutdown(stop chan struct{}) {
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+
+	go func() {
+		sig := <-sigs
+		logger.Warning("Received signal: " + sig.String() + ". Shutting down gracefully…")
+		close(stop) // Tell main() to exit cleanly
+	}()
 }
 
 func fileExists(filePath string) bool {
@@ -98,6 +117,9 @@ type ServerResp struct {
 
 // TODO: Implement automatic cache purge when a new build is detected.
 func main() {
+	stop := make(chan struct{})
+	initGracefulShutdown(stop)
+
 	defer db.Conn.Close()
 
 	// INFO:: startServer checks the current environment configuration.
@@ -203,17 +225,31 @@ func main() {
 		return <-respChan, fallbackPort
 	}
 
-	if serverResp, port := startServer(); serverResp.Http != nil || serverResp.Https != nil {
-		if serverResp.Http != nil {
-			if vars.ReverseProxy.StatementValid == true {
-				logger.Error("Server failed behind reverse proxy on port " + port + ": " + serverResp.Http.Error())
-			} else {
-				logger.Error("HTTP server failed on port " + port + ":\n" + serverResp.Http.Error())
+	go func() {
+		if serverResp, port := startServer(); serverResp.Http != nil || serverResp.Https != nil {
+			if serverResp.Http != nil {
+				if vars.ReverseProxy.StatementValid == true {
+					logger.Error("Server failed behind reverse proxy on port " + port + ": " + serverResp.Http.Error())
+				} else {
+					logger.Error("HTTP server failed on port " + port + ":\n" + serverResp.Http.Error())
+				}
 			}
+			if serverResp.Https != nil {
+				logger.Error("HTTPS server failed on port " + port + ":\n" + serverResp.Https.Error())
+			}
+			logger.Panic("One or more servers failed to start.")
 		}
-		if serverResp.Https != nil {
-			logger.Error("HTTPS server failed on port " + port + ":\n" + serverResp.Https.Error())
-		}
-		logger.Panic("One or more servers failed to start.")
-	}
+	}()
+
+	<-stop
+
+	logger.Configure(logger.Cnf{
+		IsDev: logger.IsDev{
+			EnvironmentVariable: logger.StringPtr("env"),
+			ExpectedValue:       logger.StringPtr("development"),
+		},
+		UseSyslog: false,
+	})
+	logger.Okay("Server successfully shutdown.")
+	return
 }
