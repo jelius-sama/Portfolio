@@ -11,8 +11,8 @@ github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e h1:ijClszYn+mADRFY17k
 github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e/go.mod h1:boTsfXsheKC2y+lKOCMpSfarhxDeIzfZG1jqGcPl3cA=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/jelius-sama/logger v1.4.4 h1:L54BmYwyVE5YVOpSbiu6ZenIMzbqZc73XT8K+lg/y7w=
-github.com/jelius-sama/logger v1.4.4/go.mod h1:KoOqIZzGX+t5q3qoDaiXA70Grpc1E1xixyE8T9r+i/M=
+github.com/jelius-sama/logger v1.4.5 h1:Ru3UwmlWh88yVEEp/SQfExi9i7GomHTvMwkS/niARsA=
+github.com/jelius-sama/logger v1.4.5/go.mod h1:KoOqIZzGX+t5q3qoDaiXA70Grpc1E1xixyE8T9r+i/M=
 github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 h1:6E+4a0GO5zZEnZ81pIr0yLvtUWk2if982qA3F3QD6H4=
 github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0/go.mod h1:zJYVVT2jmtg6P3p1VtQj7WsuWi/y4VnjVBn7F8KPB3I=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
