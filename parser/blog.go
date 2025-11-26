@@ -16,7 +16,7 @@ func SSRBlogPage(fullPath string) (string, error, int) {
 	// Step 1: Extract blog ID from the path
 	id := strings.TrimPrefix(fullPath, "/blog/")
 	if id == "" {
-		return "", fmt.Errorf("no blog ID found in path"), http.StatusBadRequest
+		return "", fmt.Errorf("no blog ID found in path"), http.StatusNotFound
 	}
 
 	// Step 2: Call the internal API to get the blog data

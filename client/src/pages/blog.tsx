@@ -262,7 +262,6 @@ export default function BlogPostPage() {
           </TerminalWindow>
         )}
 
-
         <Footer className="mt-12" leading={
           <div>
             Share this post:{" "}

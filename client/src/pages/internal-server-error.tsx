@@ -1,6 +1,6 @@
 import { TerminalWindow } from "@/components/ui/terminal-window"
 import { Home, Mail, RefreshCw, AlertTriangle } from "lucide-react"
-import { Fragment } from "react"
+import { Fragment, useEffect } from "react"
 import { useConfig } from "@/contexts/config"
 import { Link } from "react-router-dom"
 import { useQuery } from '@tanstack/react-query'
@@ -16,6 +16,13 @@ export default function ServerErrorPage() {
     "Contact system administrator if issue persists",
   ]
   const { app } = useConfig()
+
+  useEffect(() => {
+    const event = new CustomEvent("PageLoaded", {
+      detail: { pathname: window.location.pathname },
+    });
+    window.dispatchEvent(event);
+  }, []);
 
   const { isPending, error, data } = useQuery({
     queryKey: ['latestCommit'],

@@ -1,6 +1,6 @@
 import { TerminalWindow } from "@/components/ui/terminal-window"
 import { Home, LinkIcon } from "lucide-react"
-import { Fragment } from "react"
+import { Fragment, useEffect } from "react"
 import { PathBasedMetadata } from "@/contexts/metadata"
 import { useLocation, Link } from "react-router-dom"
 
@@ -11,6 +11,13 @@ export const suggestions = [
 
 export default function NotFoundPage() {
   const location = useLocation()
+
+  useEffect(() => {
+    const event = new CustomEvent("PageLoaded", {
+      detail: { pathname: window.location.pathname },
+    });
+    window.dispatchEvent(event);
+  }, []);
 
   return (
     <Fragment>
