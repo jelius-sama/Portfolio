@@ -4,6 +4,7 @@ import (
     "github.com/jelius-sama/logger"
     "net/http"
     "os/exec"
+    "strings"
 )
 
 type logWriter struct {
@@ -13,6 +14,16 @@ type logWriter struct {
 func (lw logWriter) Write(p []byte) (int, error) {
     lw.fn(string(p))
     return len(p), nil
+}
+
+func fuzzySignalTerminated(s string) bool {
+    s = strings.ToLower(s)
+    s = strings.ReplaceAll(s, "\t", " ")
+    s = strings.ReplaceAll(s, "\n", " ")
+    for strings.Contains(s, "  ") {
+        s = strings.ReplaceAll(s, "  ", " ")
+    }
+    return strings.Contains(s, "signal") && strings.Contains(s, "terminated")
 }
 
 // TODO: Send Email to admin for approval
@@ -37,7 +48,9 @@ func UpdateServer(w http.ResponseWriter, r *http.Request) {
     go func() {
         // If Wait returns, it means update script exited instead of killing us.
         if err := cmd.Wait(); err != nil {
-            logger.Error("Update script ended unexpectedly:", err)
+            if !fuzzySignalTerminated(err.Error()) {
+                logger.Error("Update script ended unexpectedly:", err)
+            }
         } else {
             logger.Error("Update script ended unexpectedly without killing process")
         }
