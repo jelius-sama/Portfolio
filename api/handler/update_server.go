@@ -1,31 +1,49 @@
 package handler
 
 import (
-	"net/http"
-	"os"
-	"os/exec"
-	"path/filepath"
+    "github.com/jelius-sama/logger"
+    "net/http"
+    "os/exec"
 )
+
+type logWriter struct {
+    fn func(...any)
+}
+
+func (lw logWriter) Write(p []byte) (int, error) {
+    lw.fn(string(p))
+    return len(p), nil
+}
 
 // TODO: Send Email to admin for approval
 func UpdateServer(w http.ResponseWriter, r *http.Request) {
-	if !VerifySudo(w, r) {
-		return
-	}
+    if !VerifySudo(w, r) {
+        return
+    }
 
-	// Execute update script (in background)
-	cmd := exec.Command("bash", filepath.Join(os.Getenv("home"), "/update_prod.sh"))
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+    // Execute update script (in background)
+    cmd := exec.Command("update-prod")
 
-	if err := cmd.Start(); err != nil {
-		http.Error(w, "Failed to start update", http.StatusInternalServerError)
-		return
-	}
+    cmd.Stdout = logWriter{fn: logger.Info}
+    cmd.Stderr = logWriter{fn: logger.Error}
 
-	go func() {
-		_ = cmd.Wait()
-	}()
+    if err := cmd.Start(); err != nil {
+        logger.Error("Failed to start update:", err)
+        http.Error(w, "Failed to start update", http.StatusInternalServerError)
+        return
+    }
+    logger.Info("Update script started, the server will be killed shortly...")
 
-	w.WriteHeader(http.StatusNoContent)
+    go func() {
+        // If Wait returns, it means update script exited instead of killing us.
+        if err := cmd.Wait(); err != nil {
+            logger.Error("Update script ended unexpectedly:", err)
+        } else {
+            logger.Error("Update script ended unexpectedly without killing process")
+        }
+    }()
+
+    // INFO: If the update succeeds, the server will restart and cannot notify the user afterward.
+    //       Therefore we send the response beforehand, even though the update might fail.
+    w.WriteHeader(http.StatusNoContent)
 }
