@@ -35,7 +35,7 @@ export function SkillsSection() {
                     <div>
                         <h3 className="text-orange-400 font-bold mb-4 font-mono">Tools</h3>
                         <div className="space-y-3">
-                            {me.skills.tools.map((item) => (
+                            {me.skills.others.map((item) => (
                                 <SkillBadge key={item.skill} skill={item.skill} level={item.level as ValidLevel} />
                             ))}
                         </div>

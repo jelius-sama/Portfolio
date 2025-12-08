@@ -1,4 +1,4 @@
-export type ValidLevel = "Beginner" | "Learning" | "Experienced" | "Expert"
+export type ValidLevel = "Beginner" | "Intermediate" | "Experienced" | "Expert"
 
 interface SkillBadgeProps {
     skill: string
@@ -12,7 +12,7 @@ export function SkillBadge({ skill, level = "Experienced" }: SkillBadgeProps) {
                 return "text-green-400"
             case "Experienced":
                 return "text-orange-400"
-            case "Learning":
+            case "Intermediate":
                 return "text-yellow-400"
             case "Beginner":
                 return "text-blue-400"

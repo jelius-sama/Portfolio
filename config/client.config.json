@@ -11,7 +11,7 @@
         "student": "Undergraduate",
         "enthusiast": "Open Source",
         "introduction": "An Undergraduate CS Student who loves building things that work well and are easy to use.",
-        "basic_skills": "Frontend • Backend • Full Stack • Problem Solving",
+        "basic_skills": "Full Stack • Systems",
         "about_me": [
             "I'm an Undergraduate CS Student who loves building things that work well and are easy to use. I enjoy solving problems, making code simple, and learning new things every day.",
             "Right now, I'm in my bachelors degree in Assam Don Bosco University. I like watching Anime a lot. I enjoy developing software that makes a difference in my daily life, and sometimes I play video games (but not too much!).",
@@ -20,34 +20,38 @@
         "skills": {
             "languages": [
                 {
-                    "skill": "Go",
-                    "level": "Experienced"
+                    "skill": "Rust",
+                    "level": "Beginner"
+                },
+                {
+                    "skill": "Swift",
+                    "level": "Beginner"
                 },
                 {
                     "skill": "C",
-                    "level": "Learning"
+                    "level": "Intermediate"
+                },
+                {
+                    "skill": "Go",
+                    "level": "Expert"
                 },
                 {
                     "skill": "TypeScript",
-                    "level": "Experienced"
-                },
-                {
-                    "skill": "JavaScript",
-                    "level": "Experienced"
-                },
-                {
-                    "skill": "Rust",
-                    "level": "Beginner"
+                    "level": "Expert"
                 }
             ],
             "frameworks": [
                 {
-                    "skill": "SolidJS",
-                    "level": "Experienced"
+                    "skill": "Node.js",
+                    "level": "Beginner"
                 },
                 {
                     "skill": "Svelte",
-                    "level": "Beginner"
+                    "level": "Intermediate"
+                },
+                {
+                    "skill": "SolidJS",
+                    "level": "Experienced"
                 },
                 {
                     "skill": "React",
@@ -56,32 +60,28 @@
                 {
                     "skill": "Next.js",
                     "level": "Experienced"
-                },
-                {
-                    "skill": "Node.js",
-                    "level": "Beginner"
                 }
             ],
-            "tools": [
-                {
-                    "skill": "Git",
-                    "level": "Experienced"
-                },
+            "others": [
                 {
                     "skill": "AWS",
-                    "level": "Learning"
+                    "level": "Intermediate"
                 },
                 {
                     "skill": "Cloudflare",
-                    "level": "Learning"
+                    "level": "Intermediate"
                 },
                 {
                     "skill": "PostgreSQL",
-                    "level": "Learning"
+                    "level": "Intermediate"
                 },
                 {
                     "skill": "Redis",
-                    "level": "Learning"
+                    "level": "Intermediate"
+                },
+                {
+                    "skill": "Git",
+                    "level": "Experienced"
                 }
             ]
         },
@@ -132,7 +132,7 @@
                 "image": "/assets/compressed/VPSWatchDog.webp",
                 "technologies": [
                     "Go",
-                    "SMTP Protocol",
+                    "SMTP",
                     "POSIX API"
                 ],
                 "codeUrl": "https://github.com/jelius-sama/VPSWatchDog"
@@ -144,7 +144,7 @@
                 "image": "/assets/compressed/StorageWatchDog.webp",
                 "technologies": [
                     "Go",
-                    "SMTP Protocol"
+                    "SMTP"
                 ],
                 "codeUrl": "https://github.com/jelius-sama/StorageWatchDog"
             },
@@ -156,9 +156,8 @@
                 "technologies": [
                     "Go",
                     "AWS",
-                    "IMF Protocol",
                     "File Parsing",
-                    "IMAP Protocol"
+                    "IMAP"
                 ],
                 "codeUrl": "https://github.com/jelius-sama/AWSMailParser"
             },
@@ -209,9 +208,9 @@
             "[2025-11-02] INFO: Built a wrapper around neofetch to render images with `kitten` static binary - Tags: C, CLI, Ricing",
             "[2025-10-26] INFO: Built a program to serve files from multiple directories with modern UI - Tags: Go, File System",
             "[2025-09-21] INFO: Built a CLI App to convert a directory full of folders into CBZ Archives. - Tags: Go, Archive, Concurrency",
-            "[2025-09-17] INFO: Built a program to fetch mail from S3, parse and save to your mail dir - Tags: Go, IMAP, IMF, Parsing",
-            "[2025-09-16] INFO: Built a Storage Watchdog program to watch over a directory's storage usage - Tags: Go, SMTP Protocol",
-            "[2025-09-15] INFO: Built a VPS Watchdog program to alert if VPS is running hot - Tags: Go, SMTP Protocol, POSIX API",
+            "[2025-09-17] INFO: Built a program to fetch mail from S3, parse and save to your mail dir - Tags: Go, IMAP, Parsing",
+            "[2025-09-16] INFO: Built a Storage Watchdog program to watch over a directory's storage usage - Tags: Go, SMTP",
+            "[2025-09-15] INFO: Built a VPS Watchdog program to alert if VPS is running hot - Tags: Go, SMTP, POSIX API",
             "[2025-07-16] INFO: Re-designing my Personal Portfolio site from scratch - Tags: Go/React, AWS EC2/Hosting, UI/UX Design"
         ],
         "linktree": [

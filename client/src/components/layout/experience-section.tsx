@@ -18,7 +18,7 @@ export function ExperienceSection() {
                 <span className="text-orange-400">|</span> <span className="text-white">Experience</span>
             </h2>
 
-            <div className="text-gray-400 text-center mb-8 font-mono">My professional journey:</div>
+            <div className="text-gray-400 text-center mb-8 font-mono">My nonprofessional journey:</div>
 
             <TerminalWindow title="experience.log" className="mb-8">
                 <div className="font-mono text-sm space-y-6">
