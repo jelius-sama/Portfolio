@@ -58,7 +58,7 @@ export function HeroSection() {
                         <div className="flex space-x-20 justify-center">
                             {/* MD button with note */}
                             <div className="flex flex-col items-start space-y-1">
-                                <span className="text-sm text-gray-500">*Preferred</span>
+                                <span className="text-sm text-gray-500">*Recommended</span>
                                 <button onClick={() => handleDownload({ url: "https://jelius.dev/assets/README.md", filename: "CV.md" })} className="px-6 py-2 bg-orange-500 text-black font-medium rounded hover:bg-orange-400 transition-colors">Markdown</button>
                             </div>
 
