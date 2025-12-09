@@ -30,6 +30,43 @@ export function InteractiveTerminal() {
     const [inputQueue, setInputQueue] = useState<((input: string) => void) | null>(null)
     const [pendingSudoCommand, setPendingSudoCommand] = useState<string | null>(null)
     const [pendingStdin, setPendingStdin] = useState<boolean>(false)
+    const [hasInteracted, setHasInteracted] = useState(false)
+    const [hasEnteredCmd, setHasEnteredCmd] = useState(false)
+    const [isInView, setIsInView] = useState(false);
+
+    useEffect(() => {
+        const el = inputRef.current;
+        if (!el) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => setIsInView(entry.isIntersecting),
+            { threshold: 0 } // visible by even 1px
+        );
+
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        const input = inputRef.current;
+        if (!input) return;
+
+        // Blur when out of view
+        if (!isInView && document.activeElement === input) {
+            input.blur();
+        }
+
+        const handleKey = (e: KeyboardEvent) => {
+            if (!isInView) return;
+            if (document.activeElement === input) return;
+            if (e.key.length === 1) {
+                input.focus();
+            }
+        };
+
+        window.addEventListener("keydown", handleKey);
+        return () => window.removeEventListener("keydown", handleKey);
+    }, [isInView]);
 
     const stdout = (line: string) => setOutput(prev => [...prev, line])
 
@@ -45,6 +82,11 @@ export function InteractiveTerminal() {
         }
     }
 
+    const shouldHide = (key: string): boolean => {
+        const keysToHide = ["neofetch | less", "help"];
+        return keysToHide.includes(key);
+    };
+
     const COMMANDS: Record<string, CommandHandler> = {
         "help": {
             requiresSudo: false,
@@ -57,9 +99,8 @@ export function InteractiveTerminal() {
                 } else {
                     stdout("Usage:")
                     Object.entries(COMMANDS).forEach(([key, val]) => {
-                        if (!val.requiresSudo) stdout(`-> ${key}`)
+                        if (!val.requiresSudo && !shouldHide(key)) stdout(`-> ${key}`)
                     })
-
                 }
             }
         },
@@ -88,7 +129,7 @@ export function InteractiveTerminal() {
         "neofetch": {
             requiresSudo: false,
             async run(_, stdout) {
-                stdout("[ERROR] Not enough screen real estate. Try piping to less.")
+                stdout("[WARN] Not enough screen real estate. Hint: Try piping to less.")
             }
         },
 
@@ -356,6 +397,7 @@ export function InteractiveTerminal() {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
             e.preventDefault()
+            setHasEnteredCmd(true)
 
             switch (command) {
                 // INFO: Easter eggs
@@ -441,7 +483,9 @@ export function InteractiveTerminal() {
                                             ? "text-green-400"
                                             : line.startsWith("[INFO]")
                                                 ? "text-blue-400"
-                                                : "text-gray-300"
+                                                : line.startsWith("[WARN]")
+                                                    ? "text-yellow-400"
+                                                    : "text-gray-300"
                         )}
                     >
                         {line}
@@ -450,27 +494,49 @@ export function InteractiveTerminal() {
 
                 <div ref={inputWrapperRef} className="flex items-center mt-4">
                     {!pendingStdin && (
-                        <span className="text-orange-400 mr-2">
+                        <span className={cn("text-orange-400", hasInteracted ? "mr-2" : "mr-1")}>
                             {pendingSudoCommand ? "[sudo] password for user:" : "$"}
                         </span>
                     )}
+                    <style>{`
+                        @keyframes blinkText {
+                            0% { color: var(--color-orange-400); }
+                            50% { color: transparent; }
+                            100% { color: var(--color-orange-400); }
+                        }
+                    `}</style>
                     <input
                         ref={inputRef}
                         type={pendingSudoCommand && !CSS.supports("-webkit-text-security", "disc") ? "password" : "text"}
-                        value={command}
+                        value={hasInteracted ? command : "│"}
+                        onFocus={() => setHasInteracted(true)}
+                        onBlur={() => command == "" && setHasInteracted(false)}
                         onChange={(e) => setCommand(e.target.value)}
                         onKeyDown={handleKeyDown}
                         className="flex-1 bg-transparent text-white outline-none caret-orange-400"
-                        style={
-                            CSS.supports("-webkit-text-security", "disc") && pendingSudoCommand
-                                ? { WebkitTextSecurity: "disc" } as React.CSSProperties
-                                : undefined
-                        }
-                        spellCheck={false}
+                        style={{
+                            ...(CSS.supports("-webkit-text-security", "disc") && pendingSudoCommand
+                                ? ({ WebkitTextSecurity: "disc" } as React.CSSProperties)
+                                : {}),
+                            animation: hasInteracted ? undefined : "blinkText 2s steps(1) infinite",
+                        }} spellCheck={false}
                         autoCapitalize="off"
                         autoComplete="off"
                         aria-label="Terminal command input"
                     />
+                    <span
+                        className="absolute transform translate-x-5 text-gray-600 transition-opacity duration-300"
+                        style={{
+                            /* TODO: When the user runs a command, the "help" text shifts position.
+                             * To prevent this, we hide it as soon as the user interacts with the CLI.
+                             * In future we may want to fix the positioning instead of making it disappear. 
+                             */
+                            opacity: hasEnteredCmd ? 0 : (!hasInteracted || command === "" ? 1 : 0),
+                            pointerEvents: "none"
+                        }}
+                    >
+                        help
+                    </span>
                 </div>
             </div>
         </TerminalWindow>

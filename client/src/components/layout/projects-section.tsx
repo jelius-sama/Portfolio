@@ -14,7 +14,7 @@ function ProjectLink({ url, label }: { url: string; label: string }) {
 
     const classes = {
         code: "flex items-center gap-2 px-3 py-2 bg-gray-800 text-gray-300 rounded border border-orange-500/30 hover:border-orange-500 hover:text-orange-400 transition-colors text-sm font-mono",
-        live: "flex items-center gap-2 px-3 py-2 bg-orange-500 text-black rounded hover:bg-orange-400 transition-colors text-sm font-mono",
+        live: "flex items-center gap-2 px-3 py-2 bg-orange-500 text-gray-800 rounded hover:bg-orange-400 transition-colors text-sm font-mono",
         additional: "flex items-center gap-2 px-3 py-2 bg-gray-800 text-gray-300 rounded border border-orange-500/30 hover:border-orange-500 hover:text-orange-400 transition-colors text-sm font-mono",
     };
 
