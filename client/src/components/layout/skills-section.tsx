@@ -18,7 +18,7 @@ export function SkillsSection() {
                         <h3 className="text-orange-400 font-bold mb-4 font-mono">Languages</h3>
                         <div className="space-y-3">
                             {me.skills.languages.map((item) => (
-                                <SkillBadge key={item.skill} skill={item.skill} level={item.level as ValidLevel} />
+                                <SkillBadge showLevel={false} key={item.skill} skill={item.skill} level={item.level as ValidLevel} />
                             ))}
                         </div>
                     </div>
@@ -27,7 +27,7 @@ export function SkillsSection() {
                         <h3 className="text-orange-400 font-bold mb-4 font-mono">Frameworks</h3>
                         <div className="space-y-3">
                             {me.skills.frameworks.map((item) => (
-                                <SkillBadge key={item.skill} skill={item.skill} level={item.level as ValidLevel} />
+                                <SkillBadge showLevel={false} key={item.skill} skill={item.skill} level={item.level as ValidLevel} />
                             ))}
                         </div>
                     </div>
@@ -36,7 +36,7 @@ export function SkillsSection() {
                         <h3 className="text-orange-400 font-bold mb-4 font-mono">Others</h3>
                         <div className="space-y-3">
                             {me.skills.others.map((item) => (
-                                <SkillBadge key={item.skill} skill={item.skill} level={item.level as ValidLevel} />
+                                <SkillBadge showLevel={false} key={item.skill} skill={item.skill} level={item.level as ValidLevel} />
                             ))}
                         </div>
                     </div>
