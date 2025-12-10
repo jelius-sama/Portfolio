@@ -102,8 +102,11 @@ func UpdateServer(w http.ResponseWriter, r *http.Request) {
                 "systemd-run",
                 "--unit=portfolio-updater",
                 "--collect",
+                "--uid=0",
+                "--gid=0",
                 "/usr/local/bin/update-prod",
             )
+
             if err := cmd.Start(); err != nil {
                 logger.Error("Failed to start update:", err)
                 http.Error(w, "Failed to start update", http.StatusInternalServerError)
