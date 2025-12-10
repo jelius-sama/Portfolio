@@ -104,7 +104,7 @@ func UpdateServer(w http.ResponseWriter, r *http.Request) {
                 http.Error(w, "Failed to start update", http.StatusInternalServerError)
                 return
             }
-            logger.Info("Update script started, the server will be killed shortly...")
+            logger.Info("Update script started, the server may be killed shortly...")
         } else {
             logger.Error("Initiated server update with an invalid admin token.")
             http.Error(w, "You are banned!", http.StatusForbidden)
