@@ -30,6 +30,15 @@ var (
     mu          sync.Mutex
 )
 
+func clearToken() {
+    mu.Lock()
+    if tokenValue != nil {
+        tokenValue = nil
+        tokenExpiry = time.Time{}
+    }
+    mu.Unlock()
+}
+
 // init starts a GC that clears the token when expired.
 func init() {
     go func() {
@@ -37,11 +46,9 @@ func init() {
         defer t.Stop()
 
         for range t.C {
-            mu.Lock()
-            if tokenValue != nil && time.Now().After(tokenExpiry) {
-                tokenValue = nil
+            if time.Now().After(tokenExpiry) {
+                clearToken()
             }
-            mu.Unlock()
         }
     }()
 }
@@ -97,6 +104,7 @@ func UpdateServer(w http.ResponseWriter, r *http.Request) {
     if hasToken {
         stored := GetToken()
         if stored != nil && p.Token == *stored {
+            clearToken()
             // Execute update script (in background)
             cmd := exec.Command(
                 "systemd-run",
