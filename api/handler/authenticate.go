@@ -10,7 +10,7 @@ import (
     "time"
 )
 
-const TokenValidity = 30 * time.Minute
+const TokenValidity = 5 * time.Minute
 
 var (
     authTokens = struct {
@@ -57,7 +57,7 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    token, err := GenerateSecureToken(32)
+    token, err := GenerateSecureToken(64)
     if err != nil {
         http.Error(w, "Failed to generate token", http.StatusInternalServerError)
         return
