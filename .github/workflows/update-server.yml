@@ -17,6 +17,21 @@ jobs:
         env:
           TOKEN: ${{ secrets.API_BEARER_TOKEN }}
         run: |
-          curl -sS -X POST \
+          set -e
+
+          echo "▶ Calling update API..."
+          RESPONSE=$(curl -w "\n%{http_code}" -X POST \
             -H "Authorization: Bearer $TOKEN" \
-            https://jelius.dev/api/update_server
+            https://jelius.dev/api/update_server)
+
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1)
+
+          echo "▶ Status: $STATUS"
+          echo "▶ Body:"
+          echo "$BODY"
+
+          if [ "$STATUS" -ge 400 ]; then
+            echo "API call failed"
+            exit 1
+          fi
