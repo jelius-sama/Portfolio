@@ -1,3 +1,12 @@
-*.go linguist-detectable=true
-*.ts linguist-detectable=true
+# Only count these languages
+*.go  linguist-detectable=true
+*.ts  linguist-detectable=true
 *.tsx linguist-detectable=true
+
+# Exclusions
+client/dist/               linguist-vendored
+client/node_modules/       linguist-vendored
+assets/                    linguist-vendored
+config/                    linguist-vendored
+client/src/lib/            linguist-vendored
+client/src/components/ui/  linguist-vendored
