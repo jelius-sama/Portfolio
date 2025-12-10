@@ -1,0 +1,22 @@
+name: Update Portfolio Server
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Call update API
+        env:
+          TOKEN: ${{ secrets.API_BEARER_TOKEN }}
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            https://jelius.dev/api/update_server
