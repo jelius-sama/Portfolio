@@ -1,12 +1,20 @@
+# NOTE: Note sure if this configuration actually works
+
 # Only count these languages
 *.go  linguist-detectable=true
 *.ts  linguist-detectable=true
 *.tsx linguist-detectable=true
 
-# Exclusions
-client/dist/               linguist-vendored=true
-client/node_modules/       linguist-vendored=true
-assets/                    linguist-vendored=true
-config/                    linguist-vendored=true
-client/src/lib/            linguist-vendored=true
-client/src/components/ui/  linguist-vendored=true
+# Contains Generated code
+client/dist/**               linguist-vendored=true
+client/node_modules/**       linguist-vendored=true
+
+# Contains some Javascript files related service worker
+assets/**                    linguist-vendored=true
+
+# Ignore JSON Config files
+config/**                    linguist-vendored=true
+
+# Contains community contributed code
+client/src/lib/**            linguist-vendored=true
+client/src/components/ui/**  linguist-vendored=true
