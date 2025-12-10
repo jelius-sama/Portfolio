@@ -98,7 +98,12 @@ func UpdateServer(w http.ResponseWriter, r *http.Request) {
         stored := GetToken()
         if stored != nil && p.Token == *stored {
             // Execute update script (in background)
-            cmd := exec.Command("sh", "-c", "nohup update-prod >> /var/log/update-prod.log 2>&1 &")
+            cmd := exec.Command(
+                "systemd-run",
+                "--unit=portfolio-updater",
+                "--collect",
+                "/usr/local/bin/update-prod",
+            )
             if err := cmd.Start(); err != nil {
                 logger.Error("Failed to start update:", err)
                 http.Error(w, "Failed to start update", http.StatusInternalServerError)
