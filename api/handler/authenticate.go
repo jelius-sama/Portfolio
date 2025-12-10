@@ -4,13 +4,12 @@ import (
     "crypto/rand"
     "encoding/hex"
     "fmt"
-    "github.com/jelius-sama/logger"
     "net/http"
     "sync"
     "time"
 )
 
-const TokenValidity = 5 * time.Minute
+const TokenValidity = 15 * time.Minute
 
 var (
     authTokens = struct {
@@ -36,7 +35,6 @@ func init() {
                 }
             }
             authTokens.Unlock()
-            logger.TimedInfo("Expired tokens cleaned by AuthToken GC.")
         }
     }()
 }
