@@ -13,25 +13,78 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Determine target version from repo
+        id: version
+        run: |
+          TARGET_VERSION=$(jq -r '.version' config/client.config.json)
+          echo "Target version: $TARGET_VERSION"
+          echo "TARGET_VERSION=$TARGET_VERSION" >> "$GITHUB_ENV"
+
       - name: Call update API
         env:
           TOKEN: ${{ secrets.API_BEARER_TOKEN }}
         run: |
-          set -e
-
-          echo "▶ Calling update API..."
-          RESPONSE=$(curl -w "\n%{http_code}" -X POST \
+          echo "▶ Triggering update on server..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
             -H "Authorization: Bearer $TOKEN" \
             https://jelius.dev/api/update_server)
 
-          BODY=$(echo "$RESPONSE" | sed '$d')
-          STATUS=$(echo "$RESPONSE" | tail -n1)
-
-          echo "▶ Status: $STATUS"
-          echo "▶ Body:"
-          echo "$BODY"
+          echo "API returned status: $STATUS"
 
           if [ "$STATUS" -ge 400 ]; then
-            echo "API call failed"
+            echo "Update API returned error"
             exit 1
           fi
+
+      - name: Wait for server to finish updating
+        env:
+          TARGET_VERSION: ${{ env.TARGET_VERSION }}
+        run: |
+          echo "▶ Waiting for server to update to: $TARGET_VERSION"
+          echo "   (Server may go DOWN — retries will continue)"
+
+          while true; do
+            RESPONSE=$(curl -s --max-time 10 https://jelius.dev/api/version || echo "DOWN")
+
+            if [ "$RESPONSE" = "DOWN" ] || [ -z "$RESPONSE" ]; then
+              echo "[WARN] Server down or not responding — retrying..."
+              sleep 3
+              continue
+            fi
+
+            SERVER_VERSION=$(echo "$RESPONSE" | jq -r '.version // empty')
+
+            if [ -z "$SERVER_VERSION" ]; then
+              echo "[WARN] Invalid response from server: $RESPONSE"
+              sleep 3
+              continue
+            fi
+
+            echo "Server reports version: $SERVER_VERSION"
+
+            if [ "$SERVER_VERSION" = "$TARGET_VERSION" ]; then
+              echo "✔ Server update complete."
+              break
+            fi
+
+            echo "Not updated yet — retrying..."
+            sleep 3
+          done
+
+      - name: Purge all cache
+        env:
+          TOKEN: ${{ secrets.API_BEARER_TOKEN }}
+        run: |
+          echo "▶ Purging cache..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            https://jelius.dev/api/purge_all_cache)
+
+          echo "Purge API returned: $STATUS"
+
+          if [ "$STATUS" -ge 400 ]; then
+            echo "Cache purge failed"
+            exit 1
+          fi
+
+          echo "Cache purge complete."
