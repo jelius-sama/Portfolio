@@ -2,6 +2,8 @@ import { Link, useLocation, useParams } from "react-router-dom"
 import { Fragment, useState, type MouseEventHandler } from "react"
 import { Menu, X } from "lucide-react"
 
+const DISABLE_SECTION_LINKS = true;
+
 function SmartLink({ type, to, href, item, index, className, ...rest }: { type: "link" | "a"; to?: string; href?: string; item: string; index: number; className?: string; onClick: MouseEventHandler<HTMLElement> }) {
     const Tag = type === "a" ? "a" : Link;
     const base = "flex items-center gap-3 p-3 bg-gray-800/50 border border-orange-500/20 rounded hover:border-orange-500 hover:bg-gray-800/70 transition-all duration-200 group";
@@ -14,12 +16,14 @@ function SmartLink({ type, to, href, item, index, className, ...rest }: { type: 
     };
 
     return (
-        // @ts-ignore
-        <Tag {...props}>
-            <span className="text-orange-400 group-hover:text-orange-300">{number}</span>
-            <span className="text-gray-300 group-hover:text-white font-mono">{item}</span>
-            <span className="ml-auto text-gray-500 group-hover:text-orange-400 text-xs">{type === "link" ? "page" : "section"}</span>
-        </Tag>
+        !(DISABLE_SECTION_LINKS && type === "a") && (
+            // @ts-ignore
+            <Tag {...props}>
+                <span className="text-orange-400 group-hover:text-orange-300">{number}</span>
+                <span className="text-gray-300 group-hover:text-white font-mono">{item}</span>
+                <span className="ml-auto text-gray-500 group-hover:text-orange-400 text-xs">{type === "link" ? "page" : "section"}</span>
+            </Tag>
+        )
     );
 };
 
@@ -54,7 +58,7 @@ export function Header() {
                             {location.pathname === "/" ? (
                                 navItems.map((item, index) => item === "Links" || item === "Blogs" || item === "Achievements" ? (
                                     <Link key={index} to={"/" + item.toLowerCase()} className="text-gray-300 hover:text-orange-400 transition-colors font-mono text-sm"> {item} </Link>
-                                ) : (
+                                ) : !DISABLE_SECTION_LINKS && (
                                     <a key={index} href={`#${item.toLowerCase()}`} className="text-gray-300 hover:text-orange-400 transition-colors font-mono text-sm">{item}</a>
                                 ))
                             ) : (
@@ -120,15 +124,18 @@ export function Header() {
                                 <div className="text-orange-400 mb-4">$ ls /navigation/</div>
                                 <div className="space-y-2">
                                     {location.pathname === "/" ? (
-                                        navItems.map((item, index) => (
-                                            <Fragment>
-                                                {item === "Links" || item === "Blogs" || item === "Achievements" ? (
-                                                    <SmartLink type="link" key={index} index={index} item={item} onClick={handleNavClick} to={"/" + item.toLowerCase()} />
-                                                ) : (
-                                                    <SmartLink type="a" key={index} index={index} item={item} onClick={handleNavClick} href={"#" + item.toLowerCase()} />
-                                                )}
-                                            </Fragment>
-                                        ))
+                                        navItems.map((item, index) => {
+                                            if (DISABLE_SECTION_LINKS) index -= 6;
+                                            return (
+                                                <Fragment>
+                                                    {item === "Links" || item === "Blogs" || item === "Achievements" ? (
+                                                        <SmartLink type="link" key={index} index={index} item={item} onClick={handleNavClick} to={"/" + item.toLowerCase()} />
+                                                    ) : (
+                                                        <SmartLink type="a" key={index} index={index} item={item} onClick={handleNavClick} href={"#" + item.toLowerCase()} />
+                                                    )}
+                                                </Fragment>
+                                            )
+                                        })
                                     ) : (
                                         <Fragment>
                                             {[
