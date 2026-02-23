@@ -21,7 +21,12 @@ ENV := production
 .PHONY: build dev_build dev archive_prod clean
 
 build:
-	(cd client && bun run build)
+	@if [ "$(REBUILD_CLIENT)" = "1" ] || [ ! -f client/dist/index.html ]; then \
+		echo "Building client..."; \
+		(cd client && bun run build); \
+	else \
+		echo "Skipping client build (set REBUILD_CLIENT=1 to force rebuild)"; \
+	fi
 	@mkdir -p $(BIN_DIR)
 	CGO_ENABLED=0 GOOS=linux go build -ldflags "\
 		    -s -w \
