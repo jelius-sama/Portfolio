@@ -208,10 +208,7 @@ func UpdateServer(w http.ResponseWriter, r *http.Request) {
 </html>`, hostname, os.Getenv("host")+"/api/specialized_task?task=update_server&token="+tok)
 
         err = mailer.SendMail(
-            config.Host,
-            config.Port,
-            config.Username,
-            config.Password,
+            config,
             config.From,
             "personal@jelius.dev",
             subject,
@@ -229,3 +226,4 @@ func UpdateServer(w http.ResponseWriter, r *http.Request) {
     //       Therefore we send the response beforehand, even though the update might fail.
     w.WriteHeader(http.StatusNoContent)
 }
+
