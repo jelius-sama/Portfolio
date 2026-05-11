@@ -199,9 +199,41 @@ export default function BlogPostPage() {
           </div>
         </TerminalWindow>
 
+        {/* Series Navigation */}
+        {blog.parts.length > 0 && (
+          <TerminalWindow title="series-navigation" className="mb-8">
+            <div className="font-mono text-sm">
+              <div className="text-orange-400 mb-4">$ ls series-parts/</div>
+              <div className="text-gray-300 mb-4">This post is part of a {blog.parts.length}-part series:</div>
+              <div className="grid gap-2">
+                {blog.parts.map((partId, index) => (
+                  <Link
+                    key={partId}
+                    to={`/blog/${partId}`}
+                    className={`block px-3 py-2 rounded border transition-all duration-200 ${partId === blog.id
+                      ? "bg-orange-500/20 border-orange-500 text-orange-400"
+                      : "bg-gray-800/50 border-orange-500/30 text-gray-300 hover:border-orange-500 hover:bg-gray-800/70"
+                      }`}
+                  >
+                    Part {index + 1}: {partId === blog.id ? blog.title : `Blog ${partId}`}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </TerminalWindow>
+        )}
+
+        {/* Blog Content */}
+        <TerminalWindow title="blog-content">
+          <div className="font-mono text-sm">
+            <div className="text-orange-400 mb-4">$ cat {blog.id}.md</div>
+            <MarkdownRenderer content={markdownContent} />
+          </div>
+        </TerminalWindow>
+
         {/* Navigation (Prequel/Sequel) */}
         {(blog.prequelId || blog.sequelId) && (
-          <TerminalWindow title="navigation" className="mb-8">
+          <TerminalWindow title="navigation" className="mt-8">
             <div className="font-mono text-sm">
               <div className="text-orange-400 mb-4">$ ls ../related-posts/</div>
               <div className="flex justify-between">
@@ -225,38 +257,6 @@ export default function BlogPostPage() {
                     <ChevronRight className="text-orange-400" size={16} />
                   </Link>
                 )}
-              </div>
-            </div>
-          </TerminalWindow>
-        )}
-
-        {/* Blog Content */}
-        <TerminalWindow title="blog-content">
-          <div className="font-mono text-sm">
-            <div className="text-orange-400 mb-4">$ cat {blog.id}.md</div>
-            <MarkdownRenderer content={markdownContent} />
-          </div>
-        </TerminalWindow>
-
-        {/* Series Navigation */}
-        {blog.parts.length > 0 && (
-          <TerminalWindow title="series-navigation" className="mt-8">
-            <div className="font-mono text-sm">
-              <div className="text-orange-400 mb-4">$ ls series-parts/</div>
-              <div className="text-gray-300 mb-4">This post is part of a {blog.parts.length}-part series:</div>
-              <div className="grid gap-2">
-                {blog.parts.map((partId, index) => (
-                  <Link
-                    key={partId}
-                    to={`/blog/${partId}`}
-                    className={`block px-3 py-2 rounded border transition-all duration-200 ${partId === blog.id
-                      ? "bg-orange-500/20 border-orange-500 text-orange-400"
-                      : "bg-gray-800/50 border-orange-500/30 text-gray-300 hover:border-orange-500 hover:bg-gray-800/70"
-                      }`}
-                  >
-                    Part {index + 1}: {partId === blog.id ? blog.title : `Blog ${partId}`}
-                  </Link>
-                ))}
               </div>
             </div>
           </TerminalWindow>
