@@ -6,6 +6,8 @@ import (
 )
 
 var ApiRoutes = map[string]http.HandlerFunc{
+    "OPTIONS /work_req":       handler.WorkReqHandler,
+    "POST /work_req":          handler.WorkReqHandler,
     "GET /specialized_task":   handler.SpecializedTask,
     "GET /healthz":            Cacheable(300, handler.Healthz),
     "GET /latest_commit":      handler.LatestCommit,
@@ -26,3 +28,4 @@ var ApiRoutes = map[string]http.HandlerFunc{
     "POST /purge_cache":       handler.PurgeCache,
     "POST /purge_all_cache":   handler.PurgeAllCache,
 }
+

@@ -207,10 +207,17 @@ func UpdateServer(w http.ResponseWriter, r *http.Request) {
 </body>
 </html>`, hostname, os.Getenv("host")+"/api/specialized_task?task=update_server&token="+tok)
 
+        personalEmail := os.Getenv("PERSONAL_EMAIL")
+        if len(personalEmail) == 0 {
+            logger.Error("Failed to send update confirmation email to admin:", err)
+            http.Error(w, "Failed to start update", http.StatusInternalServerError)
+            return
+        }
+
         err = mailer.SendMail(
             config,
             config.From,
-            "personal@jelius.dev",
+            personalEmail,
             subject,
             body,
             nil, nil, nil,
