@@ -1,12 +1,8 @@
-bin
 tmp
-client/node_modules
-client/dist
 build
 
-# Ignore everything in the assets folder
+# Ignore everything in the assets folder by default unless explicitly allowed
 assets/*
 
-# But do not ignore the folder itself (allow it to be part of the repo)
 !assets/manifest.json
 !assets/sw.js
