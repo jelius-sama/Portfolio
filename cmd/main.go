@@ -3,6 +3,7 @@ package main
 import (
     "os"
 
+    "git.jelius.dev/jelius-sama/Portfolio/middleware"
     "git.jelius.dev/jelius-sama/Portfolio/types"
     "github.com/gofiber/fiber/v3"
     "github.com/jelius-sama/logger"
@@ -35,11 +36,12 @@ func init() {
 }
 
 func main() {
-    var app *fiber.App = fiber.New()
+    var cnf fiber.Config = fiber.Config{
+        ErrorHandler: middleware.ErrHandler,
+    }
 
-    app.Get("/healthz", func(c fiber.Ctx) error {
-        return c.SendString("Healthy")
-    })
+    var app *fiber.App = fiber.New(cnf)
+    Router(app)
 
     logger.Fatal(app.Listen(types.EVPort.Get().Value))
 }
