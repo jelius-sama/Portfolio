@@ -7,6 +7,10 @@ import (
     "git.jelius.dev/jelius-sama/Portfolio/types"
     "github.com/gofiber/fiber/v3"
     "github.com/jelius-sama/logger"
+    "net/http"
+
+    embed "git.jelius.dev/jelius-sama/Portfolio"
+    "github.com/gofiber/template/html/v3"
 )
 
 var (
@@ -36,8 +40,11 @@ func init() {
 }
 
 func main() {
+    engine := html.NewFileSystem(http.FS(embed.TemplateFS), ".html")
+
     var cnf fiber.Config = fiber.Config{
         ErrorHandler: middleware.ErrHandler,
+        Views:        engine,
     }
 
     var app *fiber.App = fiber.New(cnf)
