@@ -3,16 +3,14 @@ module git.jelius.dev/jelius-sama/Portfolio
 go 1.26.5
 
 require (
+	github.com/a-h/templ v0.3.1020
 	github.com/gofiber/fiber/v3 v3.4.0
-	github.com/gofiber/template/html/v3 v3.0.6
 	github.com/jelius-sama/logger v1.5.0
 )
 
 require (
-	github.com/a-h/templ v0.3.1020 // indirect
 	github.com/andybalholm/brotli v1.2.2 // indirect
 	github.com/gofiber/schema v1.8.0 // indirect
-	github.com/gofiber/template/v2 v2.1.0 // indirect
 	github.com/gofiber/utils/v2 v2.1.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.19.0 // indirect
