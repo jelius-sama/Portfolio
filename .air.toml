@@ -5,7 +5,7 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./build/portfolio-dev"
-  cmd = "make dev"
+  cmd = "templ generate && make dev"
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "client", "bin", "build"]
   exclude_file = []
@@ -14,7 +14,7 @@ tmp_dir = "tmp"
   follow_symlink = false
   full_bin = ""
   include_dir = []
-  include_ext = ["go", "tpl", "tmpl", "html"]
+  include_ext = ["go", "tpl", "tmpl", "templ", "html"]
   include_file = []
   kill_delay = "0s"
   log = "build-errors.log"

@@ -7,11 +7,11 @@ import (
     "github.com/gofiber/fiber/v3"
 )
 
-func (v *ViewManager) RenderHome(c fiber.Ctx) error {
+func (v *ViewManager) RenderLinks(c fiber.Ctx) error {
     var metadata types.Metadata = types.Metadata{
-        Title:       "Home",
-        Description: "Portfolio",
+        Title:       "Links",
+        Description: "My Social Links",
     }
-    return Renderer(c, metadata, template.HomeContent())
+    return Renderer(c, metadata, template.LinksContent())
 }
 

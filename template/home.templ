@@ -1,0 +1,10 @@
+package template
+
+templ HomeContent() {
+	<main>
+		<h1>Welcome</h1>
+		<a href="/links" hx-get="/links" hx-target="main" hx-swap="outerHTML" hx-push-url="true">
+			Go to Links Page
+		</a>
+	</main>
+}

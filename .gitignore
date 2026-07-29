@@ -1,5 +1,6 @@
 tmp
 build
+*_templ.go
 
 # Ignore everything in the assets folder by default unless explicitly allowed
 assets/*

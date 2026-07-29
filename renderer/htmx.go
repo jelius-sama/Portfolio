@@ -1,6 +1,12 @@
 package renderer
 
-import "github.com/gofiber/fiber/v3"
+import (
+    "net/url"
+
+    "git.jelius.dev/jelius-sama/Portfolio/types"
+
+    "github.com/gofiber/fiber/v3"
+)
 
 type ViewManager struct{}
 
@@ -13,12 +19,13 @@ type TargetPart uint8
 const (
     TPHead TargetPart = iota
     TPBody
+    TPBoth
     TPUndefined
 )
 
 // PageContext holds metadata about the current request lifecycle
 type PageContext struct {
-    Title      string
+    Metadata   types.Metadata
     IsPartial  bool
     TargetPart TargetPart
 }
@@ -29,6 +36,8 @@ func (tp TargetPart) String() string {
         return "body"
     case TPHead:
         return "head"
+    case TPBoth:
+        return "both"
     default:
         return ""
     }
@@ -40,16 +49,24 @@ func (tp TargetPart) Into(target string) TargetPart {
         return TPBody
     case "head":
         return TPHead
+    case "both":
+        return TPBoth
     default:
         return TPUndefined
     }
 }
 
-// DetermineRenderMode inspects HTTP headers to see what the frontend requested
 func (pc *PageContext) DetermineRenderMode(c fiber.Ctx) {
-    if c.Get("X-SPA-Request") != "" {
+    if c.Get("HX-Request") == "true" {
         pc.IsPartial = true
-        pc.TargetPart = TargetPart.Into(TPUndefined, c.Get("X-SPA-Target"))
+
+        parsedURL, _ := url.Parse(c.Get("HX-Current-URL"))
+
+        if parsedURL.Path != c.Path() {
+            pc.TargetPart = TPUndefined.Into("both")
+        } else {
+            pc.TargetPart = TPUndefined.Into("body")
+        }
         return
     }
 

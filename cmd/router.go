@@ -14,5 +14,6 @@ func Router(app *fiber.App) {
 
     ui := renderer.New()
     app.Get("/", ui.RenderHome)
+    app.Get("/links", ui.RenderLinks)
 }
 

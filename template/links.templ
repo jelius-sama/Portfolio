@@ -1,0 +1,14 @@
+package template
+
+templ LinksContent() {
+	<main>
+		<h1>My Links</h1>
+		<ul>
+			<li><a href="https://github.com" target="_blank">GitHub</a></li>
+			<li><a href="https://linkedin.com" target="_blank">LinkedIn</a></li>
+		</ul>
+		<a href="/" hx-get="/" hx-target="main" hx-swap="outerHTML" hx-push-url="true">
+			Go to Home
+		</a>
+	</main>
+}
