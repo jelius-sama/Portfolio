@@ -1,0 +1,27 @@
+package components
+
+// About renders the "Who Am I" section: a heading followed by a single
+// terminal window (reusing Terminal/TerminalLine from terminal.templ)
+// with a short bio, one paragraph per line so it types itself in.
+//
+// Hardcoded bio below — swap for real copy whenever you're ready.
+templ About() {
+	<section id="about" class="bg-background px-6 py-24 sm:py-32">
+		<div class="mx-auto max-w-3xl">
+			@SectionHeading("Who Am I")
+			<div class="mt-12">
+				@Terminal("about-me") {
+					@TerminalLine(0) {
+						<span class="text-muted-foreground">I'm an undergraduate CS student who loves building things that work well and are easy to use. I enjoy solving problems, making code simple, and learning new things every day.</span>
+					}
+					@TerminalLine(1) {
+						<span class="text-muted-foreground">Right now, I'm working toward my bachelor's degree. I enjoy developing software that makes a real difference in everyday life, and I'm always curious how things work under the hood.</span>
+					}
+					@TerminalLine(2) {
+						<span class="text-muted-foreground">When I'm not coding, you'll usually find me exploring new technologies or sharing what I've learned with the developer community.</span>
+					}
+				}
+			</div>
+		</div>
+	</section>
+}

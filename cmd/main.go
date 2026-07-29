@@ -10,16 +10,18 @@ import (
 )
 
 var (
-    Environment string
-    Host        string
-    Version     string
-    Port        string
+    Environment  string
+    Host         string
+    AssetCDNHost string
+    Version      string
+    Port         string
 )
 
 func init() {
     var env []types.Env = []types.Env{
         {Key: types.EVEnv.Get().Key, Value: Environment},
         {Key: types.EVHostname.Get().Key, Value: Host},
+        {Key: types.EVAssetCDNHostname.Get().Key, Value: AssetCDNHost},
         {Key: types.EVVersion.Get().Key, Value: Version},
         {Key: types.EVPort.Get().Key, Value: Port},
     }

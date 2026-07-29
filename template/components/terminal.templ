@@ -1,0 +1,57 @@
+package components
+
+import "fmt"
+
+// Terminal renders a small macOS-style terminal window: three dots, a
+// title bar, and a body. Pass lines in via TerminalLine so each one gets
+// the staggered type-in animation and reduced-motion handling for free.
+//
+// Uses tw-animate-css's `animate-in`/`fade-in`/`slide-in-from-bottom-*`
+// utilities for the reveal, plus Tailwind's `motion-reduce:` variant —
+// no hand-rolled keyframes needed for that part.
+//
+// Usage:
+//
+//	@Terminal("guest@jelius: ~") {
+//		@TerminalLine(0) {
+//			<span class="text-primary">guest@jelius:~$</span>
+//			<span class="text-foreground"> whoami</span>
+//		}
+//	}
+templ Terminal(title string) {
+	<div class="overflow-hidden rounded-lg border border-border bg-card shadow-xl">
+		<div class="flex items-center gap-2 border-b border-border bg-secondary/60 px-4 py-3">
+			<span class="h-3 w-3 rounded-full bg-[#f38ba8]"></span>
+			<span class="h-3 w-3 rounded-full bg-[#f9e2af]"></span>
+			<span class="h-3 w-3 rounded-full bg-[#a6e3a1]"></span>
+			<span class="ml-3 font-mono text-xs text-muted-foreground">{ title }</span>
+		</div>
+		<div class="space-y-3 px-6 py-6 font-mono text-sm leading-relaxed">
+			{ children... }
+		</div>
+	</div>
+	<style>
+		/* caret-blink has no tw-animate-css equivalent, so it stays custom */
+		@keyframes caret-blink-kf {
+			0%, 49% { opacity: 1; }
+			50%, 100% { opacity: 0; }
+		}
+
+		.caret-blink {
+			animation: caret-blink-kf 1s step-end infinite;
+		}
+	</style>
+}
+
+// TerminalLine wraps one line of terminal output/prompt and staggers its
+// fade/slide-in based on index (0-based) so a block of lines reads as if
+// it typed itself out on load.
+templ TerminalLine(index int) {
+	<p class={ "animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(index) }>
+		{ children... }
+	</p>
+}
+
+css lineDelay(index int) {
+	animation-delay: { fmt.Sprintf("%dms", 300+index*260) };
+}

@@ -30,6 +30,7 @@ type EnvVal uint8
 const (
     EVEnv EnvVal = iota
     EVHostname
+    EVAssetCDNHostname
     EVVersion
     EVPort
 )
@@ -40,6 +41,8 @@ func (ek EnvVal) Get() Env {
         return Env{Key: "ENV", Value: os.Getenv("ENV")}
     case EVHostname:
         return Env{Key: "HOSTNAME", Value: os.Getenv("HOSTNAME")}
+    case EVAssetCDNHostname:
+        return Env{Key: "ASSET_CDN_HOSTNAME", Value: os.Getenv("ASSET_CDN_HOSTNAME")}
     case EVVersion:
         return Env{Key: "VERSION", Value: os.Getenv("VERSION")}
     case EVPort:

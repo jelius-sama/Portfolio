@@ -1,0 +1,78 @@
+package components
+
+// ContactLogEntry is one line in the "latest-logs" terminal at the
+// bottom of the contact section.
+type ContactLogEntry struct {
+	Date    string
+	Message string
+	Tags    string
+}
+
+// Hardcoded below — swap for real data / a props struct whenever this
+// gets wired up to actual content (or generated from commit history).
+var contactLogEntries = []ContactLogEntry{
+	{Date: "2025-11-02", Message: "Built a wrapper around neofetch to render images with \"kitten\" static binary", Tags: "C, CLI, Ricing"},
+	{Date: "2025-10-26", Message: "Built a program to serve files from multiple directories with modern UI", Tags: "Go, File System"},
+	{Date: "2025-09-21", Message: "Built a CLI App to convert a directory full of folders into CBZ Archives.", Tags: "Go, Archive, Concurrency"},
+	{Date: "2025-09-17", Message: "Built a program to fetch mail from S3, parse and save to your mail dir", Tags: "Go, IMAP, Parsing"},
+	{Date: "2025-09-16", Message: "Built a Storage Watchdog program to watch over a directory's storage usage", Tags: "Go, SMTP"},
+	{Date: "2025-09-15", Message: "Built a VPS Watchdog program to alert if VPS is running hot", Tags: "Go, SMTP, POSIX API"},
+	{Date: "2025-07-16", Message: "Re-designing my Personal Portfolio site from scratch", Tags: "Go/React, AWS EC2/Hosting, UI/UX Design"},
+}
+
+// Contact renders the "Get in Touch" section: a contact-info terminal
+// (email + social links, via social.templ), a terminal with a QR code,
+// and a latest-logs terminal below both. All three reuse Terminal from
+// terminal.templ; individual rows/lines use lineDelay directly (not
+// TerminalLine) since some rows contain block-level content (the QR
+// image container) that can't legally sit inside TerminalLine's <p>.
+templ Contact() {
+	<section id="contact" class="bg-background px-6 py-24 sm:py-32">
+		<div class="mx-auto max-w-5xl">
+			@SectionHeading("Get in Touch")
+			<div class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
+				@Terminal("contact-info") {
+					<div class="space-y-6">
+						@EmailLink(0, "contact@jelius.dev")
+						<div class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(1) }>
+							<p class="text-sm text-muted-foreground">Social Media Profiles</p>
+							<div class="mt-4 space-y-4">
+								@SocialLink(2, "X", "X", "#")
+								@SocialLink(3, "in", "LinkedIn", "#")
+								@SocialLink(4, "gh", "GitHub", "#")
+								@SocialLink(5, "lt", "Linktree", "#")
+							</div>
+						</div>
+					</div>
+				}
+				@Terminal("terminal") {
+					<div class="space-y-6">
+						<p class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(0) }>
+							<span class="text-primary">$</span>
+							<span class="text-foreground">neofetch | less</span>
+						</p>
+						<div class={ "mx-auto max-w-xs overflow-hidden rounded-md border border-border animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(1) }>
+							<img src="/assets/img/contact-qr.png" alt="QR code linking to jelius.dev" class="block w-full"/>
+						</div>
+						<p class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(2) }>
+							<span class="text-primary">$</span>
+							<span class="text-muted-foreground">help</span>
+							<span class="caret-blink ml-1 inline-block h-4 w-1.5 translate-y-0.5 bg-primary"></span>
+						</p>
+					</div>
+				}
+			</div>
+			<div class="mt-8">
+				@Terminal("latest-logs") {
+					<div class="space-y-2">
+						for i, entry := range contactLogEntries {
+							<p class={ "text-[#a6e3a1]", "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(i) }>
+								[{ entry.Date }] INFO: { entry.Message } - Tags: { entry.Tags }
+							</p>
+						}
+					</div>
+				}
+			</div>
+		</div>
+	</section>
+}

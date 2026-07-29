@@ -1,0 +1,34 @@
+package components
+
+// Header renders the site's top nav: logo/wordmark on the left, links on
+// the right. Sticky + blurred so it stays legible over whatever section
+// scrolls underneath it.
+//
+// Note: the mobile menu button below is a static placeholder — it has no
+// JS wired up yet to actually open a menu. Flagging so it's not mistaken
+// for finished functionality.
+templ Header() {
+	<header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
+		<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+			<a href="/" hx-get="/" hx-target="main" hx-swap="outerHTML" hx-push-url="true" class="font-mono text-lg font-semibold text-foreground">
+				<span class="text-primary">&gt;</span> jelius.dev
+			</a>
+			<nav class="hidden items-center gap-8 font-mono text-sm text-muted-foreground sm:flex">
+				@Links("/blogs", "Blogs")
+				@Links("/achievements", "Achievements")
+				@Links("/links", "Links")
+			</nav>
+			<button
+				type="button"
+				class="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:hidden"
+				aria-label="Open menu"
+			>
+				<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M4 6h16"></path>
+					<path d="M4 12h16"></path>
+					<path d="M4 18h16"></path>
+				</svg>
+			</button>
+		</div>
+	</header>
+}

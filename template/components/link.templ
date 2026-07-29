@@ -1,0 +1,7 @@
+package components
+
+templ Links(href string, title string) {
+	<a href={ href } hx-get={ href } hx-target="main" hx-swap="outerHTML" hx-push-url="true">
+		{ title }
+	</a>
+}

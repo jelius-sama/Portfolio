@@ -1,0 +1,43 @@
+package components
+
+// SocialLink renders one labeled profile/platform row: a small square
+// badge with the platform's abbreviation plus its display label.
+// Reused by the contact section now, and by any future Links page —
+// kept generic on purpose rather than baked into contact.templ.
+templ SocialLink(index int, badge, label, href string) {
+	<a
+		href={ templ.URL(href) }
+		class={ "flex items-center gap-3 text-foreground transition-colors hover:text-primary animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(index) }
+	>
+		@PlatformBadge(badge)
+		<span class="text-base">{ label }</span>
+	</a>
+}
+
+// PlatformBadge is a small bordered square showing a short abbreviation
+// (X, in, gh, lt, ...) instead of a trademarked brand logo — keeps the
+// terminal/monospace aesthetic and avoids reproducing brand marks.
+templ PlatformBadge(abbr string) {
+	<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-secondary/60 font-mono text-xs font-semibold text-muted-foreground">
+		{ abbr }
+	</span>
+}
+
+// EmailLink renders the primary contact email row with a mail icon in
+// the accent color — visually distinct from the plain SocialLink rows.
+templ EmailLink(index int, address string) {
+	<a
+		href={ templ.URL("mailto:" + address) }
+		class={ "flex items-center gap-3 text-foreground transition-colors hover:text-primary animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(index) }
+	>
+		@mailIcon()
+		<span class="font-mono text-base">{ address }</span>
+	</a>
+}
+
+templ mailIcon() {
+	<svg class="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+		<rect x="2" y="4" width="20" height="16" rx="2"></rect>
+		<path d="m2 7 10 6 10-6"></path>
+	</svg>
+}

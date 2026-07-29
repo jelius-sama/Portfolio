@@ -1,7 +1,8 @@
 BUILD_DIR := ./build
 
 # Config Options:
-HOST := jelius.dev
+HOST := https://jelius.dev
+ASSET_CDN_HOST := https://assets.jelius.dev
 VERSION := 2.0.1
 PORT := :6969
 
@@ -16,6 +17,7 @@ dev:
 		    -s -w \
 		    -X main.Environment=development  \
 		    -X main.Host=$(HOST) \
+		    -X main.AssetCDNHost=http://localhost$(PORT) \
 		    -X main.Version=$(VERSION) \
 		    -X main.Port=$(PORT)" \
 		    -trimpath -buildvcs=false -o $(DEV_BIN) ./cmd
@@ -27,6 +29,7 @@ build:
 		    -s -w \
 		    -X main.Environment=production \
 		    -X main.Host=$(HOST) \
+		    -X main.AssetCDNHost=$(ASSET_CDN_HOST) \
 		    -X main.Version=$(VERSION) \
 		    -X main.Port=$(PORT)" \
 		    -trimpath -buildvcs=false -o $(BIN) ./cmd

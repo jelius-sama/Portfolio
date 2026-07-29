@@ -1,0 +1,98 @@
+package components
+
+// LinkEntry is one row in the /links page's social-links list.
+type LinkEntry struct {
+	Kind     string // "github" | "linkedin" | "freelance" | "mail" | "bracket"
+	Title    string
+	Subtitle string
+	Href     string
+}
+
+// Hardcoded below — only the entries visible in the reference screenshots
+// are included. The page mentions "Found 10 links" but a few were below
+// the fold and not visible, so add those in yourself when ready.
+var linkEntries = []LinkEntry{
+	{Kind: "github", Title: "GitHub", Subtitle: "Check out my code and projects", Href: "#"},
+	{Kind: "github", Title: "GitHub for Uni. Projects", Subtitle: "University Project Repositories", Href: "#"},
+	{Kind: "freelance", Title: "Freelance", Subtitle: "Hire me for freelance projects and collaborations", Href: "#"},
+	{Kind: "linkedin", Title: "LinkedIn", Subtitle: "Connect with me professionally", Href: "#"},
+	{Kind: "bracket", Title: "Portfolio", Subtitle: "View my full portfolio site", Href: "/"},
+	{Kind: "mail", Title: "Email Me", Subtitle: "Get in touch directly", Href: "mailto:contact@jelius.dev"},
+	{Kind: "bracket", Title: "Status", Subtitle: "Uptime monitoring of my services", Href: "#"},
+}
+
+// SocialLinksList renders the "social-links" terminal window containing
+// one LinkItem row per entry in linkEntries.
+templ SocialLinksList() {
+	<section id="links-list" class="bg-background px-6 py-24 sm:py-32">
+		<div class="mx-auto max-w-3xl">
+			@Terminal("social-links") {
+				<div class="space-y-4">
+					for i, entry := range linkEntries {
+						@LinkItem(i, entry.Kind, entry.Title, entry.Subtitle, entry.Href)
+					}
+				</div>
+			}
+		</div>
+	</section>
+}
+
+// LinkItem renders one linktree-style row: an icon, a title + subtitle,
+// and an external-link chevron on the right. index staggers the
+// fade/slide-in via lineDelay, same rhythm as the rest of the site.
+templ LinkItem(index int, kind, title, subtitle, href string) {
+	<a
+		href={ templ.URL(href) }
+		target="_blank"
+		rel="noopener noreferrer"
+		class={ "group flex items-center justify-between gap-4 rounded-md border border-border bg-card px-5 py-4 transition-colors hover:border-primary/40 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(index) }
+	>
+		<div class="flex items-center gap-4">
+			@linkIcon(kind)
+			<div>
+				<p class="font-mono text-base font-semibold text-foreground">{ title }</p>
+				<p class="text-sm text-muted-foreground">{ subtitle }</p>
+			</div>
+		</div>
+		<svg class="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+			<path d="M15 3h6v6"></path>
+			<path d="M10 14 21 3"></path>
+		</svg>
+	</a>
+}
+
+// linkIcon renders the leading icon for a LinkItem. github/linkedin use
+// generic (non-brand) glyphs rather than the actual logos — same call
+// made for PlatformBadge in social.templ.
+templ linkIcon(kind string) {
+	if kind == "github" {
+		<svg class="h-5 w-5 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<circle cx="6" cy="6" r="3"></circle>
+			<circle cx="6" cy="18" r="3"></circle>
+			<circle cx="18" cy="6" r="3"></circle>
+			<path d="M6 9v6"></path>
+			<path d="M9 6h6a3 3 0 0 1 3 3"></path>
+		</svg>
+	} else if kind == "linkedin" {
+		<svg class="h-5 w-5 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<circle cx="18" cy="5" r="3"></circle>
+			<circle cx="6" cy="12" r="3"></circle>
+			<circle cx="18" cy="19" r="3"></circle>
+			<path d="m8.6 10.5 7-4"></path>
+			<path d="m8.6 13.5 7 4"></path>
+		</svg>
+	} else if kind == "freelance" {
+		<svg class="h-5 w-5 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<rect x="2" y="7" width="20" height="14" rx="2"></rect>
+			<path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+		</svg>
+	} else if kind == "mail" {
+		@mailIcon()
+	} else {
+		<svg class="h-5 w-5 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="m8 6-6 6 6 6"></path>
+			<path d="m16 6 6 6-6 6"></path>
+		</svg>
+	}
+}

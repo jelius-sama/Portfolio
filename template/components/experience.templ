@@ -1,0 +1,42 @@
+package components
+
+// Experience renders the "Experience" section: a heading, subtitle, and
+// a single terminal window (experience.log) containing a vertical
+// timeline built from the reusable ExperienceEntry component below.
+//
+// Hardcoded entries below — swap for real data / a props struct later.
+templ Experience() {
+	<section id="experience" class="bg-background px-6 py-24 sm:py-32">
+		<div class="mx-auto max-w-3xl">
+			@SectionHeading("Experience")
+			<p class="mt-4 text-center text-sm text-muted-foreground">
+				My non-professional journey:
+			</p>
+			<div class="mt-12">
+				@Terminal("experience.log") {
+					<div class="space-y-6">
+						@ExperienceEntry(0, "Birth", "ST. Augustine Hospital • New born", "November 2007", false)
+						@ExperienceEntry(1, "Student", "Holy Child • Primary School", "Jan 2009 – Dec 2013", false)
+						@ExperienceEntry(2, "Student", "ST. John's • High School", "Jan 2014 – April 2025", false)
+						@ExperienceEntry(3, "Undergraduate", "Assam Don Bosco • University", "April 2025 – Present", true)
+					</div>
+				}
+			</div>
+		</div>
+	</section>
+}
+
+// ExperienceEntry renders one timeline row: a label, a "place • role"
+// line, and a date range. current adds a left accent bar to mark the
+// entry that's still ongoing — everything else stays flush.
+//
+// index staggers the fade/slide-in via lineDelay, reused from
+// terminal.templ so this section animates on the same rhythm as the
+// terminal-based ones.
+templ ExperienceEntry(index int, label, subtitle, dateRange string, current bool) {
+	<div class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(index), templ.KV("border-l-2 border-primary pl-4", current) }>
+		<h4 class="font-mono text-sm font-semibold text-primary">{ label }</h4>
+		<p class="mt-1 text-foreground">{ subtitle }</p>
+		<p class="text-sm text-muted-foreground">{ dateRange }</p>
+	</div>
+}

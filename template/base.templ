@@ -1,10 +1,16 @@
 package template
 
+import (
+	"fmt"
+	"git.jelius.dev/jelius-sama/Portfolio/template/components"
+	"git.jelius.dev/jelius-sama/Portfolio/types"
+)
+
 templ Base(metadata templ.Component, body templ.Component, footer templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
-			<link href="/assets/output.css" rel="stylesheet"/>
+			<link href={ fmt.Sprintf("%s/assets/output.css", types.EVAssetCDNHostname.Get().Value) } rel="stylesheet"/>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			if metadata != nil {
@@ -12,6 +18,7 @@ templ Base(metadata templ.Component, body templ.Component, footer templ.Componen
 			}
 		</head>
 		<body>
+			@components.Header()
 			if body != nil {
 				@body
 			}

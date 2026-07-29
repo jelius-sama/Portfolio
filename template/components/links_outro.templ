@@ -1,0 +1,56 @@
+package components
+
+import "fmt"
+
+// LinksOutro renders the closing block for the /links page: a "stats"
+// terminal (a short git-log-style summary, the QR code, and a closing
+// echo), plus a small "built with" line. Call @Footer() separately after
+// this, same as on the home page — kept out of here so Footer stays the
+// one shared, site-wide component.
+//
+// Simplified from the original screenshot on purpose: the full fake
+// neofetch hardware dump (OS/Host/Kernel/CPU/GPU/Memory) was dropped
+// since it didn't carry real information here — kept only the parts that
+// still say something true or charming (link count, QR, thanks note). If
+// you'd rather keep a joke-y neofetch block, easy to add back in.
+templ LinksOutro() {
+	<section id="links-outro" class="bg-background px-6 pb-24 sm:pb-32">
+		<div class="mx-auto max-w-3xl">
+			@Terminal("stats") {
+				<div class="space-y-6">
+					<div class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(0) }>
+						<p>
+							<span class="text-primary">$</span>
+							<span class="text-foreground">git log --stat</span>
+						</p>
+						<ul class="mt-2 space-y-1 text-muted-foreground">
+							<li>• { fmt.Sprintf("%d social links configured", len(linkEntries)) }</li>
+							<li>• Last updated: 7/30/2026</li>
+							<li>• Status: All systems operational</li>
+						</ul>
+					</div>
+					<div class={ "flex flex-col items-center gap-3 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(1) }>
+						<p class="self-start">
+							<span class="text-primary">$</span>
+							<span class="text-foreground">neofetch</span>
+						</p>
+						<div class="w-full max-w-xs overflow-hidden rounded-md border border-border bg-secondary/40 p-4 text-center">
+							<img src="/assets/img/contact-qr.png" alt="QR code linking to jelius.dev" class="mx-auto block w-40"/>
+							<p class="mt-3 font-mono text-sm italic text-muted-foreground">Jelius Basumatary</p>
+						</div>
+					</div>
+					<p class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(2) }>
+						<span class="text-primary">$</span>
+						<span class="text-foreground">echo "Thanks for visiting!"</span>
+					</p>
+					<p class={ "text-muted-foreground animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(3) }>
+						Thanks for visiting!
+					</p>
+				</div>
+			}
+			<p class="mt-8 text-center text-sm text-muted-foreground">
+				Built with <span class="text-[#f38ba8]">♥</span> using terminal aesthetics
+			</p>
+		</div>
+	</section>
+}
