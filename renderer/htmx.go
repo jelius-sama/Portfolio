@@ -60,7 +60,7 @@ func (pc *PageContext) DetermineRenderMode(c fiber.Ctx) {
     if c.Get("HX-Request") == "true" {
         pc.IsPartial = true
 
-        parsedURL, _ := url.Parse(c.Get("HX-Current-URL"))
+        var parsedURL, _ = url.Parse(c.Get("HX-Current-URL"))
 
         if parsedURL.Path != c.Path() {
             pc.TargetPart = TPUndefined.Into("both")

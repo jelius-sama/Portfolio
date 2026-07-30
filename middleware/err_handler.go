@@ -28,7 +28,7 @@ func ErrHandler(c fiber.Ctx, err error) error {
 
     // TODO: Integrate errors with GoTH stack
     // GoTH == Go + Templ + HTMX
-    htmlResponse := fmt.Sprintf(`
+    var htmlResponse = fmt.Sprintf(`
         <!DOCTYPE html>
         <html lang="en">
         <head>

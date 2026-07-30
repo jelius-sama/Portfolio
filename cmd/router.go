@@ -16,10 +16,15 @@ func Router(app *fiber.App) {
     app.Use(middleware.RecoveryMiddleware())
     app.Use(middleware.RequestLogger())
 
-    app.Get("/api/healthz", api.Healthz)
+    var noCache = middleware.NewCacheControl(middleware.CacheConfig{
+        CustomHeader: "no-store, no-cache, must-revalidate, proxy-revalidate",
+    })
+    var apiHandle = app.Group("/api", noCache)
+
+    apiHandle.Get("/healthz", api.Healthz)
 
     if types.EVEnv.Get().Value == types.EMDev.String() {
-        sub, _ := fs.Sub(embed.AssetFS, "assets")
+        var sub, _ = fs.Sub(embed.AssetFS, "assets")
         app.Get("/assets/*", static.New("", static.Config{
             FS:            sub,
             CacheDuration: 0,
@@ -30,8 +35,12 @@ func Router(app *fiber.App) {
         }))
     }
 
-    ui := renderer.New()
-    app.Get("/", ui.RenderHome)
-    app.Get("/links", ui.RenderLinks)
+    var ui = renderer.New()
+    // INFO: Due to how htmx works we might not be able to cache this very well.
+    // I don't know if CDN allows a content to be differentiated with headers alone.
+    // Since HTMX natively uses headers to communicate, disregarding that fact will
+    // make the custom SPA solution fail, for now just stop caching it.
+    app.Get("/", noCache, ui.RenderHome)
+    app.Get("/links", noCache, ui.RenderLinks)
 }
 
