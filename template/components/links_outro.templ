@@ -14,22 +14,27 @@ import "fmt"
 // still say something true or charming (link count, QR, thanks note). If
 // you'd rather keep a joke-y neofetch block, easy to add back in.
 templ LinksOutro() {
-	<section id="links-outro" class="bg-background px-6 pb-24 sm:pb-32">
-		<div class="mx-auto max-w-3xl">
+	<section id="links-outro" class="pb-24 sm:pb-32">
+		<div class="mx-auto max-w-6xl">
 			@Terminal("stats") {
 				<div class="space-y-6">
-					<div class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(0) }>
-						<p>
-							<span class="text-primary">$</span>
-							<span class="text-foreground">git log --stat</span>
-						</p>
-						<ul class="mt-2 space-y-1 text-muted-foreground">
-							<li>• { fmt.Sprintf("%d social links configured", len(linkEntries)) }</li>
-							<li>• Last updated: 7/30/2026</li>
-							<li>• Status: All systems operational</li>
-						</ul>
-					</div>
-					<div class={ "flex flex-col items-center gap-3 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(1) }>
+					@TerminalLine(0) {
+						<span class="text-primary">guest@jelius:~$</span>
+						<span class="text-foreground">whoami</span>
+					}
+					@TerminalLine(1) {
+						<span class="text-muted-foreground">I'm an undergraduate CS student who loves building things that work well and are easy to use.</span>
+					}
+					@TerminalLine(2) {
+						<span class="text-primary">guest@jelius:~$</span>
+						<span class="text-foreground">ls social-links/</span>
+					}
+					@TerminalLine(3) {
+						<span class="text-muted-foreground">{ fmt.Sprintf("%d social links configured", len(linkEntries)) }</span>
+						<span class="mx-2 text-primary">•</span>
+						<span class="text-muted-foreground">Click any link below to connect with me</span>
+					}
+					<div class={ "flex flex-col /*items-center*/ gap-3 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(1) }>
 						<p class="self-start">
 							<span class="text-primary">$</span>
 							<span class="text-foreground">neofetch</span>
@@ -48,9 +53,6 @@ templ LinksOutro() {
 					</p>
 				</div>
 			}
-			<p class="mt-8 text-center text-sm text-muted-foreground">
-				Built with <span class="text-[#f38ba8]">♥</span> using terminal aesthetics
-			</p>
 		</div>
 	</section>
 }

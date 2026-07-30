@@ -10,13 +10,19 @@ package components
 templ Header() {
 	<header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
 		<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-			<a href="/" hx-get="/" hx-target="main" hx-swap="outerHTML" hx-push-url="true" class="font-mono text-lg font-semibold text-foreground">
+			@Link(LinkAttr{Href: "/", Class: "font-mono text-lg font-semibold text-foreground"}) {
 				<span class="text-primary">&gt;</span> jelius.dev
-			</a>
+			}
 			<nav class="hidden items-center gap-8 font-mono text-sm text-muted-foreground sm:flex">
-				@Links("/blogs", "Blogs")
-				@Links("/achievements", "Achievements")
-				@Links("/links", "Links")
+				@Link(LinkAttr{Href: "/blogs"}) {
+					Blogs 
+				}
+				@Link(LinkAttr{Href: "/achievements"}) {
+					Achievements 
+				}
+				@Link(LinkAttr{Href: "/links"}) {
+					Links 
+				}
 			</nav>
 			<button
 				type="button"

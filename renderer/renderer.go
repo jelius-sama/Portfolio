@@ -2,6 +2,7 @@ package renderer
 
 import (
     "git.jelius.dev/jelius-sama/Portfolio/template"
+    "git.jelius.dev/jelius-sama/Portfolio/template/components"
     "git.jelius.dev/jelius-sama/Portfolio/types"
 
     "github.com/a-h/templ"
@@ -34,7 +35,7 @@ func Renderer(c fiber.Ctx, metadata types.Metadata, bodyContent templ.Component)
         }
     }
 
-    var fullPage templ.Component = template.Base(template.Metadata(page.Metadata), bodyContent, nil)
+    var fullPage templ.Component = template.Base(template.Metadata(page.Metadata), bodyContent, components.Footer())
 
     return fullPage.Render(c.Req().RequestCtx(), c.Response().BodyWriter())
 }

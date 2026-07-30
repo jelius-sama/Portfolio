@@ -27,8 +27,8 @@ var contactLogEntries = []ContactLogEntry{
 // TerminalLine) since some rows contain block-level content (the QR
 // image container) that can't legally sit inside TerminalLine's <p>.
 templ Contact() {
-	<section id="contact" class="bg-background px-6 py-24 sm:py-32">
-		<div class="mx-auto max-w-5xl">
+	<section id="contact" class="bg-background py-24 sm:py-32">
+		<div class="mx-auto max-w-6xl px-6">
 			@SectionHeading("Get in Touch")
 			<div class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
 				@Terminal("contact-info") {

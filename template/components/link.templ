@@ -1,7 +1,12 @@
 package components
 
-templ Links(href string, title string) {
-	<a href={ href } hx-get={ href } hx-target="main" hx-swap="outerHTML" hx-push-url="true">
-		{ title }
+type LinkAttr struct {
+	Href  string
+	Class string
+}
+
+templ Link(attr LinkAttr) {
+	<a href={ attr.Href } hx-get={ attr.Href } class={ attr.Class } hx-target="main" hx-swap="outerHTML" hx-push-url="true">
+		{ children... }
 	</a>
 }

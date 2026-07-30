@@ -24,8 +24,8 @@ var linkEntries = []LinkEntry{
 // SocialLinksList renders the "social-links" terminal window containing
 // one LinkItem row per entry in linkEntries.
 templ SocialLinksList() {
-	<section id="links-list" class="bg-background px-6 py-24 sm:py-32">
-		<div class="mx-auto max-w-3xl">
+	<section id="links-list" class="pb-24 sm:pb-32">
+		<div class="mx-auto max-w-6xl">
 			@Terminal("social-links") {
 				<div class="space-y-4">
 					for i, entry := range linkEntries {
