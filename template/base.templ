@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"git.jelius.dev/jelius-sama/Portfolio/template/components"
 	"git.jelius.dev/jelius-sama/Portfolio/types"
+	"github.com/gofiber/fiber/v3"
 )
 
-templ Base(metadata templ.Component, body templ.Component, footer templ.Component) {
+var baseScript = templ.NewOnceHandle()
+
+templ Base(serverCtx fiber.Ctx, metadata templ.Component, body templ.Component, footer templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -18,14 +21,17 @@ templ Base(metadata templ.Component, body templ.Component, footer templ.Componen
 			}
 		</head>
 		<body>
-			@components.Header()
+			@components.Header(serverCtx)
 			if body != nil {
 				@body
 			}
 			if footer != nil {
 				@footer
 			}
-			@HTMXScript()
+			@baseScript.Once() {
+				@HTMXScript()
+				@HTMXHotFixes()
+			}
 		</body>
 	</html>
 }

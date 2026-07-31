@@ -1,0 +1,17 @@
+package pages
+
+import "fmt"
+import "git.jelius.dev/jelius-sama/Portfolio/template/components"
+
+templ Error(code int, err error) {
+	<main id={ fmt.Sprintf("error-status-%d", code) }>
+		<h1>Oops! Error code { code }</h1>
+		<p>{ err.Error() }</p>
+		<hr style="max-width: 400px; border: 0; border-top: 1px solid #ccc; margin: 20px auto;"/>
+		<p>
+			@components.Link(components.LinkAttr{Href: "/"}) {
+				Go back home
+			}
+		</p>
+	</main>
+}

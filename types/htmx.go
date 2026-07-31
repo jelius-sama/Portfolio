@@ -1,18 +1,10 @@
-package renderer
+package types
 
 import (
     "net/url"
 
-    "git.jelius.dev/jelius-sama/Portfolio/types"
-
     "github.com/gofiber/fiber/v3"
 )
-
-type ViewManager struct{}
-
-func New() *ViewManager {
-    return &ViewManager{}
-}
 
 type TargetPart uint8
 
@@ -25,7 +17,7 @@ const (
 
 // PageContext holds metadata about the current request lifecycle
 type PageContext struct {
-    Metadata   types.Metadata
+    Metadata   Metadata
     IsPartial  bool
     TargetPart TargetPart
 }

@@ -15,6 +15,14 @@ func (v *ViewManager) RenderHome(c fiber.Ctx) error {
     }
     // TODO: Remove hardcoded data to be loaded from a config file
     return Renderer(c, metadata, pages.Home(pages.HomeData{
+        HeroSectionData: components.HeroData{
+            FirstName:         "Jelius",
+            LastName:          "Basumatary",
+            EducationLevel:    components.EDLevelUG,
+            StudyDomain:       "Computer Science",
+            WhoAmI:            "An undergraduate CS student who loves building things that work well and are easy to use.",
+            SpecializedDomain: []string{"Backend Developer", "Systems Programmer"},
+        },
         AboutSectionMessage: []string{
             "I'm an undergraduate CS student who loves building things that work well and are easy to use. I enjoy solving problems, making code simple, and learning new things every day.",
             "Right now, I'm working toward my bachelor's degree. I enjoy developing software that makes a real difference in everyday life, and I'm always curious how things work under the hood.",

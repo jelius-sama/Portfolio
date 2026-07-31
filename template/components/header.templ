@@ -1,29 +1,117 @@
 package components
 
-// Header renders the site's top nav: logo/wordmark on the left, links on
-// the right. Sticky + blurred so it stays legible over whatever section
-// scrolls underneath it.
-//
-// Note: the mobile menu button below is a static placeholder — it has no
-// JS wired up yet to actually open a menu. Flagging so it's not mistaken
-// for finished functionality.
-templ Header() {
+import (
+	"git.jelius.dev/jelius-sama/Portfolio/types"
+	"github.com/gofiber/fiber/v3"
+	"maps"
+	"slices"
+	"strings"
+)
+
+// TODO: the mobile menu button below is a static placeholder — it has no
+// JS wired up yet to actually open a menu.
+
+var headerScript = templ.NewOnceHandle()
+
+func getPath(c string) string {
+	if c == "/" {
+		return ""
+	} else {
+		return c
+	}
+}
+
+func cleanPath(path string, currentPath string) string {
+	if path == "/" || currentPath == path {
+		return ""
+	}
+
+	cleaned := strings.ReplaceAll(strings.TrimPrefix(path, "/"), "-", " ")
+	return strings.ToUpper(string(cleaned[0])) + cleaned[1:]
+}
+
+script initPages(pages []string) {
+    window.pages = pages;
+}
+
+templ Header(serverCtx fiber.Ctx) {
 	<header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
 		<div class="mx-auto flex max-w-6xl items-center justify-between px-3 py-5">
-			@Link(LinkAttr{Href: "/", Class: "font-mono text-lg font-semibold text-foreground"}) {
-				<span class="text-primary">&gt;</span> jelius.dev
+			@Link(LinkAttr{Id: "current-path", Href: "/", Class: "font-mono text-lg font-semibold text-foreground"}) {
+				<span class="text-primary">&gt;</span> jelius.dev{ getPath(serverCtx.Path()) }
 			}
-			<nav class="hidden items-center gap-8 font-mono text-sm text-muted-foreground sm:flex">
-				@Link(LinkAttr{Href: "/blogs"}) {
-					Blogs 
-				}
-				@Link(LinkAttr{Href: "/achievements"}) {
-					Achievements 
-				}
-				@Link(LinkAttr{Href: "/links"}) {
-					Links 
+			<nav id="nav-links" class="hidden items-center gap-8 font-mono text-sm text-muted-foreground sm:flex">
+				{{
+					pages := slices.Collect(maps.Keys(types.Pages))
+					slices.Sort(pages)
+				}}
+				@initPages(pages)
+				for _, k := range pages {
+					{{ var path string = cleanPath(k, serverCtx.Path()) }}
+					if len(path) != 0 {
+						@Link(LinkAttr{Href: k}) {
+							{ path }
+						}
+					}
 				}
 			</nav>
+			@headerScript.Once() {
+				<script>
+					const onPathnameChange = (callback) => {
+						document.body.addEventListener('htmx:pushedIntoHistory', () => callback(window.location.pathname));
+						window.addEventListener('popstate', () => callback(window.location.pathname));
+					};
+					const getPath = (path) => {
+						if (path === "/") {
+							return "";
+						} else {
+							return path;
+						};
+					};
+					const decodeHtmlEntities = (str) => {
+						const parser = new DOMParser();
+						const dom = parser.parseFromString(str, 'text/html');
+						return dom.body.textContent;
+					};
+					const cleanPath= (path, currentPath) => {
+						if (path === "/" || currentPath === path) return "";
+
+						// Remove leading slash and replace all dashes with spaces
+						let cleaned = path.replace(/^\//, '').replaceAll('-', ' ');
+						if (cleaned.length === 0) return "";
+
+						// Capitalize the first letter and append the rest
+						return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+					};
+
+					const logoEl = document.getElementById("current-path");
+					const navLinksEl = document.getElementById("nav-links");
+					onPathnameChange((path) => {
+						if (logoEl) {
+							const iconEl = document.createElement("span");
+							iconEl.textContent = decodeHtmlEntities("&gt;");
+							iconEl.classList.add("text-primary");
+							logoEl.replaceChildren(iconEl, ` jelius.dev${getPath(path)}`);
+						};
+
+						if (navLinksEl) {
+							navLinksEl.replaceChildren();
+
+						    window.pages.forEach((k) => {
+							   const cleanedPath = cleanPath(k, path);
+
+								if (cleanedPath.length !== 0) {
+									const link = document.createElement("a");
+									link.href = k;
+									link.textContent = cleanedPath;
+
+									navLinksEl.appendChild(link);
+								}
+							});
+						 }
+					});
+				</script>
+			}
 			<button
 				type="button"
 				class="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:hidden"

@@ -12,14 +12,34 @@ import (
     "github.com/gofiber/fiber/v3/middleware/static"
 )
 
+type RouterCtx struct {
+    UI                 *renderer.ViewManager
+    MiddlewareHandlers types.MiddlewareHandlerMap
+}
+
+var routerCtx RouterCtx = RouterCtx{}
+
+func init() {
+    routerCtx.UI = renderer.New()
+    routerCtx.MiddlewareHandlers = make(types.MiddlewareHandlerMap)
+    routerCtx.MiddlewareHandlers[types.MHNoCache] = middleware.NewCacheControl(middleware.CacheConfig{
+        CustomHeader: "no-store, no-cache, must-revalidate, proxy-revalidate",
+    })
+
+    types.Pages = map[string]types.Page{
+        "/":      types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{routerCtx.UI.RenderHome}},
+        "/links": types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{routerCtx.UI.RenderLinks}},
+        // TODO:
+        "/acheivements": types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{routerCtx.UI.RenderLinks}},
+        "/blogs":        types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{routerCtx.UI.RenderLinks}},
+    }
+}
+
 func Router(app *fiber.App) {
     app.Use(middleware.RecoveryMiddleware())
     app.Use(middleware.RequestLogger())
 
-    var noCache = middleware.NewCacheControl(middleware.CacheConfig{
-        CustomHeader: "no-store, no-cache, must-revalidate, proxy-revalidate",
-    })
-    var apiHandle = app.Group("/api", noCache)
+    var apiHandle = app.Group("/api", routerCtx.MiddlewareHandlers[types.MHNoCache])
 
     apiHandle.Get("/healthz", api.Healthz)
 
@@ -35,12 +55,8 @@ func Router(app *fiber.App) {
         }))
     }
 
-    var ui = renderer.New()
-    // INFO: Due to how htmx works we might not be able to cache this very well.
-    // I don't know if CDN allows a content to be differentiated with headers alone.
-    // Since HTMX natively uses headers to communicate, disregarding that fact will
-    // make the custom SPA solution fail, for now just stop caching it.
-    app.Get("/", noCache, ui.RenderHome)
-    app.Get("/links", noCache, ui.RenderLinks)
+    for k, v := range types.Pages {
+        app.Get(k, v.Handler, v.Handlers...)
+    }
 }
 

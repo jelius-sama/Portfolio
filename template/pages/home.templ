@@ -3,6 +3,7 @@ package pages
 import "git.jelius.dev/jelius-sama/Portfolio/template/components"
 
 type HomeData struct {
+	HeroSectionData       components.HeroData
 	AboutSectionMessage   []string
 	SkillSectionData      components.SkillData
 	ExperienceSectionData []components.ExperienceEntry
@@ -11,7 +12,7 @@ type HomeData struct {
 
 templ Home(data HomeData) {
 	<main>
-		@components.Hero()
+		@components.Hero(data.HeroSectionData)
 		@components.About(data.AboutSectionMessage)
 		@components.Skills(data.SkillSectionData)
 		@components.Experience(data.ExperienceSectionData)
