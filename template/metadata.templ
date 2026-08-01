@@ -2,6 +2,7 @@ package template
 
 import "git.jelius.dev/jelius-sama/Portfolio/types"
 
+// TODO: Implement more metadatas
 templ Metadata(metadata types.Metadata) {
 	<title hx-swap-oob="true">{ metadata.Title }</title>
 	<meta name="description" hx-swap-oob="outerHTML:[name=description]" content={ metadata.Description }/>

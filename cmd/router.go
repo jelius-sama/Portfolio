@@ -40,12 +40,16 @@ func init() {
         MustRevalidate: true,
     })
 
+    var pageCache = routerCtx.MiddlewareHandlers[types.MHStaticPages]
+    if types.EVEnv.Get().Value == types.EMDev.String() {
+        pageCache = routerCtx.MiddlewareHandlers[types.MHNoCache]
+    }
     types.Pages = map[string]types.Page{
-        "/":      types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHStaticPages], Handlers: []any{routerCtx.UI.RenderHome}},
-        "/links": types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHStaticPages], Handlers: []any{routerCtx.UI.RenderLinks}},
-        // TODO:
-        "/acheivements": types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHStaticPages], Handlers: []any{routerCtx.UI.RenderLinks}},
-        "/blogs":        types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHStaticPages], Handlers: []any{routerCtx.UI.RenderLinks}},
+        "/":      types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderHome}},
+        "/links": types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
+        // TODO: Implement these pages
+        "/acheivements": types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
+        "/blogs":        types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
     }
 }
 

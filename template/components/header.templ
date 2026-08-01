@@ -11,7 +11,6 @@ import (
 
 var headerScript = templ.NewOnceHandle()
 
-// TODO: Fix header links
 func getPath(c string) string {
 	if c == "/" {
 		return ""
@@ -27,7 +26,10 @@ func getPath(c string) string {
 }
 
 func cleanPath(path string, currentPath string) string {
-	if path == "/" || currentPath == path {
+	if currentPath != "/" && path == "/" {
+		return "Portfolio"
+	}
+	if currentPath == path {
 		return ""
 	}
 
@@ -143,7 +145,8 @@ templ Header(serverCtx fiber.Ctx) {
 						return dom.body.textContent;
 					};
 					const cleanPath= (path, currentPath) => {
-						if (path === "/" || currentPath === path) return "";
+						if (currentPath !== "/" && path === "/") return "Portfolio";
+						if (currentPath === path) return "";
 						// Remove leading slash and replace all dashes with spaces
 						let	cleaned = path.replace(/^\//, '').replaceAll('-', ' ');
 						if (cleaned.length === 0) return "";
