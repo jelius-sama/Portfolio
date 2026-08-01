@@ -26,15 +26,26 @@ func init() {
     routerCtx.UI = renderer.New()
     routerCtx.MiddlewareHandlers = make(types.MiddlewareHandlerMap)
     routerCtx.MiddlewareHandlers[types.MHNoCache] = middleware.NewCacheControl(middleware.CacheConfig{
-        CustomHeader: "no-store, no-cache, must-revalidate, proxy-revalidate",
+        CustomHeader: "no-store, no-cache, max-age=0, must-revalidate, proxy-revalidate",
+    })
+    routerCtx.MiddlewareHandlers[types.MHStaticPages] = middleware.NewCacheControl(middleware.CacheConfig{
+        Public:         true,
+        MaxAge:         time.Hour,
+        SMaxAge:        new(48 * time.Hour),
+        MustRevalidate: true,
+    })
+    routerCtx.MiddlewareHandlers[types.MHStaticAsset] = middleware.NewCacheControl(middleware.CacheConfig{
+        Public:         true,
+        MaxAge:         31536000 * time.Second, // 1 year
+        MustRevalidate: true,
     })
 
     types.Pages = map[string]types.Page{
-        "/":      types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{routerCtx.UI.RenderHome}},
-        "/links": types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{routerCtx.UI.RenderLinks}},
+        "/":      types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHStaticPages], Handlers: []any{routerCtx.UI.RenderHome}},
+        "/links": types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHStaticPages], Handlers: []any{routerCtx.UI.RenderLinks}},
         // TODO:
-        "/acheivements": types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{routerCtx.UI.RenderLinks}},
-        "/blogs":        types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{routerCtx.UI.RenderLinks}},
+        "/acheivements": types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHStaticPages], Handlers: []any{routerCtx.UI.RenderLinks}},
+        "/blogs":        types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHStaticPages], Handlers: []any{routerCtx.UI.RenderLinks}},
     }
 }
 
@@ -50,9 +61,9 @@ func Router(app *fiber.App) {
         if _, err := os.Stat("assets"); os.IsNotExist(err) {
             logger.Panic("assets dir missing; golang's lack of #ifdef forces runtime hacks just to stop assets leaking into prod")
         }
-        app.Get("/assets/*", static.New("assets", static.Config{
-            CacheDuration: 0,
+        app.Get("/assets/*", routerCtx.MiddlewareHandlers[types.MHNoCache], static.New("assets", static.Config{
             Compress:      true,
+            CacheDuration: 0 * time.Second,
             NotFoundHandler: func(c fiber.Ctx) error {
                 return middleware.ErrHandler(c, fiber.ErrNotFound)
             },
@@ -77,11 +88,9 @@ func Router(app *fiber.App) {
             logger.Error("Assets directory could not be found, disabling static asset route!")
         } else {
             logger.Okay("Serving assets from:", assetDir)
-            app.Get("/assets/*", static.New(assetDir, static.Config{
-                Browse:        false,
-                MaxAge:        3600,
-                CacheDuration: 10 * time.Second,
-                Compress:      true,
+            app.Get("/assets/*", routerCtx.MiddlewareHandlers[types.MHStaticAsset], static.New(assetDir, static.Config{
+                Browse:   false,
+                Compress: true,
                 NotFoundHandler: func(c fiber.Ctx) error {
                     return middleware.ErrHandler(c, fiber.ErrNotFound)
                 },

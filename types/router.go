@@ -8,6 +8,8 @@ type MiddlewareHandler uint8
 
 const (
     MHNoCache MiddlewareHandler = iota
+    MHStaticAsset
+    MHStaticPages
 )
 
 type MiddlewareHandlerMap map[MiddlewareHandler]fiber.Handler

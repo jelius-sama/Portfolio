@@ -12,6 +12,7 @@ import (
 )
 
 func ErrHandler(c fiber.Ctx, err error) error {
+    c.Response().Header.Del("Cache-Control")
     var code int
     if err == nil {
         logger.Panic("Expected error got nil, panicked to prevent nil pointer deference, this should be caught by panic handler middleware.")
