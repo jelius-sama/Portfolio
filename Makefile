@@ -3,7 +3,7 @@ BUILD_DIR := ./build
 # Config Options:
 HOST := https://jelius.dev
 ASSET_CDN_HOST := https://assets.jelius.dev
-VERSION := 2.0.1
+VERSION := 3.0.1
 PORT := :6969
 
 DEV_BIN := $(BUILD_DIR)/portfolio-dev

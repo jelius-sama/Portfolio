@@ -11,7 +11,7 @@ type HomeData struct {
 }
 
 templ Home(data HomeData) {
-	<main>
+	<main id="home">
 		@components.Hero(data.HeroSectionData)
 		@components.About(data.AboutSectionMessage)
 		@components.Skills(data.SkillSectionData)

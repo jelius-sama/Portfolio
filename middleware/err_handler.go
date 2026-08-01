@@ -1,6 +1,7 @@
 package middleware
 
 import (
+    "strconv"
     "strings"
 
     "git.jelius.dev/jelius-sama/Portfolio/renderer"
@@ -30,6 +31,10 @@ func ErrHandler(c fiber.Ctx, err error) error {
     c.Set(fiber.HeaderContentType, fiber.MIMETextHTMLCharsetUTF8)
     c.Status(fiber.StatusNotFound)
 
-    return renderer.Renderer(c, types.Metadata{}, pages.Error(code, err))
+    var metadata types.Metadata = types.Metadata{
+        Title:       strconv.Itoa(code),
+        Description: err.Error(),
+    }
+    return renderer.Renderer(c, metadata, pages.Error(code, err))
 }
 
