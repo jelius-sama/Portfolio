@@ -1,11 +1,16 @@
 package pages
 
-import "git.jelius.dev/jelius-sama/Portfolio/template/components"
+import (
+	"fmt"
+	"git.jelius.dev/jelius-sama/Portfolio/template/components"
+	"git.jelius.dev/jelius-sama/Portfolio/types"
+)
 
 templ Links() {
 	<main id="links">
 		@components.AuroraBackdrop()
-		@ProfileHandle("/assets/img/avatar.jpg", "Portrait of Jelius Basumatary", "jelius_sama", "Undergraduate Student • Open Source Enthusiast")
+		// TODO: Remove the hardcoded data
+		@ProfileHandle(fmt.Sprintf("%s/assets/compressed/jelius.webp", types.EVAssetCDNHostname.Get().Value), "Portrait of Jelius Basumatary", "jelius_sama", "Undergraduate Student • Open Source Enthusiast")
 		<div class="mx-auto max-w-6xl px-3">
 			@components.SocialLinksList()
 			@components.LinksOutro()
@@ -13,10 +18,6 @@ templ Links() {
 	</main>
 }
 
-// ProfileHandle renders the avatar + @handle + tagline intro block used
-// at the top of the /links page — same ambient-glow + AvatarRing
-// treatment as Hero, just trimmed down to identity only (no bio, no
-// CTAs, no terminal).
 templ ProfileHandle(avatarSrc, avatarAlt, handle, tagline string) {
 	<section class="relative isolate overflow-hidden px-3 pt-20 pb-10 sm:pt-28">
 		<!-- ambient glow, same treatment as Hero's -->

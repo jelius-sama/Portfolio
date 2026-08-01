@@ -1,7 +1,6 @@
 package main
 
 import (
-    "io/fs"
     "net/url"
     "os"
     "path/filepath"
@@ -59,16 +58,25 @@ func Router(app *fiber.App) {
             },
         }))
     } else {
-        var parsedURL, err = url.Parse(types.EVHostname.Get().Value)
+        var parsedURL, err = url.Parse(types.EVAssetCDNHostname.Get().Value)
+        var dataDir string = os.Getenv("XDG_DATA_HOME")
+        if len(dataDir) == 0 {
+            var home, err = os.UserHomeDir()
+            if err != nil {
+                logger.Panic(err)
+            }
+            dataDir = filepath.Join(home, ".local", "share")
+        }
         if err != nil {
             logger.Panic(err)
         }
 
-        var assetDir = filepath.Join(os.Getenv("XDG_DATA_HOME"), parsedURL.Hostname())
+        var assetDir = filepath.Join(dataDir, parsedURL.Hostname(), "assets")
 
         if _, err := os.Stat(assetDir); err != nil {
             logger.Error("Assets directory could not be found, disabling static asset route!")
         } else {
+            logger.Okay("Serving assets from:", assetDir)
             app.Get("/assets/*", static.New(assetDir, static.Config{
                 Browse:        false,
                 MaxAge:        3600,

@@ -14,6 +14,7 @@ templ Base(serverCtx fiber.Ctx, metadata templ.Component, body templ.Component, 
 	<html lang="en">
 		<head>
 			<link href={ fmt.Sprintf("%s/assets/output.css", types.EVAssetCDNHostname.Get().Value) } rel="stylesheet"/>
+			<link rel="manifest" href={ fmt.Sprintf("%s/assets/manifest.json", types.EVAssetCDNHostname.Get().Value) }/>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			if metadata != nil {

@@ -1,5 +1,10 @@
 package components
 
+import (
+	"fmt"
+	"git.jelius.dev/jelius-sama/Portfolio/types"
+)
+
 type QuickContactLinks struct {
 	Platform string
 	Icon     string
@@ -37,7 +42,7 @@ templ Contact(data ContactData) {
 							<span class="text-foreground">neofetch | less</span>
 						</p>
 						<div class={ "mx-auto max-w-xs overflow-hidden rounded-md border border-border animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(1) }>
-							<img src="/assets/img/contact-qr.png" alt="QR code linking to jelius.dev" class="block w-full"/>
+							<img src={ fmt.Sprintf("%s/assets/jelius-dev-dark.png", types.EVAssetCDNHostname.Get().Value) } alt="QR code linking to jelius.dev" class="block w-full p-2"/>
 						</div>
 						/*
 						<p class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(2) }>

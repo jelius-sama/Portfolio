@@ -2,7 +2,7 @@ BUILD_DIR := ./build
 
 # Config Options:
 HOST := https://jelius.dev
-ASSET_CDN_HOST := https://assets.jelius.dev
+ASSET_CDN_HOST := https://d1hzj1ooxbpmr0.cloudfront.net
 VERSION := 3.0.1
 PORT := :6969
 
@@ -31,5 +31,5 @@ build:
 		    -X main.Host=$(HOST) \
 		    -X main.AssetCDNHost=$(ASSET_CDN_HOST) \
 		    -X main.Version=$(VERSION) \
-		    -X main.Port=$(PORT)" \
+			-X main.Port=:6500" \
 		    -trimpath -buildvcs=false -o $(BIN) ./cmd

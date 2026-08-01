@@ -1,5 +1,10 @@
 package components
 
+import (
+	"fmt"
+	"git.jelius.dev/jelius-sama/Portfolio/types"
+)
+
 type EDLevel uint8
 
 const (
@@ -43,7 +48,7 @@ templ Hero(data HeroData) {
 			aria-hidden="true"
 		></div>
 		<div class="mx-auto flex max-w-2xl flex-col items-center px-3 text-center">
-			@AvatarRing("/assets/img/avatar.jpg", "Portrait of Jelius Basumatary")
+			@AvatarRing(fmt.Sprintf("%s/assets/compressed/jelius.webp", types.EVAssetCDNHostname.Get().Value), "Portrait of Jelius Basumatary")
 			<p class="mt-8 text-sm text-muted-foreground">Hello, I'm</p>
 			<h1 class="mt-2 font-mono text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
 				<span class="text-primary">{ data.FirstName }</span> { data.LastName }

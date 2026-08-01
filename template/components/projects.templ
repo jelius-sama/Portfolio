@@ -1,9 +1,7 @@
 package components
 
-// ProjectLink is one action button on a project card ("Code", "Live
-// Demo", "Blog Post", ...). Kind picks both the icon and the button
-// style: "demo" renders as the solid primary button, anything else
-// renders as an outline button.
+import "strings"
+
 type ProjectLink struct {
 	Label string
 	Href  string
@@ -17,58 +15,35 @@ func projectLinkClass(kind string) string {
 	return "inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-accent"
 }
 
-// Projects renders the "Projects" section: a heading followed by a
-// responsive grid of ProjectCard entries, and a closing terminal
-// ("more-projects") reusing Terminal/TerminalLine for the "more coming
-// soon" note.
-//
-// Hardcoded entries below — swap for real data / a props struct later.
-templ Projects() {
+type ProjectData struct {
+	Title       string
+	Description string
+	Tags        []string
+	Links       []ProjectLink
+	Thumbnail   string
+}
+
+func strEncode(s string) string {
+	s = strings.ToLower(s)
+	return strings.ReplaceAll(s, " ", "-")
+}
+
+templ Projects(data []ProjectData) {
 	<section id="projects" class="bg-background py-24 sm:py-32">
 		<div class="mx-auto max-w-6xl px-3">
 			@SectionHeading("Projects")
 			<div class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-				@ProjectCard(0, "project-pixelle", "Pixelle",
-					"An anime image gallery application with collections of illustrations and photography.",
-					[]string{"Next.js", "TypeScript", "PostgreSQL"},
-					[]ProjectLink{
-						{Label: "Code", Href: "#", Kind: "code"},
-						{Label: "Live Demo", Href: "#", Kind: "demo"},
-					}) {
-					<img src="/assets/img/projects/pixelle.png" alt="Pixelle preview" class="h-full w-full object-cover"/>
-				}
-				@ProjectCard(1, "project-vps-watch-dog", "VPS Watch Dog",
-					"A watch dog program that monitors your VPS's system usage and alerts via mail if usage is running high.",
-					[]string{"Go", "SMTP", "POSIX API"},
-					[]ProjectLink{
-						{Label: "Code", Href: "#", Kind: "code"},
-					}) {
-					@ProjectPreviewPlaceholder("VPS Watchdog")
-				}
-				@ProjectCard(2, "project-storage-watch-dog", "Storage Watch Dog",
-					"A program that watches a specific directory and if the storage space is running low alerts via mails.",
-					[]string{"Go", "SMTP"},
-					[]ProjectLink{
-						{Label: "Code", Href: "#", Kind: "code"},
-					}) {
-					@ProjectPreviewPlaceholder("Storage Watchdog")
-				}
-				@ProjectCard(3, "project-aws-mail-parser", "AWSMailParser",
-					"Polls your AWS SQS and when a new mail event is detected fetches that mail from S3 bucket and saves it to your maildir after parsing it.",
-					[]string{"Go", "AWS", "File Parsing", "IMAP"},
-					[]ProjectLink{
-						{Label: "Code", Href: "#", Kind: "code"},
-					}) {
-					@ProjectPreviewPlaceholder("AWS Mail Parser")
-				}
-				@ProjectCard(4, "project-convert-cbz", "Convert CBZ",
-					"A high-performance, concurrent tool for converting folders containing images into CBZ (Comic Book Archive) files. Built in Go for speed and reliability.",
-					[]string{"Go", "Archive", "Concurrency"},
-					[]ProjectLink{
-						{Label: "Code", Href: "#", Kind: "code"},
-						{Label: "Blog Post", Href: "#", Kind: "blog"},
-					}) {
-					@ProjectPreviewPlaceholder("Convert CBZ")
+				for i := range(data) {
+					@ProjectCard(i, strEncode(data[i].Title), data[i].Title,
+						data[i].Description,
+						data[i].Tags,
+						data[i].Links) {
+						if len(data[i].Thumbnail) != 0 {
+							<img src={ data[i].Thumbnail } alt={ data[i].Title } class="h-full w-full object-cover"/>
+						} else {
+							@ProjectPreviewPlaceholder(data[i].Title)
+						}
+					}
 				}
 			</div>
 			<div class="mt-8">
@@ -78,7 +53,7 @@ templ Projects() {
 						<span class="text-foreground">ls projects/ --all</span>
 					}
 					@TerminalLine(1) {
-						<span class="text-muted-foreground">Found 5 projects in current directory</span>
+						<span class="text-muted-foreground">Found { len(data) } projects in current directory</span>
 					}
 					@TerminalLine(2) {
 						<span class="text-primary">$</span>

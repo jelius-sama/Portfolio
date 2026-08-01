@@ -1,6 +1,9 @@
 package components
 
-import "fmt"
+import (
+	"fmt"
+	"git.jelius.dev/jelius-sama/Portfolio/types"
+)
 
 // LinksOutro renders the closing block for the /links page: a "stats"
 // terminal (a short git-log-style summary, the QR code, and a closing
@@ -39,9 +42,8 @@ templ LinksOutro() {
 							<span class="text-primary">$</span>
 							<span class="text-foreground">neofetch</span>
 						</p>
-						<div class="w-full max-w-xs overflow-hidden rounded-md border border-border bg-secondary/40 p-4 text-center">
-							<img src="/assets/img/contact-qr.png" alt="QR code linking to jelius.dev" class="mx-auto block w-40"/>
-							<p class="mt-3 font-mono text-sm italic text-muted-foreground">Jelius Basumatary</p>
+						<div class="w-full max-w-sm overflow-hidden rounded-md border border-border bg-secondary/40 p-4 flex justify-center items-center">
+							<img src={ fmt.Sprintf("%s/assets/compressed/links.webp", types.EVAssetCDNHostname.Get().Value) } alt="QR code linking to jelius.dev" class="w-full h-full rounded-sm"/>
 						</div>
 					</div>
 					<p class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(2) }>

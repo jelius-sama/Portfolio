@@ -6,6 +6,7 @@ type HomeData struct {
 	HeroSectionData       components.HeroData
 	AboutSectionMessage   []string
 	SkillSectionData      components.SkillData
+	ProjectSectionData    []components.ProjectData
 	ExperienceSectionData []components.ExperienceEntry
 	ContactSectionData    components.ContactData
 }
@@ -16,7 +17,7 @@ templ Home(data HomeData) {
 		@components.About(data.AboutSectionMessage)
 		@components.Skills(data.SkillSectionData)
 		@components.Experience(data.ExperienceSectionData)
-		@components.Projects()
+		@components.Projects(data.ProjectSectionData)
 		@components.Contact(data.ContactSectionData)
 	</main>
 }
