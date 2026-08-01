@@ -2,14 +2,18 @@ package main
 
 import (
     "io/fs"
+    "net/url"
+    "os"
+    "path/filepath"
+    "time"
 
-    embed "git.jelius.dev/jelius-sama/Portfolio"
     "git.jelius.dev/jelius-sama/Portfolio/api"
     "git.jelius.dev/jelius-sama/Portfolio/middleware"
     "git.jelius.dev/jelius-sama/Portfolio/renderer"
     "git.jelius.dev/jelius-sama/Portfolio/types"
     "github.com/gofiber/fiber/v3"
     "github.com/gofiber/fiber/v3/middleware/static"
+    "github.com/jelius-sama/logger"
 )
 
 type RouterCtx struct {
@@ -44,15 +48,37 @@ func Router(app *fiber.App) {
     apiHandle.Get("/healthz", api.Healthz)
 
     if types.EVEnv.Get().Value == types.EMDev.String() {
-        var sub, _ = fs.Sub(embed.AssetFS, "assets")
-        app.Get("/assets/*", static.New("", static.Config{
-            FS:            sub,
+        if _, err := os.Stat("assets"); os.IsNotExist(err) {
+            logger.Panic("assets dir missing; golang's lack of #ifdef forces runtime hacks just to stop assets leaking into prod")
+        }
+        app.Get("/assets/*", static.New("assets", static.Config{
             CacheDuration: 0,
             Compress:      true,
             NotFoundHandler: func(c fiber.Ctx) error {
                 return middleware.ErrHandler(c, fiber.ErrNotFound)
             },
         }))
+    } else {
+        var parsedURL, err = url.Parse(types.EVHostname.Get().Value)
+        if err != nil {
+            logger.Panic(err)
+        }
+
+        var assetDir = filepath.Join(os.Getenv("XDG_DATA_HOME"), parsedURL.Hostname())
+
+        if _, err := os.Stat(assetDir); err != nil {
+            logger.Error("Assets directory could not be found, disabling static asset route!")
+        } else {
+            app.Get("/assets/*", static.New(assetDir, static.Config{
+                Browse:        false,
+                MaxAge:        3600,
+                CacheDuration: 10 * time.Second,
+                Compress:      true,
+                NotFoundHandler: func(c fiber.Ctx) error {
+                    return middleware.ErrHandler(c, fiber.ErrNotFound)
+                },
+            }))
+        }
     }
 
     for k, v := range types.Pages {

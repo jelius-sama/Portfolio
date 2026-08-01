@@ -6,7 +6,8 @@ const (
 	EDLevelUG EDLevel = iota
 	EDLevelPG
 	EDLevelHS
-	EDLevelNil
+	EDLevelGoodNil
+	EDLevelBadNil
 )
 
 func (edl EDLevel) String() string {
@@ -17,8 +18,10 @@ func (edl EDLevel) String() string {
 		return "Post Graduate"
 	case EDLevelUG:
 		return "Under Graduate"
-	case EDLevelNil:
-		return "Working at ..." // <- TODO
+	case EDLevelGoodNil:
+		return "Employed"
+	case EDLevelBadNil:
+		return "Unemployed" // Maybe change to "Hire me" ?
 	default:
 		return ""
 	}
