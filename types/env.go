@@ -33,6 +33,7 @@ const (
     EVAssetCDNHostname
     EVVersion
     EVPort
+    EVDataDir
 )
 
 func (ek EnvVal) Get() Env {
@@ -47,6 +48,8 @@ func (ek EnvVal) Get() Env {
         return Env{Key: "VERSION", Value: os.Getenv("VERSION")}
     case EVPort:
         return Env{Key: "PORT", Value: os.Getenv("PORT")}
+    case EVDataDir:
+        return Env{Key: "DATA_DIR", Value: os.Getenv("DATA_DIR")}
     default:
         return Env{Key: "", Value: ""}
     }

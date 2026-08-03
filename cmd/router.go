@@ -1,12 +1,12 @@
 package main
 
 import (
-    "net/url"
     "os"
     "path/filepath"
     "time"
 
     "git.jelius.dev/jelius-sama/Portfolio/api"
+    "git.jelius.dev/jelius-sama/Portfolio/api/analytics"
     "git.jelius.dev/jelius-sama/Portfolio/middleware"
     "git.jelius.dev/jelius-sama/Portfolio/renderer"
     "git.jelius.dev/jelius-sama/Portfolio/types"
@@ -60,6 +60,14 @@ func Router(app *fiber.App) {
     var apiHandle = app.Group("/api", routerCtx.MiddlewareHandlers[types.MHNoCache])
 
     apiHandle.Get("/healthz", api.Healthz)
+    apiHandle.Get("/version", api.Version)
+
+    // Analytics endpoints
+    apiHandle.Get("/analytics/get/all", analytics.GetAllAnalyticsEvents)
+    apiHandle.Get("/analytics/get/avg-visits", analytics.GetAvgVisitsPerHour)
+    apiHandle.Get("/analytics/get/top-countries", analytics.GetTopCountries)
+    apiHandle.Get("/analytics/get/top-pages", analytics.GetTopPages)
+    apiHandle.Get("/analytics/post", analytics.TrackAnalytics)
 
     if types.EVEnv.Get().Value == types.EMDev.String() {
         if _, err := os.Stat("assets"); os.IsNotExist(err) {
@@ -73,20 +81,7 @@ func Router(app *fiber.App) {
             },
         }))
     } else {
-        var parsedURL, err = url.Parse(types.EVAssetCDNHostname.Get().Value)
-        var dataDir string = os.Getenv("XDG_DATA_HOME")
-        if len(dataDir) == 0 {
-            var home, err = os.UserHomeDir()
-            if err != nil {
-                logger.Panic(err)
-            }
-            dataDir = filepath.Join(home, ".local", "share")
-        }
-        if err != nil {
-            logger.Panic(err)
-        }
-
-        var assetDir = filepath.Join(dataDir, parsedURL.Hostname(), "assets")
+        var assetDir = filepath.Join(types.EVDataDir.Get().Value, "assets")
 
         if _, err := os.Stat(assetDir); err != nil {
             logger.Error("Assets directory could not be found, disabling static asset route!")
