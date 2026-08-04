@@ -55,7 +55,7 @@ templ mobileNavRow(index int, href, label string) {
 }
 
 templ Header(serverCtx fiber.Ctx) {
-	<header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
+	<header id="header" class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
 		<div class="mx-auto flex max-w-6xl items-center justify-between px-3 py-5">
 			@Link(LinkAttr{Id: "current-path", Href: "/", Class: "font-mono text-lg font-semibold text-foreground"}) {
 				<span class="text-primary">&gt;</span> jelius.dev{ getPath(serverCtx.Path()) }
@@ -175,7 +175,13 @@ templ Header(serverCtx fiber.Ctx) {
 									const link = document.createElement("a");
 									link.href = k;
 									link.textContent = cleanedPath;
-
+									link.setAttribute("hx-get", k);
+									link.setAttribute("hx-target", "main");
+									link.setAttribute("hx-push-url", "true");
+									link.setAttribute("hx-swap", "outerHTML");
+									if (typeof htmx !== "undefined") {
+										htmx.process(link);
+									}
 									navLinksEl.appendChild(link);
 								}
 							});
@@ -254,6 +260,13 @@ templ Header(serverCtx fiber.Ctx) {
 								const row = document.createElement("a");
 								row.href = k;
 								row.className = "mobile-nav-row group flex items-center justify-between gap-4 rounded-md border border-border bg-card px-4 py-3 transition-colors hover:border-primary/40";
+								row.setAttribute("hx-get", k);
+								row.setAttribute("hx-target", "main");
+								row.setAttribute("hx-push-url", "true");
+								row.setAttribute("hx-swap", "outerHTML");
+								if (typeof htmx !== "undefined") {
+									htmx.process(row);
+								}
 
 								const label = document.createElement("span");
 								label.className = "font-mono text-sm text-foreground";

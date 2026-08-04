@@ -57,7 +57,7 @@ func Renderer(c fiber.Ctx, metadata types.Metadata, bodyContent templ.Component)
         }
     }
 
-    var fullPage templ.Component = template.Base(c, template.Metadata(page.Metadata), bodyContent, components.Footer())
+    var fullPage templ.Component = template.Base(c, page.Metadata, bodyContent, components.Footer())
 
     if err := fullPage.Render(c.Req().RequestCtx(), &buf); err != nil {
         return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")

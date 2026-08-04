@@ -1,7 +1,6 @@
 package template
 
 import (
-	"fmt"
 	"git.jelius.dev/jelius-sama/Portfolio/template/components"
 	"git.jelius.dev/jelius-sama/Portfolio/types"
 	"github.com/gofiber/fiber/v3"
@@ -9,19 +8,11 @@ import (
 
 var baseScript = templ.NewOnceHandle()
 
-templ Base(serverCtx fiber.Ctx, metadata templ.Component, body templ.Component, footer templ.Component) {
+templ Base(serverCtx fiber.Ctx, metadata types.Metadata, body templ.Component, footer templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
-		<head>
-			<link href={ fmt.Sprintf("%s/assets/output.css", types.EVAssetCDNHostname.Get().Value) } rel="stylesheet"/>
-			<link rel="manifest" href={ fmt.Sprintf("%s/assets/manifest.json", types.EVAssetCDNHostname.Get().Value) }/>
-			<meta charset="UTF-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			if metadata != nil {
-				@metadata
-			}
-		</head>
-		<body>
+		@Metadata(metadata)
+		<body hx-ext="head-support">
 			@components.Header(serverCtx)
 			if body != nil {
 				@body
@@ -31,7 +22,16 @@ templ Base(serverCtx fiber.Ctx, metadata templ.Component, body templ.Component, 
 			}
 			@baseScript.Once() {
 				@HTMXScript()
+				@HTMXHeadSupport()
 				@HTMXHotFixes()
+				<script>
+					// TODO: Fix browser back button not preserving scroll position
+					document.addEventListener("htmx:beforeSwap", function(event) {
+						if (event.detail.target.tagName.toLowerCase() === "main" || event.detail.target.id === "main") {
+							window.scrollTo(0, 0);
+						}
+					});
+				</script>
 			}
 		</body>
 	</html>

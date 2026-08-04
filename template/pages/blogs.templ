@@ -3,17 +3,44 @@ package pages
 import (
 	"fmt"
 	"git.jelius.dev/jelius-sama/Portfolio/template/components"
+	"git.jelius.dev/jelius-sama/Portfolio/types"
 )
 
 templ Blogs() {
-	<main id="blogs" class="mx-auto max-w-6xl px-3">
+	<main id="blogs" class="mx-auto max-w-6xl p-3">
 		@BlogsIntro()
-		<div id="blog-section" class="flex flex-col py-2 gap-2">
-			@BlogInfo("Newest", 5, 10, 1, 2)
-			@BlogSortSelect("newest")
-			@BlogPostsList(SampleBlogPosts[:5], true, 2, "newest")
-		</div>
+		@BlogsSection(BlogsSectionArgs{
+			Post:        types.SampleBlogPosts[:5],
+			HasMore:     true,
+			TotalPosts:  len(types.SampleBlogPosts),
+			LoadedPages: 1,
+			TotalPages:  (len(types.SampleBlogPosts) + types.PostPerPage - 1) / types.PostPerPage,
+			Sort:        types.BSONew,
+		})
 	</main>
+}
+
+type BlogsSectionArgs struct {
+	Post        []types.BlogPost
+	HasMore     bool
+	TotalPosts  int
+	LoadedPages int
+	TotalPages  int
+	Sort        types.BlogsSortOrder
+}
+
+templ BlogsSection(args BlogsSectionArgs) {
+	<div id="blog-section" class="flex flex-col py-3 gap-3">
+		@BlogInfo(BlogInfoArgs{
+			Sort:        args.Sort,
+			LoadedPosts: len(args.Post),
+			TotalPosts:  args.TotalPosts,
+			LoadedPages: args.LoadedPages,
+			TotalPages:  args.TotalPages,
+		})
+		@BlogSortSelect(args.Sort)
+		@BlogPostsList(args.Post, args.HasMore, args.LoadedPages+1, args.Sort)
+	</div>
 }
 
 templ BlogsIntro() {
@@ -39,7 +66,15 @@ templ BlogsIntro() {
 // BlogLoadMoreTrigger, have that handler's response also include
 // @BlogInfoOOBUpdate(...) so these numbers stay in sync — see that
 // component's doc comment for the exact response shape.
-templ BlogInfo(sortLabel string, displayed, total, loadedPages, totalPages int) {
+type BlogInfoArgs struct {
+	Sort        types.BlogsSortOrder
+	LoadedPosts int
+	TotalPosts  int
+	LoadedPages int
+	TotalPages  int
+}
+
+templ BlogInfo(args BlogInfoArgs) {
 	@components.Terminal("blog-info") {
 		<div class="space-y-4">
 			<div>
@@ -47,17 +82,17 @@ templ BlogInfo(sortLabel string, displayed, total, loadedPages, totalPages int) 
 					<span class="text-primary">$</span>
 					<span class="text-foreground">ls /var/www/blogs/posts/</span>
 				</p>
-				<p id="blog-info-status" class="text-muted-foreground">{ fmt.Sprintf("Found %d articles.", total) }</p>
+				<p id="blog-info-status" class="text-muted-foreground">{ fmt.Sprintf("Found %d articles.", args.TotalPosts) }</p>
 			</div>
 			<div>
 				<p>
 					<span class="text-primary">$</span>
 					<span class="text-foreground">cat /etc/blog-config.conf</span>
 				</p>
-				<p id="blog-info-sort" class="text-muted-foreground">{ fmt.Sprintf("Sort by: %s", sortLabel) }</p>
-				<p id="blog-info-displaying" class="text-muted-foreground">{ fmt.Sprintf("Displaying: %d of %d", displayed, total) }</p>
-				<p id="blog-info-pages" class={ "text-muted-foreground", templ.KV("hidden", loadedPages == 0) }>
-					{ fmt.Sprintf("Loaded pages: %d of %d", loadedPages, totalPages) }
+				<p id="blog-info-sort" class="text-muted-foreground">{ fmt.Sprintf("Sort by: %s", args.Sort.String()) }</p>
+				<p id="blog-info-displaying" class="text-muted-foreground">{ fmt.Sprintf("Displaying: %d of %d", args.LoadedPosts, args.TotalPosts) }</p>
+				<p id="blog-info-pages" class={ "text-muted-foreground", templ.KV("hidden", args.LoadedPages == 0) }>
+					{ fmt.Sprintf("Loaded pages: %d of %d", args.LoadedPages, args.TotalPages) }
 				</p>
 			</div>
 		</div>
@@ -69,11 +104,11 @@ templ BlogInfo(sortLabel string, displayed, total, loadedPages, totalPages int) 
 // include this in the response returned to BlogLoadMoreTrigger's
 // hx-get, alongside the new post rows and the next primary-target
 // content (see blog_posts_list.templ for the full contract).
-templ BlogInfoOOBUpdate(sortLabel string, displayed, total, loadedPages, totalPages int) {
-	<p id="blog-info-status" hx-swap-oob="true" class="text-muted-foreground">{ fmt.Sprintf("Found %d articles.", total) }</p>
-	<p id="blog-info-sort" hx-swap-oob="true" class="text-muted-foreground">{ fmt.Sprintf("Sort by: %s", sortLabel) }</p>
-	<p id="blog-info-displaying" hx-swap-oob="true" class="text-muted-foreground">{ fmt.Sprintf("Displaying: %d of %d", displayed, total) }</p>
-	<p id="blog-info-pages" hx-swap-oob="true" class="text-muted-foreground">{ fmt.Sprintf("Loaded pages: %d of %d", loadedPages, totalPages) }</p>
+templ BlogInfoOOBUpdate(args BlogInfoArgs) {
+	<p id="blog-info-status" hx-swap-oob="true" class="text-muted-foreground">{ fmt.Sprintf("Found %d articles.", args.TotalPosts) }</p>
+	<p id="blog-info-sort" hx-swap-oob="true" class="text-muted-foreground">{ fmt.Sprintf("Sort by: %s", args.Sort.String()) }</p>
+	<p id="blog-info-displaying" hx-swap-oob="true" class="text-muted-foreground">{ fmt.Sprintf("Displaying: %d of %d", args.LoadedPosts, args.TotalPosts) }</p>
+	<p id="blog-info-pages" hx-swap-oob="true" class="text-muted-foreground">{ fmt.Sprintf("Loaded pages: %d of %d", args.LoadedPages, args.TotalPages) }</p>
 }
 
 // BlogSortSelect renders the sort dropdown, wired to reload the blog
@@ -83,7 +118,7 @@ templ BlogInfoOOBUpdate(sortLabel string, displayed, total, loadedPages, totalPa
 // BlogInfo + BlogPostsList — wrap those two in a
 // <div id="blog-section"> when you assemble the page, or change the
 // hx-target below to whatever container you actually use.
-templ BlogSortSelect(current string) {
+templ BlogSortSelect(current types.BlogsSortOrder) {
 	<div class="flex justify-end">
 		<div class="relative">
 			<select
@@ -96,40 +131,15 @@ templ BlogSortSelect(current string) {
 				hx-include="this"
 				class="appearance-none rounded-md border border-border bg-card py-2 pl-4 pr-9 font-mono text-sm text-foreground transition-colors hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-ring"
 			>
-				<option value="newest" selected?={ current == "newest" }>Sort by: Newest</option>
-				<option value="oldest" selected?={ current == "oldest" }>Sort by: Oldest</option>
-				<option value="popular" selected?={ current == "popular" }>Sort by: Most Viewed</option>
+				<option value={ types.BSONew } selected?={ current == types.BSONew }>Sort by: Newest</option>
+				<option value={ types.BSOOld } selected?={ current == types.BSOOld }>Sort by: Oldest</option>
+				<option value={ types.BSOPopular } selected?={ current == types.BSOPopular }>Sort by: Most Viewed</option>
 			</select>
 			<svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 				<path d="m6 9 6 6 6-6"></path>
 			</svg>
 		</div>
 	</div>
-}
-
-// BlogPost is one entry in the blog list.
-type BlogPost struct {
-	Title     string
-	Excerpt   string
-	Slug      string
-	Published string
-	Updated   string
-	Views     int
-}
-
-// SampleBlogPosts is hardcoded placeholder data — swap the handler that
-// calls BlogPostsList/BlogInfo over to a real DB-backed source later;
-// nothing in these components needs to change when you do.
-var SampleBlogPosts = []BlogPost{
-	{Title: "Caveats & Workarounds — OpenMediaCloud", Excerpt: "Architectural Workarounds for Compute-Dependent Features", Slug: "caveats-workarounds-openmediacloud", Published: "May 11, 2026 at 01:14 PM", Updated: "May 11, 2026 at 07:47 AM", Views: 13},
-	{Title: "Setup Guide — OpenMediaCloud", Excerpt: "This guide walks you through setting up OpenMediaCloud on a Linux server", Slug: "setup-guide-openmediacloud", Published: "May 11, 2026 at 01:02 PM", Updated: "May 11, 2026 at 07:47 AM", Views: 12},
-	{Title: "A Proxy that cuts my Jellyfin Hosting costs by 80%", Excerpt: "Say goodbye to egress costs", Slug: "proxy-cuts-jellyfin-hosting-costs", Published: "April 3, 2026 at 08:32 PM", Updated: "May 11, 2026 at 07:47 AM", Views: 55},
-	{Title: "Safari Is a Dumpster Fire and Apple Knows It", Excerpt: "Safari is not \"privacy-focused brilliance.\" — It's a broken, inconsistent, developer-hostile piece of shit.", Slug: "safari-is-a-dumpster-fire", Published: "February 13, 2026 at 02:33 PM", Updated: "", Views: 18},
-	{Title: "Convert Folders to CBZ Archives with \"convert-cbz\" — Fast, Cross-Platform Comic Converter", Excerpt: "A powerful, cross-platform tool for converting directory of folders of images into CBZ comic book archives. \"convert-cbz\" helps you to quickly create clean, organized CBZ files for your entire comic or manga library.", Slug: "convert-cbz", Published: "September 22, 2025 at 12:59 PM", Updated: "November 16, 2025 at 08:59 AM", Views: 601},
-	{Title: "Email Done Right: My End-to-End Journey from Gmail to AWS SES — Part 3", Excerpt: "Getting SES production access, cleaning up configs, and finally sending emails that look truly professional.", Slug: "email-done-right-part-3", Published: "August 23, 2025 at 08:09 PM", Updated: "August 23, 2025 at 02:51 PM", Views: 24},
-	{Title: "Email Done Right: My End-to-End Journey from Gmail to AWS SES — Part 2", Excerpt: "Setting up AWS SES, DNS records, and testing email flow while dealing with sandbox restrictions.", Slug: "email-done-right-part-2", Published: "August 23, 2025 at 08:08 PM", Updated: "August 23, 2025 at 02:51 PM", Views: 22},
-	{Title: "Email Done Right: My End-to-End Journey from Gmail to AWS SES — Part 1", Excerpt: "Why Gmail's \"sent via\" headers and limits pushed me to find a professional email-sending solution.", Slug: "email-done-right-part-1", Published: "August 23, 2025 at 08:04 PM", Updated: "August 23, 2025 at 02:51 PM", Views: 30},
-	{Title: "Hello World — I'm Jelius", Excerpt: "A quick introduction to who I am, what I do, and why I build. Meet the mind behind jelius.dev.", Slug: "hello-world-im-jelius", Published: "July 21, 2025 at 08:24 PM", Updated: "", Views: 73},
 }
 
 // BlogPostItem renders one row: title + excerpt, an arrow icon, and a
@@ -140,7 +150,7 @@ var SampleBlogPosts = []BlogPost{
 // the site. Note: LinkAttr only exposes Href/Class/Id, so unlike
 // TerminalLine/SkillItem this can't stagger its entrance animation by
 // index — every row uses the same fixed fade/slide-in instead.
-templ BlogPostItem(post BlogPost) {
+templ BlogPostItem(post types.BlogPost) {
 	@components.Link(components.LinkAttr{
 		Href:  "/blogs/" + post.Slug,
 		Class: "group flex flex-col gap-4 rounded-md border border-border bg-card px-6 py-5 transition-colors hover:border-primary/40 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none",
@@ -177,7 +187,7 @@ var blogScript = templ.NewOnceHandle()
 // hardcoded) rows from the start — no loading skeleton, since this is
 // server-rendered. Below the terminal sits either a BlogLoadMoreTrigger
 // (if hasMore) or a static BlogEndOfPosts marker.
-templ BlogPostsList(posts []BlogPost, hasMore bool, nextPage int, sort string) {
+templ BlogPostsList(posts []types.BlogPost, hasMore bool, nextPage int, sort types.BlogsSortOrder) {
 	@components.Terminal("blog-posts") {
 		<div id="blog-posts-list" class="space-y-4">
 			for _, post := range posts {
@@ -211,10 +221,10 @@ templ BlogPostsList(posts []BlogPost, hasMore bool, nextPage int, sort string) {
 // On error, return the ErrorResp JSON with a non-2xx status — the
 // script below intercepts that via htmx:responseError and swaps in a
 // retry card instead of trying to swap non-HTML content.
-templ BlogLoadMoreTrigger(page int, sort string) {
+templ BlogLoadMoreTrigger(nextPage int, sort types.BlogsSortOrder) {
 	<div
 		class="blog-load-trigger mt-8 text-center text-sm text-muted-foreground"
-		hx-get={ fmt.Sprintf("/api/blogs?page=%d&sort=%s", page, sort) }
+		hx-get={ fmt.Sprintf("/api/blogs?page=%d&sort=%s", nextPage, sort) }
 		hx-trigger="revealed"
 		hx-swap="outerHTML"
 		hx-target="this"
@@ -236,7 +246,7 @@ templ BlogEndOfPosts() {
 // flush in the list's own space-y-4, rather than nesting inside an
 // extra visible box. (Needed because LinkAttr doesn't expose a way to
 // put hx-swap-oob directly on BlogPostItem's own <a> tag.)
-templ BlogPostsOOB(posts []BlogPost) {
+templ BlogPostsOOB(posts []types.BlogPost) {
 	for _, post := range posts {
 		<div class="contents" hx-swap-oob="beforeend:#blog-posts-list">
 			@BlogPostItem(post)

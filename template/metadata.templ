@@ -1,9 +1,16 @@
 package template
 
 import "git.jelius.dev/jelius-sama/Portfolio/types"
+import "fmt"
 
 // TODO: Implement more metadatas
 templ Metadata(metadata types.Metadata) {
-	<title hx-swap-oob="true">{ metadata.Title }</title>
-	<meta name="description" hx-swap-oob="outerHTML:[name=description]" content={ metadata.Description }/>
+	<head hx-head="re-eval">
+		<link hx-preserve="true" href={ fmt.Sprintf("%s/assets/output.css", types.EVAssetCDNHostname.Get().Value) } rel="stylesheet"/>
+		<link hx-preserve="true" rel="manifest" href={ fmt.Sprintf("%s/assets/manifest.json", types.EVAssetCDNHostname.Get().Value) }/>
+		<meta hx-preserve="true" charset="UTF-8"/>
+		<meta hx-preserve="true" name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>{ metadata.Title }</title>
+		<meta name="description" content={ metadata.Description }/>
+	</head>
 }

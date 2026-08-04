@@ -7,7 +7,19 @@ type LinkAttr struct {
 }
 
 templ Link(attr LinkAttr) {
-	<a id={ attr.Id } href={ attr.Href } hx-get={ attr.Href } class={ attr.Class } hx-target="main" hx-swap="outerHTML" hx-push-url="true">
+	<a
+		if len(attr.Id) != 0 {
+			id={ attr.Id }
+		}
+		href={ attr.Href }
+		hx-get={ attr.Href }
+		if len(attr.Class) != 0 {
+			class={ attr.Class }
+		}
+		hx-target="main"
+		hx-swap="outerHTML"
+		hx-push-url="true"
+	>
 		{ children... }
 	</a>
 }
