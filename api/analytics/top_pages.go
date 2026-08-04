@@ -11,7 +11,7 @@ func GetTopPages(c fiber.Ctx) error {
     // Query parameters
     var pageStr = c.Query("page", "0")
     var limitStr = c.Query("limit", "10")
-    var sortOrder = c.Query("sort", "2") // asc or desc (default desc for top pages)
+    var sortOrder = c.Query("sort", "1") // asc or desc (default desc for top pages)
 
     var page, limit, sort, parseErr = parsePaginationParam(pageStr, limitStr, sortOrder)
     if parseErr != nil {

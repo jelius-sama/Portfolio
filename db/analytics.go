@@ -1,7 +1,7 @@
 package db
 
 func createAnalyticsTables() error {
-    schema := `
+    var schema = `
     CREATE TABLE IF NOT EXISTS analytics_events (
         event_id INTEGER PRIMARY KEY AUTOINCREMENT,
         country_code TEXT NOT NULL,
@@ -14,8 +14,7 @@ func createAnalyticsTables() error {
     CREATE INDEX IF NOT EXISTS idx_timestamp ON analytics_events(timestamp);
     `
 
-    _, err := DB.Exec(schema)
-    if err != nil {
+    if _, err := DB.Exec(schema); err != nil {
         return err
     }
 

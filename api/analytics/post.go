@@ -29,7 +29,7 @@ func TrackAnalytics(c fiber.Ctx) error {
     // Insert into database
     var query = `
         INSERT INTO analytics_events (country_code, page_path, timestamp)
-        VALUES (?, ?, UTC_TIMESTAMP())
+        VALUES (?, ?, datetime('now', 'utc'))
     `
 
     if _, err := db.DB.Exec(query, req.CountryCode, req.PagePath); err != nil {

@@ -9,11 +9,11 @@ import (
     "github.com/gofiber/fiber/v3"
 )
 
-func GetBlogs(c fiber.Ctx) error {
+func GetBlogsPage(c fiber.Ctx) error {
     var pageStr = c.Query("page", "1")
     var sort types.BlogsSortOrder = types.BSONew
 
-    if s := c.Query("sort", ""); len(s) != 0 {
+    if s := c.Query("sort"); len(s) != 0 {
         switch s {
         case types.BSONew.String():
             sort = types.BSONew

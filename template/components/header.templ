@@ -33,7 +33,7 @@ func cleanPath(path string, currentPath string) string {
 		return ""
 	}
 
-	cleaned := strings.ReplaceAll(strings.TrimPrefix(path, "/"), "-", " ")
+	var cleaned = strings.ReplaceAll(strings.TrimPrefix(path, "/"), "-", " ")
 	return strings.ToUpper(string(cleaned[0])) + cleaned[1:]
 }
 
@@ -62,7 +62,10 @@ templ Header(serverCtx fiber.Ctx) {
 			}
 			<nav id="nav-links" class="hidden items-center gap-8 font-mono text-sm text-muted-foreground sm:flex">
 				{{
-					pages := slices.Collect(maps.Keys(types.Pages))
+					var pages = slices.Collect(maps.Keys(types.Pages))
+					pages = slices.DeleteFunc(pages, func(s string) bool {
+						return strings.Contains(s, ":")
+					})
 					slices.Sort(pages)
 				}}
 				@initPages(pages)

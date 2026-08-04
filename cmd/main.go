@@ -21,7 +21,7 @@ var (
 )
 
 func init() {
-    var parsedURL, err = url.Parse(types.EVAssetCDNHostname.Get().Value)
+    var parsedURL, err = url.Parse(AssetCDNHost)
     if err != nil {
         logger.Panic(err)
     }

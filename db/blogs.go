@@ -2,11 +2,11 @@ package db
 
 // createBlogsTable creates the blogs table with support for posts, relationships, and soft deletes
 func createBlogsTable() error {
-    schema := `
+    var schema = `
     CREATE TABLE IF NOT EXISTS blogs (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
-        description TEXT,
+        excerpt TEXT,
         published_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         deleted_at DATETIME,
@@ -23,8 +23,7 @@ func createBlogsTable() error {
     CREATE INDEX IF NOT EXISTS idx_title ON blogs(title);
     `
 
-    _, err := DB.Exec(schema)
-    if err != nil {
+    if _, err := DB.Exec(schema); err != nil {
         return err
     }
 

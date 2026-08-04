@@ -50,6 +50,7 @@ func init() {
         "/links": types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
         // TODO: Implement these pages
         "/blogs":        types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlogs}},
+        "/blog/:id":     types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlogs}},
         "/acheivements": types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
     }
 }
@@ -65,12 +66,16 @@ func Router(app *fiber.App) {
 
     // Analytics endpoints
     apiHandle.Get("/analytics/get/all", analytics.GetAllAnalyticsEvents)
+    apiHandle.Get("/analytics/get/visit-count", func(c fiber.Ctx) { analytics.GetPageVisitCount(c) })
     apiHandle.Get("/analytics/get/avg-visits", analytics.GetAvgVisitsPerHour)
     apiHandle.Get("/analytics/get/top-countries", analytics.GetTopCountries)
     apiHandle.Get("/analytics/get/top-pages", analytics.GetTopPages)
-    apiHandle.Get("/analytics/post", analytics.TrackAnalytics)
+    apiHandle.Post("/analytics/track", analytics.TrackAnalytics)
 
-    apiHandle.Get("/blogs", blogs.GetBlogs)
+    apiHandle.Get("/blogs", blogs.GetBlogsPage)
+    apiHandle.Get("/blog/all", blogs.GetAllBlog)
+    apiHandle.Get("/blog/:id", func(c fiber.Ctx) { blogs.GetBlog(c) })
+    apiHandle.Post("/blog", blogs.CreateBlog)
 
     if types.EVEnv.Get().Value == types.EMDev.String() {
         if _, err := os.Stat("assets"); os.IsNotExist(err) {

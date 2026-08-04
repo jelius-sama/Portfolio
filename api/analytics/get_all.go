@@ -44,7 +44,7 @@ func GetAllAnalyticsEvents(c fiber.Ctx) error {
             event_id,
             country_code,
             page_path,
-            DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:%s') as timestamp
+            strftime('%Y-%m-%d %H:%M:%S', timestamp) as timestamp
         FROM analytics_events
         ORDER BY timestamp ` + sortDir + `
         LIMIT ? OFFSET ?

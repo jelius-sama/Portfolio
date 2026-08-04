@@ -31,9 +31,9 @@ func GetAvgVisitsPerHour(c fiber.Ctx) error {
 
     // Get total count
     var countQuery = `
-        SELECT COUNT(DISTINCT DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00'), country_code, page_path)
+        SELECT COUNT(*)
         FROM analytics_events
-        WHERE timestamp >= DATE_SUB(NOW(), INTERVAL ? HOUR)
+        WHERE timestamp >= datetime('now', '-' || ? || ' hours')
     `
 
     var totalRows int
@@ -56,13 +56,13 @@ func GetAvgVisitsPerHour(c fiber.Ctx) error {
 
     var query = `
         SELECT 
-            DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00') as time_window,
+            strftime('%Y-%m-%d %H:00:00', timestamp) as time_window,
             country_code,
             page_path,
             COUNT(*) as visit_count,
-            DATE(timestamp) as date
+            strftime('%Y-%m-%d', timestamp) as date
         FROM analytics_events
-        WHERE timestamp >= DATE_SUB(NOW(), INTERVAL ? HOUR)
+        WHERE timestamp >= datetime('now', '-' || ? || ' hours')
         GROUP BY time_window, country_code, page_path
         ORDER BY time_window ` + sortDir + `, country_code
         LIMIT ? OFFSET ?

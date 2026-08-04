@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"git.jelius.dev/jelius-sama/Portfolio/template/components"
 	"git.jelius.dev/jelius-sama/Portfolio/types"
+	"time"
 )
 
 templ Blogs() {
@@ -142,6 +143,14 @@ templ BlogSortSelect(current types.BlogsSortOrder) {
 	</div>
 }
 
+func formatTime(t time.Time) string {
+	// "January" -> Full Month Name
+	// "_2"     -> Day of the month without a leading zero
+	// "2006"   -> 4-digit Year
+	// "15:04"  -> 24-hour Time format
+	return t.UTC().Format("January _2, 2006 at 15:04 UTC")
+}
+
 // BlogPostItem renders one row: title + excerpt, an arrow icon, and a
 // Published/Views/Updated meta line — matches the card row pattern used
 // elsewhere on the site (SkillItem, LinkItem).
@@ -152,7 +161,7 @@ templ BlogSortSelect(current types.BlogsSortOrder) {
 // index — every row uses the same fixed fade/slide-in instead.
 templ BlogPostItem(post types.BlogPost) {
 	@components.Link(components.LinkAttr{
-		Href:  "/blogs/" + post.Slug,
+		Href:  "/blog/" + post.ID,
 		Class: "group flex flex-col gap-4 rounded-md border border-border bg-card px-6 py-5 transition-colors hover:border-primary/40 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none",
 	}) {
 		<div class="flex items-start justify-between gap-4">
@@ -171,11 +180,11 @@ templ BlogPostItem(post types.BlogPost) {
 		</div>
 		<div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-1 font-mono text-xs text-muted-foreground">
 			<div class="space-y-1">
-				<p>{ fmt.Sprintf("Published: %s", post.Published) }</p>
+				<p>{ fmt.Sprintf("Published: %s", formatTime(post.PublishedAt)) }</p>
 				<p>{ fmt.Sprintf("Views: %d", post.Views) }</p>
 			</div>
-			if post.Updated != "" {
-				<p>{ fmt.Sprintf("Updated: %s", post.Updated) }</p>
+			if post.UpdatedAt != post.PublishedAt {
+				<p>{ fmt.Sprintf("Updated: %s", formatTime(post.UpdatedAt)) }</p>
 			}
 		</div>
 	}
