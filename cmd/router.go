@@ -7,6 +7,7 @@ import (
 
     "git.jelius.dev/jelius-sama/Portfolio/api"
     "git.jelius.dev/jelius-sama/Portfolio/api/analytics"
+    "git.jelius.dev/jelius-sama/Portfolio/api/blogs"
     "git.jelius.dev/jelius-sama/Portfolio/middleware"
     "git.jelius.dev/jelius-sama/Portfolio/renderer"
     "git.jelius.dev/jelius-sama/Portfolio/types"
@@ -48,8 +49,8 @@ func init() {
         "/":      types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderHome}},
         "/links": types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
         // TODO: Implement these pages
+        "/blogs":        types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlogs}},
         "/acheivements": types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
-        "/blogs":        types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
     }
 }
 
@@ -68,6 +69,8 @@ func Router(app *fiber.App) {
     apiHandle.Get("/analytics/get/top-countries", analytics.GetTopCountries)
     apiHandle.Get("/analytics/get/top-pages", analytics.GetTopPages)
     apiHandle.Get("/analytics/post", analytics.TrackAnalytics)
+
+    apiHandle.Get("/blogs", blogs.GetBlogs)
 
     if types.EVEnv.Get().Value == types.EMDev.String() {
         if _, err := os.Stat("assets"); os.IsNotExist(err) {

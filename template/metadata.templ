@@ -2,15 +2,6 @@ package template
 
 import "git.jelius.dev/jelius-sama/Portfolio/types"
 
-//FIXME: The following require thinking more throughly
-// TODO:
-// 1. Setup Let's Encrypt in Mumbai VPS
-// 2. Create TLS cert for all services and remove Cloudflare-only certs
-// 3. Migrate Cloudflare DNS to Route53
-// 4. Setup Route53 DNS record for Portfolio to implement distributed system
-// 5. Setup Cloudfront for apex domain using CNAME using fancy CNAME features
-// 6. Optionally setup a CDN server (maybe for assets.jelius.dev?)
-
 // TODO: Implement more metadatas
 templ Metadata(metadata types.Metadata) {
 	<title hx-swap-oob="true">{ metadata.Title }</title>

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+    "fmt"
     "strconv"
     "strings"
 
@@ -23,10 +24,13 @@ func ErrHandler(c fiber.Ctx, err error) error {
     }
 
     if path := c.Path(); strings.HasPrefix(path, "/api/") || strings.HasPrefix(path, "/assets/") {
-        return c.Status(code).JSON(fiber.Map{
+        if err := c.Status(code).JSON(fiber.Map{
             "status":  code,
             "message": err.Error(),
-        })
+        }); err != nil {
+            logger.Panic(err)
+        }
+        return nil
     }
 
     c.Set(fiber.HeaderContentType, fiber.MIMETextHTMLCharsetUTF8)
@@ -36,6 +40,15 @@ func ErrHandler(c fiber.Ctx, err error) error {
         Title:       strconv.Itoa(code),
         Description: err.Error(),
     }
-    return renderer.Renderer(c, metadata, pages.Error(code, err))
+    if renderErr := renderer.Renderer(c, metadata, pages.Error(code, err)); renderErr != nil {
+        logger.Panic(fmt.Sprintf(
+            "double fault in error middleware:\n"+
+                " -> Original Error: %v\n"+
+                " -> Render Error  : %v",
+            err, renderErr,
+        ))
+    }
+
+    return nil
 }
 

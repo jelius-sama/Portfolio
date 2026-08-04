@@ -16,6 +16,7 @@ var (
 func createTables() []error {
     var errors []error
     errors = append(errors, createAnalyticsTables())
+    errors = append(errors, createBlogsTable())
     return errors
 }
 
@@ -25,7 +26,7 @@ func InitDB(dbPath string) error {
     defer mu.Unlock()
 
     var err error
-    DB, err = sql.Open("sqlite3", dbPath)
+    DB, err = sql.Open("sqlite", dbPath)
     if err != nil {
         logger.Fatal("Failed to open database:", err.Error())
         return err

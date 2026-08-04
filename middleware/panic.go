@@ -23,10 +23,10 @@ func RecoveryMiddleware() fiber.Handler {
                 c.Set("Content-Type", "text/html; charset=utf-8")
                 c.Status(500)
                 c.Response().AppendBodyString(`
-                    <div>
+                    <main id="internal-server-error">
                         <h2>500</h2>
                         <p>Internal Server Error</p>
-                    </div>
+                    </main>
                 `)
                 return
             }
