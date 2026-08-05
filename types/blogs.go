@@ -31,8 +31,8 @@ type BlogPost struct {
     PublishedAt time.Time  `json:"published_at"`
     UpdatedAt   time.Time  `json:"updated_at"`
     DeletedAt   *time.Time `json:"-"`
-    PrequelID   string     `json:"prequel_id"`
-    SequelID    string     `json:"sequel_id"`
+    PrequelID   *string    `json:"prequel_id"`
+    SequelID    *string    `json:"sequel_id"`
     Title       string     `json:"title"`
     Excerpt     string     `json:"excerpt"`
     Views       uint       `json:"views"`
@@ -48,7 +48,6 @@ type CreateBlogPost struct {
 type BlogResponse struct {
     ID          string        `json:"id"`
     PublishedAt time.Time     `json:"published_at"`
-    BlogMD      string        `json:"blog_md"`
     UpdatedAt   time.Time     `json:"updated_at"`
     DeletedAt   *time.Time    `json:"-"`
     Prequel     *BlogResponse `json:"prequel"`

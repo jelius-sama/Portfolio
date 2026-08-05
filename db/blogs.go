@@ -10,8 +10,8 @@ func createBlogsTable() error {
         published_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         deleted_at DATETIME,
-        prequel_id INTEGER,
-        sequel_id INTEGER,
+        prequel_id TEXT,
+        sequel_id TEXT,
         FOREIGN KEY (prequel_id) REFERENCES blogs(id) ON DELETE SET NULL,
         FOREIGN KEY (sequel_id) REFERENCES blogs(id) ON DELETE SET NULL
     );

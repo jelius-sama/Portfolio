@@ -33,6 +33,8 @@ func init() {
             logger.Panic(err)
         }
         dataDir = filepath.Join(home, ".local", "share", parsedURL.Hostname())
+    } else {
+        dataDir = filepath.Join(dataDir, parsedURL.Hostname())
     }
 
     var env []types.Env = []types.Env{
@@ -66,7 +68,8 @@ func init() {
         dbPath = filepath.Join(dataDir, "db.sqlite3")
     }
 
-    logger.Info("Using DB Path:", dbPath)
+    logger.Info("Server Data Directory:", dataDir)
+    logger.Info("SQLite DB Path:", dbPath)
     err = db.InitDB(dbPath)
     if err != nil {
         logger.Fatal("Failed to initialize database:", err.Error())

@@ -14,6 +14,26 @@ import (
     "github.com/jelius-sama/logger"
 )
 
+// NOTE:
+// var tempTestDirectCall = func() {
+//     buf := bytes.NewBufferString("abc1230") // Blog ID
+//     err := blogs.GetAllBlogs(nil, buf)
+//     if err == nil {
+//         var decodedResponse types.BlogResponse
+//         decErr := gob.NewDecoder(buf).Decode(&decodedResponse)
+//         if decErr != nil {
+//             logger.Error("Failed to decode Gob data:", decErr.Error())
+//             return
+//         }
+//         decodedResponse.Title // access fields
+//         // convert into human-readible
+//         humanReadable, _ := json.MarshalIndent(decodedResponse, "", "  ")
+//         logger.Okay("Buffer output:\n", string(humanReadable))
+//     } else {
+//         logger.Error("Error output:", err.Error())
+//     }
+// }
+
 // GetBlog retrieves a blog post by ID with its prequel and sequel chain
 func GetBlog(c fiber.Ctx, buf ...*bytes.Buffer) error {
     var id string
@@ -51,10 +71,7 @@ func GetBlog(c fiber.Ctx, buf ...*bytes.Buffer) error {
 
     if len(buf) != 0 {
         buf[0].Reset()
-        if err := gob.NewEncoder(buf[0]).Encode(blog); err != nil {
-            return err
-        }
-        return nil
+        return gob.NewEncoder(buf[0]).Encode(blog)
     }
 
     return c.Status(fiber.StatusOK).JSON(blog)

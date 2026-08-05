@@ -66,15 +66,17 @@ func Router(app *fiber.App) {
 
     // Analytics endpoints
     apiHandle.Get("/analytics/get/all", analytics.GetAllAnalyticsEvents)
-    apiHandle.Get("/analytics/get/visit-count", func(c fiber.Ctx) { analytics.GetPageVisitCount(c) })
+    apiHandle.Get("/analytics/get/visit-count", func(c fiber.Ctx) error { return analytics.GetPageVisitCount(c) })
     apiHandle.Get("/analytics/get/avg-visits", analytics.GetAvgVisitsPerHour)
     apiHandle.Get("/analytics/get/top-countries", analytics.GetTopCountries)
     apiHandle.Get("/analytics/get/top-pages", analytics.GetTopPages)
     apiHandle.Post("/analytics/track", analytics.TrackAnalytics)
 
     apiHandle.Get("/blogs", blogs.GetBlogsPage)
-    apiHandle.Get("/blog/all", blogs.GetAllBlog)
-    apiHandle.Get("/blog/:id", func(c fiber.Ctx) { blogs.GetBlog(c) })
+
+    apiHandle.Get("/blog/all", func(c fiber.Ctx) error { return blogs.GetAllBlogs(c) })
+    apiHandle.Get("/blog/md/:id", func(c fiber.Ctx) error { return blogs.GetBlogMarkdown(c) })
+    apiHandle.Get("/blog/:id", func(c fiber.Ctx) error { return blogs.GetBlog(c) })
     apiHandle.Post("/blog", blogs.CreateBlog)
 
     if types.EVEnv.Get().Value == types.EMDev.String() {
