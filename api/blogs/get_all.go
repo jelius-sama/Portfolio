@@ -132,15 +132,19 @@ func GetAllBlogs(c fiber.Ctx, buf ...*bytes.Buffer) error {
         orderBy = "published_at DESC"
     case types.BSOOld:
         orderBy = "published_at ASC"
+    // FIXME:views doesn't exists as a column, it is derived from analytics data
     case types.BSOPopular:
-        orderBy = "views DESC"
+        orderBy = "visit_count DESC"
     }
 
     var query = `
         SELECT 
-            id, title, excerpt, published_at, updated_at, deleted_at, prequel_id, sequel_id
-        FROM blogs
-        WHERE deleted_at IS NULL
+            b.id, b.title, b.excerpt, b.published_at, b.updated_at, b.deleted_at, b.prequel_id, b.sequel_id,
+            COALESCE(COUNT(ae.event_id), 0) as visit_count
+        FROM blogs b
+        LEFT JOIN analytics_events ae ON ae.page_path = '/blog/' || b.id
+        WHERE b.deleted_at IS NULL
+        GROUP BY b.id
         ORDER BY ` + orderBy + `
         LIMIT ? OFFSET ?
     `
@@ -171,6 +175,7 @@ func GetAllBlogs(c fiber.Ctx, buf ...*bytes.Buffer) error {
             &post.DeletedAt,
             &post.PrequelID,
             &post.SequelID,
+            &post.Views,
         ); err != nil {
             if len(buf) != 0 {
                 return err
@@ -212,7 +217,7 @@ func GetAllBlogs(c fiber.Ctx, buf ...*bytes.Buffer) error {
         Limit:     types.PostPerPage,
         HasMore:   hasMore,
         TotalRows: totalRows,
-        Sort:      sort.String(),
+        Sort:      sort,
     }
 
     if len(buf) != 0 {

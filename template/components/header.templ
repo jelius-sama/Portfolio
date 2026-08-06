@@ -15,11 +15,14 @@ func getPath(c string) string {
 	if c == "/" {
 		return ""
 	} else {
-		// TODO: Fine tune for dynamic pages on route `/blog/*`
 		var _, exists = types.Pages[c]
 		if exists {
 			return c
 		} else {
+			// NOTE: This may be fine for now but if we have more dynamic routes this will be messy
+			if strings.HasPrefix(c, "/blog/") {
+				return ""
+			}
 			return "/error"
 		}
 	}
@@ -137,8 +140,8 @@ templ Header(serverCtx fiber.Ctx) {
 						if (path === "/") {
 							return "";
 						} else {
-							// TODO: Fine tune for dynamic pages on route `/blog/*`
 							if (window.pages.includes(path)) return path
+							if (path.startsWith("/blog/")) return ""
 							return "/error"
 						};
 					};

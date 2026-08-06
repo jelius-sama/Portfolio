@@ -7,17 +7,10 @@ import (
 	"time"
 )
 
-templ Blogs() {
+templ Blogs(args BlogsSectionArgs) {
 	<main id="blogs" class="mx-auto max-w-6xl p-3">
 		@BlogsIntro()
-		@BlogsSection(BlogsSectionArgs{
-			Post:        types.SampleBlogPosts[:5],
-			HasMore:     true,
-			TotalPosts:  len(types.SampleBlogPosts),
-			LoadedPages: 1,
-			TotalPages:  (len(types.SampleBlogPosts) + types.PostPerPage - 1) / types.PostPerPage,
-			Sort:        types.BSONew,
-		})
+		@BlogsSection(args)
 	</main>
 }
 
@@ -125,7 +118,7 @@ templ BlogSortSelect(current types.BlogsSortOrder) {
 			<select
 				id="blog-sort"
 				name="sort"
-				hx-get="/api/blogs?page=1"
+				hx-get="/api/blogs?page=0"
 				hx-trigger="change"
 				hx-target="#blog-section"
 				hx-swap="innerHTML"

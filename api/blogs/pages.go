@@ -1,12 +1,16 @@
 package blogs
 
 import (
+    "bytes"
+    "encoding/gob"
+    "fmt"
     "strconv"
     "strings"
 
     "git.jelius.dev/jelius-sama/Portfolio/template/pages"
     "git.jelius.dev/jelius-sama/Portfolio/types"
     "github.com/gofiber/fiber/v3"
+    "github.com/jelius-sama/logger"
 )
 
 func GetBlogsPage(c fiber.Ctx) error {
@@ -39,16 +43,33 @@ func GetBlogsPage(c fiber.Ctx) error {
         page = p
     }
 
+    var dataBuf bytes.Buffer
+    if _, err := fmt.Fprintf(&dataBuf, "page=%dsort=%d", page, sort); err != nil {
+        logger.Error(c.Path(), err.Error())
+        return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
+    }
+
+    if err := GetAllBlogs(nil, &dataBuf); err != nil {
+        logger.Error(c.Path(), err.Error())
+        return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
+    }
+
+    var decodedResponse types.PaginatedBlogsResponse
+    if err := gob.NewDecoder(&dataBuf).Decode(&decodedResponse); err != nil {
+        logger.Error(c.Path(), err.Error())
+        return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
+    }
+
     var buf strings.Builder
 
-    if page == 1 {
+    if page == 0 {
         if err := pages.BlogsSection(pages.BlogsSectionArgs{
-            Post:        types.SampleBlogPosts[:5],
-            HasMore:     true,
-            TotalPosts:  len(types.SampleBlogPosts),
-            LoadedPages: page,
-            TotalPages:  (len(types.SampleBlogPosts) + types.PostPerPage - 1) / types.PostPerPage,
-            Sort:        sort,
+            Post:        decodedResponse.Data,
+            HasMore:     decodedResponse.HasMore,
+            TotalPosts:  decodedResponse.TotalRows,
+            LoadedPages: decodedResponse.Page,
+            TotalPages:  (decodedResponse.TotalRows + decodedResponse.Limit - 1) / decodedResponse.Limit,
+            Sort:        decodedResponse.Sort,
         }).Render(c.RequestCtx(), &buf); err != nil {
             return c.Status(fiber.StatusInternalServerError).JSON(types.ErrorResp{
                 Code:    fiber.StatusInternalServerError,
@@ -60,13 +81,7 @@ func GetBlogsPage(c fiber.Ctx) error {
         return c.SendString(buf.String())
     }
 
-    var skip = (page - 1) * types.PostPerPage
-    var take = types.PostPerPage
-
-    start := min(skip, len(types.SampleBlogPosts))
-    end := min(start+take, len(types.SampleBlogPosts))
-
-    if err := pages.BlogPostsOOB(types.SampleBlogPosts[start:end]).Render(c.RequestCtx(), &buf); err != nil {
+    if err := pages.BlogPostsOOB(decodedResponse.Data).Render(c.RequestCtx(), &buf); err != nil {
         return c.Status(fiber.StatusInternalServerError).JSON(types.ErrorResp{
             Code:    fiber.StatusInternalServerError,
             Message: err.Error(),
@@ -75,10 +90,10 @@ func GetBlogsPage(c fiber.Ctx) error {
 
     if err := pages.BlogInfoOOBUpdate(pages.BlogInfoArgs{
         Sort:        sort,
-        LoadedPosts: ((page - 1) * types.PostPerPage) + len(types.SampleBlogPosts[start:end]),
-        TotalPosts:  len(types.SampleBlogPosts),
-        LoadedPages: page,
-        TotalPages:  (len(types.SampleBlogPosts) + types.PostPerPage - 1) / types.PostPerPage,
+        LoadedPosts: ((page - 1) * decodedResponse.Limit) + decodedResponse.Limit,
+        TotalPosts:  decodedResponse.TotalRows,
+        LoadedPages: decodedResponse.Page,
+        TotalPages:  (decodedResponse.TotalRows + decodedResponse.Limit - 1) / decodedResponse.Limit,
     }).Render(c.RequestCtx(), &buf); err != nil {
         return c.Status(fiber.StatusInternalServerError).JSON(types.ErrorResp{
             Code:    fiber.StatusInternalServerError,
@@ -86,7 +101,7 @@ func GetBlogsPage(c fiber.Ctx) error {
         })
     }
 
-    if page >= (len(types.SampleBlogPosts)+types.PostPerPage-1)/types.PostPerPage {
+    if page >= (decodedResponse.TotalRows+decodedResponse.Limit-1)/decodedResponse.Limit {
         if err := pages.BlogEndOfPosts().Render(c.RequestCtx(), &buf); err != nil {
             return c.Status(fiber.StatusInternalServerError).JSON(types.ErrorResp{
                 Code:    fiber.StatusInternalServerError,
@@ -94,7 +109,7 @@ func GetBlogsPage(c fiber.Ctx) error {
             })
         }
     } else {
-        if err := pages.BlogLoadMoreTrigger(page+1, types.BSONew).Render(c.RequestCtx(), &buf); err != nil {
+        if err := pages.BlogLoadMoreTrigger(decodedResponse.Page+1, types.BSONew).Render(c.RequestCtx(), &buf); err != nil {
             return c.Status(fiber.StatusInternalServerError).JSON(types.ErrorResp{
                 Code:    fiber.StatusInternalServerError,
                 Message: err.Error(),

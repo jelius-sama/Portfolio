@@ -50,7 +50,7 @@ func init() {
         "/links": types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
         // TODO: Implement these pages
         "/blogs":        types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlogs}},
-        "/blog/:id":     types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlogs}},
+        "/blog/:id":     types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
         "/acheivements": types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
     }
 }
