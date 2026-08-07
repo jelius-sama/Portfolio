@@ -30,17 +30,28 @@ script errorScript(code int) {
 	try {
 		const currentElement = document.getElementById(`error-status-${code}`);
 		if (!currentElement) return;
-		document.querySelectorAll('body').forEach(body => {
+
+		const bodies = document.querySelectorAll('body');
+		const originalStyles = [];
+
+		bodies.forEach(body => {
+			originalStyles.push({
+				element: body,
+				display: body.style.display,
+				height: body.style.height,
+				flexDirection: body.style.flexDirection
+			});
+
 			body.style.display = 'flex';
 			body.style.height = '100vh';
 			body.style.flexDirection = 'column';
 		});
 
 		currentElement.addEventListener('htmx:beforeCleanupElement', function cleanupHandler(evt) {
-			document.querySelectorAll('body').forEach(body => {
-				body.style.display = 'block';
-				body.style.height = 'auto';
-				body.style.flexDirection = 'row';
+			originalStyles.forEach(saved => {
+				saved.element.style.display = saved.display;
+				saved.element.style.height = saved.height;
+				saved.element.style.flexDirection = saved.flexDirection;
 			});
 			currentElement.removeEventListener('htmx:beforeCleanupElement', cleanupHandler);
 		});

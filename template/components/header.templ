@@ -58,8 +58,8 @@ templ mobileNavRow(index int, href, label string) {
 }
 
 templ Header(serverCtx fiber.Ctx) {
-	<header id="header" class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
-		<div class="mx-auto flex max-w-6xl items-center justify-between px-3 py-5">
+	<header id="header" class="fixed top-0 z-50 border-b border-border bg-background/80 backdrop-blur w-full">
+		<div class="mx-auto flex max-w-6xl items-center justify-between px-3 py-3 sm:py-5">
 			@Link(LinkAttr{Id: "current-path", Href: "/", Class: "font-mono text-lg font-semibold text-foreground"}) {
 				<span class="text-primary">&gt;</span> jelius.dev{ getPath(serverCtx.Path()) }
 			}

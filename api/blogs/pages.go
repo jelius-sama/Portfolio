@@ -27,7 +27,7 @@ func GetBlogsPage(c fiber.Ctx) error {
             sort = types.BSOOld
         default:
             return c.Status(fiber.StatusBadRequest).JSON(types.ErrorResp{
-                Code:    fiber.StatusBadGateway,
+                Code:    fiber.StatusBadRequest,
                 Message: "Invalid sorting order requested!",
             })
         }
@@ -36,7 +36,7 @@ func GetBlogsPage(c fiber.Ctx) error {
     var page int
     if p, err := strconv.Atoi(pageStr); err != nil {
         return c.Status(fiber.StatusBadRequest).JSON(types.ErrorResp{
-            Code:    fiber.StatusBadGateway,
+            Code:    fiber.StatusBadRequest,
             Message: "Invalid page number!",
         })
     } else {
@@ -62,7 +62,7 @@ func GetBlogsPage(c fiber.Ctx) error {
 
     var buf strings.Builder
 
-    if page == 0 {
+    if page == 1 {
         if err := pages.BlogsSection(pages.BlogsSectionArgs{
             Post:        decodedResponse.Data,
             HasMore:     decodedResponse.HasMore,
@@ -90,7 +90,9 @@ func GetBlogsPage(c fiber.Ctx) error {
 
     if err := pages.BlogInfoOOBUpdate(pages.BlogInfoArgs{
         Sort:        sort,
-        LoadedPosts: ((page - 1) * decodedResponse.Limit) + decodedResponse.Limit,
+        LoadedPosts: ((page - 1) * decodedResponse.Limit) + len(decodedResponse.Data),
+        // NOTE: For mathematicians out there, golang stores the length of an array internally, it is more efficient to use that length than to do fancy math which only waste more CPU cycles
+        // LoadedPosts: ((page - 1) * decodedResponse.Limit) + min(decodedResponse.Limit, decodedResponse.TotalRows - ((page - 1) * decodedResponse.Limit)),
         TotalPosts:  decodedResponse.TotalRows,
         LoadedPages: decodedResponse.Page,
         TotalPages:  (decodedResponse.TotalRows + decodedResponse.Limit - 1) / decodedResponse.Limit,
@@ -109,7 +111,7 @@ func GetBlogsPage(c fiber.Ctx) error {
             })
         }
     } else {
-        if err := pages.BlogLoadMoreTrigger(decodedResponse.Page+1, types.BSONew).Render(c.RequestCtx(), &buf); err != nil {
+        if err := pages.BlogLoadMoreTrigger(decodedResponse.Page, sort).Render(c.RequestCtx(), &buf); err != nil {
             return c.Status(fiber.StatusInternalServerError).JSON(types.ErrorResp{
                 Code:    fiber.StatusInternalServerError,
                 Message: err.Error(),

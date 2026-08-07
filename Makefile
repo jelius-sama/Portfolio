@@ -18,7 +18,7 @@ dev:
 		    -s -w \
 		    -X main.Environment=development  \
 		    -X main.Host=$(HOST) \
-		    -X main.AssetCDNHost=http://localhost$(PORT) \
+		    -X main.AssetCDNHost=http://shogun.local$(PORT) \
 		    -X main.Version=$(VERSION) \
 		    -X main.Port=$(PORT)" \
 		    -trimpath -buildvcs=false -o $(DEV_BIN) ./cmd

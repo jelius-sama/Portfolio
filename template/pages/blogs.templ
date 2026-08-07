@@ -8,7 +8,14 @@ import (
 )
 
 templ Blogs(args BlogsSectionArgs) {
-	<main id="blogs" class="mx-auto max-w-6xl p-3">
+	<main
+		id="blogs"
+		if len(args.Post) == 0 {
+			class="h-[calc(100vh-(((var(--spacing)*8)*(var(--text-multiplier)+0.6))+(var(--text-xs))))] mx-auto max-w-6xl p-3 pt-[calc(var(--header-padding)+(var(--spacing)*3))]"
+		} else {
+			class="mx-auto max-w-6xl p-3 pt-[calc(var(--header-padding)+(var(--spacing)*3))]"
+		}
+	>
 		@BlogsIntro()
 		@BlogsSection(args)
 	</main>
@@ -118,10 +125,10 @@ templ BlogSortSelect(current types.BlogsSortOrder) {
 			<select
 				id="blog-sort"
 				name="sort"
-				hx-get="/api/blogs?page=0"
+				hx-get="/api/blogs?page=1"
 				hx-trigger="change"
 				hx-target="#blog-section"
-				hx-swap="innerHTML"
+				hx-swap="outerHTML"
 				hx-include="this"
 				class="appearance-none rounded-md border border-border bg-card py-2 pl-4 pr-9 font-mono text-sm text-foreground transition-colors hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-ring"
 			>
@@ -155,7 +162,7 @@ func formatTime(t time.Time) string {
 templ BlogPostItem(post types.BlogPost) {
 	@components.Link(components.LinkAttr{
 		Href:  "/blog/" + post.ID,
-		Class: "group flex flex-col gap-4 rounded-md border border-border bg-card px-6 py-5 transition-colors hover:border-primary/40 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none",
+		Class: "group flex flex-col gap-4 rounded-md border border-border bg-card  px-2 sm:px-5 py-2 sm:py-5 transition-colors hover:border-primary/40 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none",
 	}) {
 		<div class="flex items-start justify-between gap-4">
 			<div class="min-w-0">
@@ -186,15 +193,21 @@ templ BlogPostItem(post types.BlogPost) {
 templ BlogPostsList(posts []types.BlogPost, hasMore bool, nextPage int, sort types.BlogsSortOrder) {
 	@components.Terminal("blog-posts") {
 		<div id="blog-posts-list" class="space-y-4">
-			for _, post := range posts {
-				@BlogPostItem(post)
+			if len(posts) == 0 {
+				<div class="text-center text-gray-500 font-mono py-4">No blog posts found.</div>
+			} else {
+				for _, post := range posts {
+					@BlogPostItem(post)
+				}
 			}
 		</div>
 	}
 	if hasMore {
 		@BlogLoadMoreTrigger(nextPage, sort)
 	} else {
-		@BlogEndOfPosts()
+		if len(posts) != 0 {
+			@BlogEndOfPosts()
+		}
 	}
 }
 

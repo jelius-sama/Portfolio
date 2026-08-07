@@ -18,7 +18,7 @@ func (v *ViewManager) RenderBlogs(c fiber.Ctx) error {
         Description: "My blog posts",
     }
 
-    var buf = bytes.NewBufferString("page=0sort=0")
+    var buf = bytes.NewBufferString("page=1sort=0")
     if err := blogs.GetAllBlogs(nil, buf); err != nil {
         logger.Error(c.Path(), err.Error())
         return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
@@ -35,7 +35,7 @@ func (v *ViewManager) RenderBlogs(c fiber.Ctx) error {
         HasMore:     decodedResponse.HasMore,
         TotalPosts:  decodedResponse.TotalRows,
         LoadedPages: decodedResponse.Page,
-        TotalPages:  (decodedResponse.TotalRows + decodedResponse.Limit - 1) / decodedResponse.Limit,
+        TotalPages:  max(1, (decodedResponse.TotalRows+decodedResponse.Limit-1)/decodedResponse.Limit),
         Sort:        decodedResponse.Sort,
     }))
 }

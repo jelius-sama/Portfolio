@@ -36,7 +36,7 @@ import (
 
 // GetAllBlogs retrieves all non-deleted blog posts with pagination and sorting
 func GetAllBlogs(c fiber.Ctx, buf ...*bytes.Buffer) error {
-    var page int = 0
+    var page int = 1
     var sort types.BlogsSortOrder = types.BSONew
 
     var validateSort = func(t any, s *types.BlogsSortOrder) error {
@@ -90,10 +90,10 @@ func GetAllBlogs(c fiber.Ctx, buf ...*bytes.Buffer) error {
             return fmt.Errorf("page must be a non-negative integer\n")
         }
     } else {
-        if p, pageErr := strconv.Atoi(c.Query("page", "0")); pageErr != nil || p < 0 {
+        if p, pageErr := strconv.Atoi(c.Query("page", "1")); pageErr != nil || p < 0 {
             return c.Status(fiber.StatusBadRequest).JSON(types.ErrorResp{
                 Code:    fiber.StatusBadRequest,
-                Message: "page must be a non-negative integer",
+                Message: "page must be a non-negative and non-zero integer",
             })
         } else {
             page = p
@@ -123,7 +123,7 @@ func GetAllBlogs(c fiber.Ctx, buf ...*bytes.Buffer) error {
     }
 
     // Calculate offset
-    var offset = page * types.PostPerPage
+    var offset = (page - 1) * types.PostPerPage
 
     // Build query with sorting
     var orderBy string
@@ -132,7 +132,6 @@ func GetAllBlogs(c fiber.Ctx, buf ...*bytes.Buffer) error {
         orderBy = "published_at DESC"
     case types.BSOOld:
         orderBy = "published_at ASC"
-    // FIXME:views doesn't exists as a column, it is derived from analytics data
     case types.BSOPopular:
         orderBy = "visit_count DESC"
     }

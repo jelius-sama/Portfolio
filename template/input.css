@@ -155,4 +155,19 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  :root {
+    --text-multiplier: 1.55;
+    --header-padding: calc((var(--text-lg) * var(--text-multiplier)) + ((var(--spacing) * 5) * 2));
+  }
+
+  @media (max-width: 640px) {
+    :root {
+      --text-multiplier: 1;
+    }
+  }
+
+  main {
+    @apply pt-[var(--header-padding)];
+  }
 }
