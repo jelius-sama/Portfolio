@@ -57,8 +57,9 @@ func init() {
     types.Pages = map[string]types.Page{
         "/":      types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderHome}},
         "/links": types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
+        "/blogs": types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlogs}},
         // TODO: Implement these pages
-        "/blogs":        types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlogs}},
+        // TODO: Implement API routes that are in the V2 of the project
         "/blog/:id":     types.Page{Handler: pageCache, Handlers: []any{inDev}},
         "/acheivements": types.Page{Handler: pageCache, Handlers: []any{inDev}},
     }

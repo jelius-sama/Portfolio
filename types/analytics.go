@@ -60,8 +60,8 @@ type PaginatedTopPagesResponse struct {
 }
 
 type TrackAnalyticsRequest struct {
-    CountryCode string `json:"country_code"`
-    PagePath    string `json:"page_path"`
+    UserTimeZone string `json:"user_time_zone"`
+    PagePath     string `json:"page_path"`
 }
 
 type SortOrder uint8

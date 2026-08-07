@@ -17,7 +17,7 @@ templ Link(attr LinkAttr) {
 			class={ attr.Class }
 		}
 		hx-target="main"
-		hx-swap="outerHTML"
+		hx-swap="outerHTML show:window:top"
 		hx-push-url="true"
 	>
 		{ children... }

@@ -29,7 +29,6 @@ templ Contact(data ContactData) {
 							<p class="text-sm text-muted-foreground">Social Media Profiles</p>
 							<div class="mt-4 space-y-4">
 								for i := range(data.QuickLinks) {
-									// TODO: Update the Link component to either open in new tab or do an SPA navigation
 									@SocialLink(i+2, data.QuickLinks[i].Icon, data.QuickLinks[i].Platform, data.QuickLinks[i].URL)
 								}
 							</div>

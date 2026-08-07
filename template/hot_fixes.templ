@@ -1,8 +1,5 @@
 package template
 
-// TODO: Record analytics (base.templ)
-// TODO: Work on `pages/links.templ`, similar todo note can be found in another file, use ripgrep.
-// TODO: Optimize layout for mobile devices
 templ HTMXHotFixes() {
 	<script>
 		// Global HTMX error handling: if a request fails, the server might
@@ -40,15 +37,6 @@ templ HTMXHotFixes() {
 			// swap it in normally.
 			evt.detail.shouldSwap = true;
 			evt.detail.isError = false;
-		});
-
-		// This is to make sure that when navigating to a new page, the scroll
-		// position is reset.
-		// TODO: Fix browser back button not preserving scroll position
-		document.addEventListener("htmx:beforeSwap", function(event) {
-			if (event.detail.target.tagName.toLowerCase() === "main" || event.detail.target.id === "main") {
-				window.scrollTo(0, 0);
-			}
 		});
 
 		// renderHtmxErrorCard builds a compact themed error card and swaps it
