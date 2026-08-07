@@ -8,7 +8,7 @@ import (
 
 var baseScript = templ.NewOnceHandle()
 
-templ Base(serverCtx fiber.Ctx, metadata types.Metadata, body templ.Component, footer templ.Component) {
+templ Base(serverCtx fiber.Ctx, metadata *types.Metadata, body templ.Component, footer templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
 		@Metadata(metadata)

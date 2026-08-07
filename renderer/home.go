@@ -8,7 +8,6 @@ import (
     "git.jelius.dev/jelius-sama/Portfolio/db"
     "git.jelius.dev/jelius-sama/Portfolio/template/components"
     "git.jelius.dev/jelius-sama/Portfolio/template/pages"
-    "git.jelius.dev/jelius-sama/Portfolio/types"
 
     "github.com/gofiber/fiber/v3"
     "github.com/jelius-sama/logger"
@@ -226,16 +225,16 @@ func getHomePageData(ctx context.Context) (pages.HomeData, error) {
 }
 
 func (v *ViewManager) RenderHome(c fiber.Ctx) error {
-    var metadata types.Metadata = types.Metadata{
-        Title:       "Home",
-        Description: "Portfolio",
-    }
-
-    if data, err := getHomePageData(c.RequestCtx()); err == nil {
-        return Renderer(c, metadata, pages.Home(data))
-    } else {
+    if metadata, err := GetMetadata(c); err != nil {
         logger.Error(c.Path(), err.Error())
         return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
+    } else {
+        if data, err := getHomePageData(c.RequestCtx()); err == nil {
+            return Renderer(c, metadata, pages.Home(data))
+        } else {
+            logger.Error(c.Path(), err.Error())
+            return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
+        }
     }
 }
 

@@ -18,7 +18,7 @@ func New() *ViewManager {
     return &ViewManager{}
 }
 
-func Renderer(c fiber.Ctx, metadata types.Metadata, bodyContent templ.Component) error {
+func Renderer(c fiber.Ctx, metadata *types.Metadata, bodyContent templ.Component) error {
     var page types.PageContext = types.PageContext{}
     page.DetermineRenderMode(c)
     c.Set(fiber.HeaderContentType, fiber.MIMETextHTMLCharsetUTF8)

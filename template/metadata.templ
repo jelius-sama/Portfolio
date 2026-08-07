@@ -5,14 +5,26 @@ import (
 	"git.jelius.dev/jelius-sama/Portfolio/types"
 )
 
-// TODO: Implement more metadatas
-templ Metadata(metadata types.Metadata) {
+templ Metadata(metadata *types.Metadata) {
 	<head hx-head="re-eval">
 		<link hx-preserve="true" href={ fmt.Sprintf("%s/assets/output.css", types.EVAssetCDNHostname.Get().Value) } rel="stylesheet"/>
 		<link hx-preserve="true" rel="manifest" href={ fmt.Sprintf("%s/assets/manifest.json", types.EVAssetCDNHostname.Get().Value) }/>
 		<meta hx-preserve="true" charset="UTF-8"/>
 		<meta hx-preserve="true" name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<title>{ metadata.Title }</title>
-		<meta name="description" content={ metadata.Description }/>
+		for _, link := range metadata.Links {
+			if link.Media != nil {
+				<link rel={ link.Rel } href={ link.Href } media={ *link.Media }/>
+			} else {
+				<link rel={ link.Rel } href={ link.Href }/>
+			}
+		}
+		for _, m := range metadata.Meta {
+			if m.Name != nil {
+				<meta name={ *m.Name } content={ m.Content }/>
+			} else if m.Property != nil {
+				<meta property={ *m.Property } content={ m.Content }/>
+			}
+		}
 	</head>
 }

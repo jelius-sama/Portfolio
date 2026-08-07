@@ -17,7 +17,7 @@ const (
 
 // PageContext holds metadata about the current request lifecycle
 type PageContext struct {
-    Metadata   Metadata
+    Metadata   *Metadata
     IsPartial  bool
     TargetPart TargetPart
 }

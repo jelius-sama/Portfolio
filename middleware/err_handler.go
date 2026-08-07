@@ -40,7 +40,7 @@ func ErrHandler(c fiber.Ctx, err error) error {
         Title:       strconv.Itoa(code),
         Description: err.Error(),
     }
-    if renderErr := renderer.Renderer(c, metadata, pages.Error(code, err)); renderErr != nil {
+    if renderErr := renderer.Renderer(c, &metadata, pages.Error(code, err)); renderErr != nil {
         logger.Panic(fmt.Sprintf(
             "double fault in error middleware:\n"+
                 " -> Original Error: %v\n"+

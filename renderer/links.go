@@ -8,13 +8,11 @@ import (
     "git.jelius.dev/jelius-sama/Portfolio/db"
     "git.jelius.dev/jelius-sama/Portfolio/template/components"
     "git.jelius.dev/jelius-sama/Portfolio/template/pages"
-    "git.jelius.dev/jelius-sama/Portfolio/types"
 
     "github.com/gofiber/fiber/v3"
     "github.com/jelius-sama/logger"
 )
 
-// GetLinksPage retrieves a links page by handle and returns pages.LinksArg
 func getLinksPageData(ctx context.Context) (pages.LinksArg, error) {
     var linksArg pages.LinksArg
     var footerWhoAmI, qrImagePath sql.NullString
@@ -90,16 +88,16 @@ func getLinksPageData(ctx context.Context) (pages.LinksArg, error) {
 }
 
 func (v *ViewManager) RenderLinks(c fiber.Ctx) error {
-    var metadata types.Metadata = types.Metadata{
-        Title:       "Links",
-        Description: "My Social Links",
-    }
-
-    if data, err := getLinksPageData(c.RequestCtx()); err == nil {
-        return Renderer(c, metadata, pages.Links(data))
-    } else {
+    if metadata, err := GetMetadata(c); err != nil {
         logger.Error(c.Path(), err.Error())
         return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
+    } else {
+        if data, err := getLinksPageData(c.RequestCtx()); err == nil {
+            return Renderer(c, metadata, pages.Links(data))
+        } else {
+            logger.Error(c.Path(), err.Error())
+            return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
+        }
     }
 }
 

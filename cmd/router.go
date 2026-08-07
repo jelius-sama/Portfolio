@@ -48,10 +48,10 @@ func init() {
     }
 
     var inDev = func(c fiber.Ctx) error {
-        return renderer.Renderer(c, types.Metadata{
+        return renderer.Renderer(c, new(types.Metadata{
             Title:       "501",
             Description: "Feature in development",
-        }, pages.Error(501, &fiber.Error{Code: 501, Message: "Active work on this feature is ongoing, in the mean time you can visit other parts of this application."}))
+        }), pages.Error(501, &fiber.Error{Code: 501, Message: "Active work on this feature is ongoing, in the mean time you can visit other parts of this application."}))
     }
 
     types.Pages = map[string]types.Page{
