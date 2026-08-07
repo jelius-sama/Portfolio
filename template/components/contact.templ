@@ -12,8 +12,9 @@ type QuickContactLinks struct {
 }
 
 type ContactData struct {
-	QuickLinks []QuickContactLinks
-	Email      string
+	QuickLinks  []QuickContactLinks
+	QRImagePath string
+	Email       string
 }
 
 templ Contact(data ContactData) {
@@ -39,10 +40,10 @@ templ Contact(data ContactData) {
 					<div class="space-y-6">
 						<p class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(0) }>
 							<span class="text-primary">$</span>
-							<span class="text-foreground">neofetch | less</span>
+							<span class="text-foreground">qr-fetch</span>
 						</p>
 						<div class={ "mx-auto max-w-xs overflow-hidden rounded-md border border-border animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(1) }>
-							<img src={ fmt.Sprintf("%s/assets/jelius-dev-dark.png", types.EVAssetCDNHostname.Get().Value) } alt="QR code linking to jelius.dev" class="block w-full p-2"/>
+							<img src={ fmt.Sprintf("%s%s", types.EVAssetCDNHostname.Get().Value, data.QRImagePath) } alt="QR code linking to jelius.dev" class="block w-full p-2"/>
 						</div>
 						/*
 						<p class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(2) }>

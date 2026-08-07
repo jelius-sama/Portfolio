@@ -1,6 +1,8 @@
 package components
 
 import "strings"
+import "fmt"
+import "git.jelius.dev/jelius-sama/Portfolio/types"
 
 type ProjectLink struct {
 	Label string
@@ -39,7 +41,7 @@ templ Projects(data []ProjectData) {
 						data[i].Tags,
 						data[i].Links) {
 						if len(data[i].Thumbnail) != 0 {
-							<img src={ data[i].Thumbnail } alt={ data[i].Title } class="h-full w-full object-cover"/>
+							<img src={ fmt.Sprintf("%s%s", types.EVAssetCDNHostname.Get().Value, data[i].Thumbnail) } alt={ data[i].Title } class="h-full w-full object-cover"/>
 						} else {
 							@ProjectPreviewPlaceholder(data[i].Title)
 						}

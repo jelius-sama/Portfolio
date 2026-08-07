@@ -17,6 +17,8 @@ func createTables() []error {
     var errors []error
     errors = append(errors, createAnalyticsTables())
     errors = append(errors, createBlogsTable())
+    errors = append(errors, createLinksTable())
+    errors = append(errors, createHomeTables())
     return errors
 }
 

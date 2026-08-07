@@ -19,6 +19,8 @@ func errorTitle(code int) string {
 		return "Something went wrong"
 	case 503:
 		return "Service unavailable"
+	case 501:
+		return "Feature in development"
 	default:
 		return "Unexpected error"
 	}

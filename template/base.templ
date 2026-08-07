@@ -24,14 +24,6 @@ templ Base(serverCtx fiber.Ctx, metadata types.Metadata, body templ.Component, f
 				@HTMXScript()
 				@HTMXHeadSupport()
 				@HTMXHotFixes()
-				<script>
-					// TODO: Fix browser back button not preserving scroll position
-					document.addEventListener("htmx:beforeSwap", function(event) {
-						if (event.detail.target.tagName.toLowerCase() === "main" || event.detail.target.id === "main") {
-							window.scrollTo(0, 0);
-						}
-					});
-				</script>
 			}
 		</body>
 	</html>

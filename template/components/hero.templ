@@ -22,7 +22,7 @@ func (edl EDLevel) String() string {
 	case EDLevelPG:
 		return "Post Graduate"
 	case EDLevelUG:
-		return "Under Graduate"
+		return "Undergraduate"
 	case EDLevelGoodNil:
 		return "Employed"
 	case EDLevelBadNil:
@@ -33,12 +33,25 @@ func (edl EDLevel) String() string {
 }
 
 type HeroData struct {
+	ImagePath         string
+	CVPath            string
+	ImageAltText      *string
 	FirstName         string
 	LastName          string
 	EducationLevel    EDLevel
 	StudyDomain       string
 	WhoAmI            string
 	SpecializedDomain []string
+}
+
+script scrollToSection(id string) {
+    const target = document.getElementById(id);
+    if (target) {
+        target.scrollIntoView({ 
+            behavior: "smooth",
+            block: "start" 
+        });
+    }
 }
 
 templ Hero(data HeroData) {
@@ -48,7 +61,7 @@ templ Hero(data HeroData) {
 			aria-hidden="true"
 		></div>
 		<div class="mx-auto flex max-w-2xl flex-col items-center px-3 text-center">
-			@AvatarRing(fmt.Sprintf("%s/assets/compressed/jelius.webp", types.EVAssetCDNHostname.Get().Value), "Portrait of Jelius Basumatary")
+			@AvatarRing(fmt.Sprintf("%s%s", types.EVAssetCDNHostname.Get().Value, data.ImagePath), data.ImageAltText)
 			<p class="mt-8 text-sm text-muted-foreground">Hello, I'm</p>
 			<h1 class="mt-2 font-mono text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
 				<span class="text-primary">{ data.FirstName }</span> { data.LastName }
@@ -58,7 +71,7 @@ templ Hero(data HeroData) {
 			</p>
 			<div class="mt-10 flex flex-wrap items-center justify-center gap-4">
 				<a
-					href="/cv.pdf"
+					href={ fmt.Sprintf("%s%s", types.EVAssetCDNHostname.Get().Value, data.CVPath) }
 					download
 					class="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 				>
@@ -69,8 +82,8 @@ templ Hero(data HeroData) {
 					</svg>
 					Download CV
 				</a>
-				<a
-					href="#contact"
+				<button
+					hx-on:click={ scrollToSection("contact") }
 					class="inline-flex items-center gap-2 rounded-md border border-border px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 				>
 					Contact Info
@@ -78,7 +91,7 @@ templ Hero(data HeroData) {
 						<path d="M5 12h14"></path>
 						<path d="m13 6 6 6-6 6"></path>
 					</svg>
-				</a>
+				</button>
 			</div>
 		</div>
 		<div class="mx-auto mt-16 max-w-6xl px-3">

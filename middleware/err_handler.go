@@ -34,7 +34,7 @@ func ErrHandler(c fiber.Ctx, err error) error {
     }
 
     c.Set(fiber.HeaderContentType, fiber.MIMETextHTMLCharsetUTF8)
-    c.Status(fiber.StatusNotFound)
+    c.Status(code)
 
     var metadata types.Metadata = types.Metadata{
         Title:       strconv.Itoa(code),

@@ -5,18 +5,18 @@ import (
 	"git.jelius.dev/jelius-sama/Portfolio/types"
 )
 
+type LinksFooter struct {
+	WhoAmI      string
+	TotalLinks  int
+	QRImagePath string
+}
+
 // LinksOutro renders the closing block for the /links page: a "stats"
 // terminal (a short git-log-style summary, the QR code, and a closing
 // echo), plus a small "built with" line. Call @Footer() separately after
 // this, same as on the home page — kept out of here so Footer stays the
 // one shared, site-wide component.
-//
-// Simplified from the original screenshot on purpose: the full fake
-// neofetch hardware dump (OS/Host/Kernel/CPU/GPU/Memory) was dropped
-// since it didn't carry real information here — kept only the parts that
-// still say something true or charming (link count, QR, thanks note). If
-// you'd rather keep a joke-y neofetch block, easy to add back in.
-templ LinksOutro() {
+templ LinksOutro(arg LinksFooter) {
 	<section id="links-outro" class="pb-24 sm:pb-32">
 		<div class="mx-auto max-w-6xl">
 			@Terminal("stats") {
@@ -26,24 +26,24 @@ templ LinksOutro() {
 						<span class="text-foreground">whoami</span>
 					}
 					@TerminalLine(1) {
-						<span class="text-muted-foreground">I'm an undergraduate CS student who loves building things that work well and are easy to use.</span>
+						<span class="text-muted-foreground">{ arg.WhoAmI }</span>
 					}
 					@TerminalLine(2) {
 						<span class="text-primary">guest@jelius:~$</span>
 						<span class="text-foreground">ls social-links/</span>
 					}
 					@TerminalLine(3) {
-						<span class="text-muted-foreground">{ fmt.Sprintf("%d social links configured", len(linkEntries)) }</span>
+						<span class="text-muted-foreground">{ fmt.Sprintf("%d social links configured", arg.TotalLinks) }</span>
 						<span class="mx-2 text-primary">•</span>
 						<span class="text-muted-foreground">Click any link below to connect with me</span>
 					}
 					<div class={ "flex flex-col /*items-center*/ gap-3 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(1) }>
 						<p class="self-start">
 							<span class="text-primary">$</span>
-							<span class="text-foreground">neofetch</span>
+							<span class="text-foreground">qr-fetch</span>
 						</p>
 						<div class="w-full max-w-sm overflow-hidden rounded-md border border-border bg-secondary/40 p-4 flex justify-center items-center">
-							<img src={ fmt.Sprintf("%s/assets/compressed/links.webp", types.EVAssetCDNHostname.Get().Value) } alt="QR code linking to jelius.dev" class="w-full h-full rounded-sm"/>
+							<img src={ fmt.Sprintf("%s%s", types.EVAssetCDNHostname.Get().Value, arg.QRImagePath) } alt="QR code linking to jelius.dev" class="w-full h-full rounded-sm"/>
 						</div>
 					</div>
 					<p class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(2) }>
