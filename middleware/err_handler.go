@@ -2,15 +2,18 @@ package middleware
 
 import (
     "fmt"
-    "strconv"
     "strings"
 
     "git.jelius.dev/jelius-sama/Portfolio/renderer"
     "git.jelius.dev/jelius-sama/Portfolio/template/pages"
-    "git.jelius.dev/jelius-sama/Portfolio/types"
     "github.com/gofiber/fiber/v3"
     "github.com/jelius-sama/logger"
 )
+
+var PseudoPath map[int]string = map[int]string{
+    fiber.StatusNotFound:            "#not_found",
+    fiber.StatusInternalServerError: "#internal_server_error",
+}
 
 func ErrHandler(c fiber.Ctx, err error) error {
     c.Response().Header.Del("Cache-Control")
@@ -33,20 +36,21 @@ func ErrHandler(c fiber.Ctx, err error) error {
         return nil
     }
 
-    c.Set(fiber.HeaderContentType, fiber.MIMETextHTMLCharsetUTF8)
-    c.Status(code)
+    c.Locals("pseudo_path", PseudoPath[code])
+    if metadata, metadataErr := renderer.GetMetadata(c); metadataErr != nil {
+        logger.Panic(metadataErr)
+    } else {
+        c.Set(fiber.HeaderContentType, fiber.MIMETextHTMLCharsetUTF8)
+        c.Status(code)
 
-    var metadata types.Metadata = types.Metadata{
-        Title:       strconv.Itoa(code),
-        Description: err.Error(),
-    }
-    if renderErr := renderer.Renderer(c, &metadata, pages.Error(code, err)); renderErr != nil {
-        logger.Panic(fmt.Sprintf(
-            "double fault in error middleware:\n"+
-                " -> Original Error: %v\n"+
-                " -> Render Error  : %v",
-            err, renderErr,
-        ))
+        if renderErr := renderer.Renderer(c, metadata, pages.Error(code, err)); renderErr != nil {
+            logger.Panic(fmt.Sprintf(
+                "double fault in error middleware:\n"+
+                    " -> Original Error: %v\n"+
+                    " -> Render Error  : %v",
+                err, renderErr,
+            ))
+        }
     }
 
     return nil

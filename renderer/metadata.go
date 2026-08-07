@@ -46,11 +46,16 @@ func preProcessMetadata(metadata *types.Metadata) *types.Metadata {
     return metadata
 }
 
-// TODO: Handle special case paths such as `#not_found`
 func GetMetadata(c fiber.Ctx) (*types.Metadata, error) {
     var metadata types.Metadata
-    var path = c.Path()
     var ctx = c.RequestCtx()
+    var path string
+
+    if pp, ok := c.Locals("pseudo_path").(string); ok && len(pp) != 0 {
+        path = pp
+    } else {
+        path = c.Path()
+    }
 
     metadata.Path = path
 
