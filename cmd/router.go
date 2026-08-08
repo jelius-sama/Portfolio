@@ -10,7 +10,6 @@ import (
     "git.jelius.dev/jelius-sama/Portfolio/api/blogs"
     "git.jelius.dev/jelius-sama/Portfolio/middleware"
     "git.jelius.dev/jelius-sama/Portfolio/renderer"
-    "git.jelius.dev/jelius-sama/Portfolio/template/pages"
     "git.jelius.dev/jelius-sama/Portfolio/types"
     "github.com/gofiber/fiber/v3"
     "github.com/gofiber/fiber/v3/middleware/static"
@@ -47,23 +46,14 @@ func init() {
         pageCache = routerCtx.MiddlewareHandlers[types.MHNoCache]
     }
 
-    var inDev = func(c fiber.Ctx) error {
-        return renderer.Renderer(c, new(types.Metadata{
-            Title:       "501",
-            Description: "Feature in development",
-        }), pages.Error(501, &fiber.Error{Code: 501, Message: "Active work on this feature is ongoing, in the mean time you can visit other parts of this application."}))
-    }
-
     types.Pages = map[string]types.Page{
-        "/":            types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderHome}},
-        "/links":       types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
-        "/blogs":       types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlogs}},
-        "/robots.txt":  types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{api.GenerateRobots}},
-        "/sitemap.xml": types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{api.GenerateSitemap}},
-        // TODO: Implement these pages
-        // TODO: Implement dynamic metadata for blog pages
+        "/":             types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderHome}},
+        "/links":        types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
+        "/blogs":        types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlogs}},
+        "/robots.txt":   types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{api.GenerateRobots}},
+        "/sitemap.xml":  types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{api.GenerateSitemap}},
         "/blog/:id":     types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlog}},
-        "/acheivements": types.Page{Handler: pageCache, Handlers: []any{inDev}},
+        "/achievements": types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderAchievements}},
     }
 }
 

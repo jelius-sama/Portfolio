@@ -73,11 +73,11 @@ templ BlogPost(serverCtx fiber.Ctx, post *types.BlogResponse, mdContent *string)
 			} else {
 				{{ series := buildSeries(post) }}
 				@BlogPostHeader(post)
-				@BlogMetadata(post, len(series))
+				@BlogMetadata(serverCtx, post, len(series))
 				if len(series) > 1 {
 					@SeriesNavigation(post, series)
 				}
-				@components.Terminal("blog-content", templ.Attributes{
+				@components.Terminal(fmt.Sprintf("%s-content", serverCtx.Locals("context")), templ.Attributes{
 					"style": "margin-top: calc(var(--spacing) * 8);",
 				}) {
 					<article id={ post.ID } data-markdown-root>
@@ -102,15 +102,15 @@ templ BlogPostHeader(post *types.BlogResponse) {
 		</div>
 		<h1 class="text-3xl md:text-4xl font-bold font-mono">{ post.Title }</h1>
 		if post.Excerpt != "" {
-			<p class="text-muted-foreground max-w-2xl">{ post.Excerpt }</p>
+			<p class="text-muted-foreground max-w-2xl whitespace-pre-line">{ post.Excerpt }</p>
 		}
 	</div>
 }
 
-templ BlogMetadata(post *types.BlogResponse, seriesLen int) {
-	@components.Terminal("blog-metadata") {
+templ BlogMetadata(serverCtx fiber.Ctx, post *types.BlogResponse, seriesLen int) {
+	@components.Terminal(fmt.Sprintf("%s-metadata", serverCtx.Locals("context"))) {
 		@components.TerminalLine(0) {
-			<p class="font-mono"><span class="text-primary">$</span> cat blog-metadata.json</p>
+			<p class="font-mono"><span class="text-primary">$</span> cat { fmt.Sprintf("%s-metadata.json", serverCtx.Locals("context")) }</p>
 		}
 		@components.TerminalLine(1) {
 			<p class="flex items-center gap-2">

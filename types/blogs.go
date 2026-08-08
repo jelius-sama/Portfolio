@@ -38,23 +38,24 @@ type BlogPost struct {
     Views       uint       `json:"views"`
 }
 
+type BlogResponse struct {
+    ID          string     `json:"id"`
+    PublishedAt time.Time  `json:"published_at"`
+    UpdatedAt   time.Time  `json:"updated_at"`
+    DeletedAt   *time.Time `json:"-"`
+    // TODO: Implement the fixme.
+    Prequel *BlogResponse `json:"prequel"` // FIXME: Maybe a better solution would be to use `BlogPost` here
+    Sequel  *BlogResponse `json:"sequel"`  // FIXME: Maybe a better solution would be to use `BlogPost` here
+    Title   string        `json:"title"`
+    Excerpt string        `json:"excerpt"`
+    Views   uint          `json:"views"`
+}
+
 type CreateBlogPost struct {
     Title     string  `json:"title"`
     Excerpt   string  `json:"excerpt"`
     PrequelID *string `json:"prequel_id"`
     SequelID  *string `json:"sequel_id"`
-}
-
-type BlogResponse struct {
-    ID          string        `json:"id"`
-    PublishedAt time.Time     `json:"published_at"`
-    UpdatedAt   time.Time     `json:"updated_at"`
-    DeletedAt   *time.Time    `json:"-"`
-    Prequel     *BlogResponse `json:"prequel"`
-    Sequel      *BlogResponse `json:"sequel"`
-    Title       string        `json:"title"`
-    Excerpt     string        `json:"excerpt"`
-    Views       uint          `json:"views"`
 }
 
 type PaginatedBlogsResponse struct {

@@ -4,6 +4,7 @@ import (
     "bytes"
     "database/sql"
     "encoding/gob"
+    "fmt"
     "io"
     "strings"
 
@@ -15,14 +16,16 @@ import (
 )
 
 func (v *ViewManager) RenderBlog(c fiber.Ctx) error {
-    var metadata types.Metadata = types.Metadata{
-        Title: "Blog",
-    }
-
     var buf = bytes.NewBufferString(c.Params("id"))
     if err := blogs.GetBlog(nil, buf); err != nil {
         if err == sql.ErrNoRows {
-            return Renderer(c, &metadata, pages.BlogPost(c, nil, nil))
+            c.Locals("pseudo_path", "#not_found")
+            if metadata, metadataErr := GetMetadata(c); metadataErr != nil {
+                logger.Error(c.Path(), err.Error())
+                return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
+            } else {
+                return Renderer(c, metadata, pages.BlogPost(c, nil, nil))
+            }
         }
         logger.Error("Failed to fetch blog post data:", err.Error())
         return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
@@ -47,7 +50,18 @@ func (v *ViewManager) RenderBlog(c fiber.Ctx) error {
         return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
     } else {
         markdownContent = string(content)
-        return Renderer(c, &metadata, pages.BlogPost(c, &decodedResponse, &markdownContent))
+        c.Locals("context", "blog")
+        c.Locals("pseudo_path", "*")
+
+        if metadata, metadataErr := GetMetadata(c); metadataErr != nil {
+            logger.Error(c.Path(), metadataErr.Error())
+            return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
+        } else {
+            c.Locals("title", fmt.Sprintf("%s | Jelius", decodedResponse.Title))
+            c.Locals("description", decodedResponse.Excerpt)
+            GetDynamicRouteMetadata(c, metadata)
+            return Renderer(c, metadata, pages.BlogPost(c, &decodedResponse, &markdownContent))
+        }
     }
 }
 
