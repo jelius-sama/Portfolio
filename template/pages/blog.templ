@@ -88,7 +88,7 @@ templ BlogPost(serverCtx fiber.Ctx, post *types.BlogResponse, mdContent *string)
 				}
 				@PostFooterNavigation(serverCtx, post)
 				@blogPostScript.Once() {
-					<script src={ fmt.Sprintf("%s/assets/js/markdown-renderer-%s.js", types.EVAssetCDNHostname.Get().Value, types.EVVersion.Get().Value) }></script>
+					<script src={ fmt.Sprintf("%s/js/markdown-renderer-%s.js", types.EVAssetCDNHostname.Get().Value, types.EVVersion.Get().Value) }></script>
 				}
 			}
 		}

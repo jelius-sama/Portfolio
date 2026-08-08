@@ -187,7 +187,7 @@ func GetDynamicRouteMetadata(c fiber.Ctx, metadata *types.Metadata) {
         types.MMeta{Property: new("og:description"), Content: c.Locals("description").(string)},
         types.MMeta{Property: new("og:url"), Content: host.JoinPath(c.Path()).String()},
         types.MMeta{Property: new("og:site_name"), Content: "Jelius Basumatary"},
-        types.MMeta{Property: new("og:image"), Content: "/assets/compressed/jelius.webp"},
+        types.MMeta{Property: new("og:image"), Content: "/compressed/jelius.webp"},
         types.MMeta{Property: new("og:type"), Content: "article"},
 
         types.MMeta{Name: new("twitter:card"), Content: "summary"},
@@ -195,7 +195,7 @@ func GetDynamicRouteMetadata(c fiber.Ctx, metadata *types.Metadata) {
         types.MMeta{Name: new("twitter:creator"), Content: "@jelius_sama"},
         types.MMeta{Name: new("twitter:title"), Content: c.Locals("title").(string)},
         types.MMeta{Name: new("twitter:description"), Content: c.Locals("description").(string)},
-        types.MMeta{Name: new("twitter:image"), Content: "/assets/compressed/jelius.webp"},
+        types.MMeta{Name: new("twitter:image"), Content: "/compressed/jelius.webp"},
     )
 
     metadata.Links = append(metadata.Links,

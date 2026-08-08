@@ -1,16 +1,80 @@
 package template
 
 import (
+	"encoding/json"
 	"fmt"
+	"git.jelius.dev/jelius-sama/Portfolio/db"
 	"git.jelius.dev/jelius-sama/Portfolio/types"
+	"github.com/jelius-sama/logger"
+	"net/url"
 )
+
+// FIXME: Please dont panic 🥹
+func getFirstName() string {
+	var firstName string
+	err := db.DB.QueryRow("SELECT first_name FROM home_page ORDER BY updated_at DESC LIMIT 1").Scan(&firstName)
+	if err != nil {
+		logger.Panic("Failed to query first name:", err)
+		return ""
+	}
+	return firstName
+}
+
+func getSameAsLinks() []string {
+	rows, err := db.DB.Query("SELECT url FROM home_contact_quick_link ORDER BY position")
+	if err != nil {
+		logger.Panic("Failed to query same as links:", err)
+		return nil
+	}
+	defer rows.Close()
+
+	var links []string
+	for rows.Next() {
+		var link string
+		err := rows.Scan(&link)
+		if err != nil {
+			logger.Panic("Failed to query same as links:", err)
+			return nil
+		}
+		if u, err := url.Parse(link); err == nil {
+			if u.IsAbs() {
+				links = append(links, link)
+			}
+		}
+	}
+
+	if err = rows.Err(); err != nil {
+		logger.Panic("Failed to query same as links:", err)
+		return nil
+	}
+
+	return links
+}
+
+func generateJsonLdScript() string {
+	jsonLd := map[string]any{
+		"@context": "https://schema.org",
+		"@type":    "Person",
+		"name":     getFirstName(),
+		"url":      types.EVHostname.Get().Value,
+		"sameAs":   getSameAsLinks(),
+	}
+
+	jsonBytes, err := json.Marshal(jsonLd)
+	if err != nil {
+		logger.Panic("Failed to marshal JSON-LD:", err)
+	}
+
+	return fmt.Sprintf(`<script type="application/ld+json" data-aria-hidden="true" aria-hidden="true">%s</script>`, string(jsonBytes))
+}
 
 templ Metadata(metadata *types.Metadata) {
 	<head hx-head="re-eval">
-		<link hx-preserve="true" href={ fmt.Sprintf("%s/assets/css/output-%s.css", types.EVAssetCDNHostname.Get().Value, types.EVVersion.Get().Value) } rel="stylesheet"/>
-		<link hx-preserve="true" rel="manifest" href={ fmt.Sprintf("%s/assets/manifest.json", types.EVAssetCDNHostname.Get().Value) }/>
+		<link hx-preserve="true" href={ fmt.Sprintf("%s/css/output-%s.css", types.EVAssetCDNHostname.Get().Value, types.EVVersion.Get().Value) } rel="stylesheet"/>
+		<link hx-preserve="true" rel="manifest" href={ fmt.Sprintf("%s/manifest.json", types.EVAssetCDNHostname.Get().Value) }/>
 		<meta hx-preserve="true" charset="UTF-8"/>
 		<meta hx-preserve="true" name="viewport" content="width=device-width, initial-scale=1.0"/>
+		@templ.Raw(generateJsonLdScript())
 		<title>{ metadata.Title }</title>
 		for _, link := range metadata.Links {
 			if link.Media != nil {
