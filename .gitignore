@@ -8,3 +8,4 @@ assets/*
 !assets/manifest.json
 !assets/sw.js
 db.sqlite3
+db.sqlite3-*
