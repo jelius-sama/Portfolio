@@ -22,14 +22,14 @@ templ LinksOutro(arg LinksFooter) {
 			@Terminal("stats") {
 				<div class="space-y-6">
 					@TerminalLine(0) {
-						<span class="text-primary">guest@jelius:~$</span>
+						<span class="text-primary">"guest@" + types.EVDomainname.Get().Value + ":~"$</span>
 						<span class="text-foreground">whoami</span>
 					}
 					@TerminalLine(1) {
 						<span class="text-muted-foreground">{ arg.WhoAmI }</span>
 					}
 					@TerminalLine(2) {
-						<span class="text-primary">guest@jelius:~$</span>
+						<span class="text-primary">"guest@" + types.EVDomainname.Get().Value + ":~"$</span>
 						<span class="text-foreground">ls social-links/</span>
 					}
 					@TerminalLine(3) {

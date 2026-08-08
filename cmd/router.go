@@ -55,11 +55,13 @@ func init() {
     }
 
     types.Pages = map[string]types.Page{
-        "/":      types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderHome}},
-        "/links": types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
-        "/blogs": types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlogs}},
+        "/":            types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderHome}},
+        "/links":       types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
+        "/blogs":       types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlogs}},
+        "/robots.txt":  types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{api.GenerateRobots}},
+        "/sitemap.xml": types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{api.GenerateSitemap}},
         // TODO: Implement these pages
-        // TODO: Implement API routes that are in the V2 of the project
+        // TODO: Implement dynamic metadata for blog pages
         "/blog/:id":     types.Page{Handler: pageCache, Handlers: []any{inDev}},
         "/acheivements": types.Page{Handler: pageCache, Handlers: []any{inDev}},
     }

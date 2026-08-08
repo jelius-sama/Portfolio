@@ -4,9 +4,28 @@ import (
 	"git.jelius.dev/jelius-sama/Portfolio/template/components"
 	"git.jelius.dev/jelius-sama/Portfolio/types"
 	"github.com/gofiber/fiber/v3"
+	"net/url"
+	"strings"
 )
 
 var baseScript = templ.NewOnceHandle()
+
+func DomainName(withTLD ...bool) string {
+	if u, err := url.Parse(types.EVHostname.Get().Value); err != nil {
+		return ""
+	} else {
+		if len(withTLD) != 0 && withTLD[0] != true {
+			// Grab everything up to the very first dot
+			if idx := strings.Index(u.Host, "."); idx != -1 {
+				return u.Host[:idx]
+			} else {
+				return ""
+			}
+		} else {
+			return u.Hostname()
+		}
+	}
+}
 
 templ Base(serverCtx fiber.Ctx, metadata *types.Metadata, body templ.Component, footer templ.Component) {
 	<!DOCTYPE html>

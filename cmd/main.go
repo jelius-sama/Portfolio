@@ -4,6 +4,7 @@ import (
     "net/url"
     "os"
     "path/filepath"
+    "strings"
 
     "git.jelius.dev/jelius-sama/Portfolio/db"
     "git.jelius.dev/jelius-sama/Portfolio/middleware"
@@ -21,9 +22,26 @@ var (
 )
 
 func init() {
+    var env []types.Env
+
     var parsedURL, err = url.Parse(AssetCDNHost)
     if err != nil {
         logger.Panic(err)
+    }
+
+    if u, err := url.Parse(Host); err != nil {
+        logger.Panic(err)
+    } else {
+        // Grab everything up to the very first dot
+        if idx := strings.Index(u.Host, "."); idx != -1 {
+            env = append(env,
+                types.Env{Key: types.EVDomainname.Get().Key, Value: u.Host[:idx]},
+            )
+        } else {
+            env = append(env,
+                types.Env{Key: types.EVDomainname.Get().Key, Value: u.Hostname()},
+            )
+        }
     }
 
     var dataDir string = os.Getenv("XDG_DATA_HOME")
@@ -37,14 +55,14 @@ func init() {
         dataDir = filepath.Join(dataDir, parsedURL.Hostname())
     }
 
-    var env []types.Env = []types.Env{
-        {Key: types.EVEnv.Get().Key, Value: Environment},
-        {Key: types.EVHostname.Get().Key, Value: Host},
-        {Key: types.EVAssetCDNHostname.Get().Key, Value: AssetCDNHost},
-        {Key: types.EVVersion.Get().Key, Value: Version},
-        {Key: types.EVPort.Get().Key, Value: Port},
-        {Key: types.EVDataDir.Get().Key, Value: dataDir},
-    }
+    env = append(env,
+        types.Env{Key: types.EVEnv.Get().Key, Value: Environment},
+        types.Env{Key: types.EVHostname.Get().Key, Value: Host},
+        types.Env{Key: types.EVAssetCDNHostname.Get().Key, Value: AssetCDNHost},
+        types.Env{Key: types.EVVersion.Get().Key, Value: Version},
+        types.Env{Key: types.EVPort.Get().Key, Value: Port},
+        types.Env{Key: types.EVDataDir.Get().Key, Value: dataDir},
+    )
 
     types.InitEnv(env)
 
