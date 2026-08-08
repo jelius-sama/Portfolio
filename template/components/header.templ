@@ -35,6 +35,9 @@ func cleanPath(path string, currentPath string) string {
 	if currentPath == path {
 		return ""
 	}
+	if strings.Contains(path, ".") {
+		return ""
+	}
 
 	var cleaned = strings.ReplaceAll(strings.TrimPrefix(path, "/"), "-", " ")
 	return strings.ToUpper(string(cleaned[0])) + cleaned[1:]
@@ -156,6 +159,7 @@ templ Header(serverCtx fiber.Ctx) {
 						// Remove leading slash and replace all dashes with spaces
 						let	cleaned = path.replace(/^\//, '').replaceAll('-', ' ');
 						if (cleaned.length === 0) return "";
+						if (cleaned.includes(".")) return "";
 
 						// Capitalize the first letter and append the rest
 						return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);

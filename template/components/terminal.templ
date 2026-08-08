@@ -2,8 +2,14 @@ package components
 
 import "fmt"
 
-templ Terminal(title string) {
-	<div class="overflow-hidden rounded-lg border border-border bg-card shadow-xl">
+templ Terminal(title string, attrs ...templ.Attributes) {
+	<div
+		class="overflow-hidden rounded-lg border border-border bg-card shadow-xl"
+		{ templ.Attributes(func() templ.Attributes {
+            if len(attrs) > 0 { return attrs[0] }
+            return nil
+        }())... }
+	>
 		<div class="flex items-center gap-2 border-b border-border bg-secondary/60 px-4 py-3">
 			<span class="h-3 w-3 rounded-full bg-[#f38ba8]"></span>
 			<span class="h-3 w-3 rounded-full bg-[#f9e2af]"></span>

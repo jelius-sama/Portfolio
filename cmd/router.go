@@ -62,7 +62,7 @@ func init() {
         "/sitemap.xml": types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{api.GenerateSitemap}},
         // TODO: Implement these pages
         // TODO: Implement dynamic metadata for blog pages
-        "/blog/:id":     types.Page{Handler: pageCache, Handlers: []any{inDev}},
+        "/blog/:id":     types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlog}},
         "/acheivements": types.Page{Handler: pageCache, Handlers: []any{inDev}},
     }
 }

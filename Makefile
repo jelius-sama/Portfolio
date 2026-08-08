@@ -14,6 +14,9 @@ BIN := $(BUILD_DIR)/portfolio
 
 dev:
 	@mkdir -p $(BUILD_DIR)
+	tailwindcss -i ./template/input.css -o ./assets/css/output-$(VERSION).css
+	bun run --cwd ./legacy/markdown/ build
+	templ generate
 	CGO_ENABLED=0 GOOS=linux go build -ldflags "\
 		    -s -w \
 		    -X main.Environment=development  \
@@ -25,6 +28,8 @@ dev:
 
 build:
 	@mkdir -p $(BUILD_DIR)
+	tailwindcss -i ./template/input.css -o ./assets/css/output-$(VERSION).css
+	bun run --cwd ./legacy/markdown/ build
 	templ generate
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "\
 		    -s -w \

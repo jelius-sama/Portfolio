@@ -7,7 +7,7 @@ import (
 
 templ Metadata(metadata *types.Metadata) {
 	<head hx-head="re-eval">
-		<link hx-preserve="true" href={ fmt.Sprintf("%s/assets/output.css", types.EVAssetCDNHostname.Get().Value) } rel="stylesheet"/>
+		<link hx-preserve="true" href={ fmt.Sprintf("%s/assets/css/output-%s.css", types.EVAssetCDNHostname.Get().Value, types.EVVersion.Get().Value) } rel="stylesheet"/>
 		<link hx-preserve="true" rel="manifest" href={ fmt.Sprintf("%s/assets/manifest.json", types.EVAssetCDNHostname.Get().Value) }/>
 		<meta hx-preserve="true" charset="UTF-8"/>
 		<meta hx-preserve="true" name="viewport" content="width=device-width, initial-scale=1.0"/>

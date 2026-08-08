@@ -5,7 +5,7 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./build/portfolio-dev"
-  cmd = "tailwindcss -i ./template/input.css -o ./assets/output.css && templ generate && make dev"
+  cmd = "make dev"
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "client", "bin", "build"]
   exclude_file = []
