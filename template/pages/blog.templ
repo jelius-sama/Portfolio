@@ -1,0 +1,224 @@
+package pages
+
+import (
+	"fmt"
+
+	"git.jelius.dev/jelius-sama/Portfolio/template/components"
+	"git.jelius.dev/jelius-sama/Portfolio/template/icon"
+	"git.jelius.dev/jelius-sama/Portfolio/types"
+	"github.com/gofiber/fiber/v3"
+	"net/url"
+)
+
+var blogPostScript = templ.NewOnceHandle()
+
+const blogDateFormat = "January 2, 2006 at 03:04 PM"
+
+// buildSeries rewinds to the earliest Prequel, then walks forward via Sequel
+// collecting every entry in publish order. Returns a 1-element slice when
+// the post has no prequel/sequel at all.
+func buildSeries(post *types.BlogResponse) []*types.BlogResponse {
+	var before []*types.BlogResponse
+	for p := post.Prequel; p != nil; p = p.Prequel {
+		before = append(before, p)
+	}
+	for i, j := 0, len(before)-1; i < j; i, j = i+1, j-1 {
+		before[i], before[j] = before[j], before[i]
+	}
+
+	var after []*types.BlogResponse
+	for s := post.Sequel; s != nil; s = s.Sequel {
+		after = append(after, s)
+	}
+
+	series := make([]*types.BlogResponse, 0, len(before)+1+len(after))
+	series = append(series, before...)
+	series = append(series, post)
+	series = append(series, after...)
+	return series
+}
+
+func blogShareURL(serverCtx fiber.Ctx, post *types.BlogResponse) string {
+	postURL := fmt.Sprintf("%s/blog/%s", serverCtx.BaseURL(), post.ID)
+	return fmt.Sprintf(
+		"https://twitter.com/intent/tweet?text=%s&url=%s",
+		url.QueryEscape(post.Title), url.QueryEscape(postURL),
+	)
+}
+
+func seriesPartLabel(entry *types.BlogResponse) string {
+	if entry.Title != "" {
+		return entry.Title
+	}
+	return fmt.Sprintf("Blog %s", entry.ID)
+}
+
+templ BlogPost(serverCtx fiber.Ctx, post *types.BlogResponse, mdContent *string) {
+	<main
+		id="blog-post"
+		if post != nil || mdContent != nil {
+			class="mx-auto pt-[calc(var(--header-padding)+(var(--spacing)*3))] w-full max-w-6xl px-3 pb-3 sm:pb-5"
+		} else {
+			class="h-[calc(100vh-(((var(--spacing)*8)*(var(--text-multiplier)+0.6))+(var(--text-xs))))] mx-auto max-w-6xl pt-[calc(var(--header-padding)+(var(--spacing)*3))] px-3 pb-3 sm:pb-5"
+		}
+	>
+		if post == nil {
+			@BlogPostError(serverCtx.Params("id"), fmt.Sprintf(`Blog with ID of "%s" was not found!`, serverCtx.Params("id")))
+		} else if mdContent == nil {
+			@BlogPostError(post.ID, "Blog content is unavailable right now.")
+		} else {
+			{{ mdStr, err := templ.JSONString(*mdContent) }}
+			if err != nil {
+				@BlogPostError(post.ID, "Failed to prepare this post for rendering.")
+			} else {
+				{{ series := buildSeries(post) }}
+				@BlogPostHeader(post)
+				@BlogMetadata(serverCtx, post, len(series))
+				if len(series) > 1 {
+					@SeriesNavigation(post, series)
+				}
+				@components.Terminal(fmt.Sprintf("%s-content", serverCtx.Locals("context")), templ.Attributes{
+					"style": "margin-top: calc(var(--spacing) * 8);",
+				}) {
+					<article id={ post.ID } data-markdown-root>
+						@templ.Raw(fmt.Sprintf(
+							`<script type="application/json" data-markdown-source>%s</script>`, mdStr,
+						))
+					</article>
+				}
+				@PostFooterNavigation(serverCtx, post)
+				@blogPostScript.Once() {
+					<script src={ fmt.Sprintf("%s/js/markdown-renderer-%s.js", types.EVAssetCDNHostname.Get().Value, types.EVVersion.Get().Value) }></script>
+				}
+			}
+		}
+	</main>
+}
+
+templ BlogPostHeader(post *types.BlogResponse) {
+	<div class="flex flex-col items-center gap-4 text-center mb-8">
+		<div class="flex items-center justify-center size-14 rounded-full bg-primary text-primary-foreground">
+			@icon.FileText()
+		</div>
+		<h1 class="text-3xl md:text-4xl font-bold font-mono">{ post.Title }</h1>
+		if post.Excerpt != "" {
+			<p class="text-muted-foreground max-w-2xl whitespace-pre-line">{ post.Excerpt }</p>
+		}
+	</div>
+}
+
+templ BlogMetadata(serverCtx fiber.Ctx, post *types.BlogResponse, seriesLen int) {
+	@components.Terminal(fmt.Sprintf("%s-metadata", serverCtx.Locals("context"))) {
+		@components.TerminalLine(0) {
+			<p class="font-mono"><span class="text-primary">$</span> cat { fmt.Sprintf("%s-metadata.json", serverCtx.Locals("context")) }</p>
+		}
+		@components.TerminalLine(1) {
+			<p class="flex items-center gap-2">
+				@icon.Calendar(icon.Props{Class: "size-3"})
+				Published: { post.PublishedAt.Format(blogDateFormat) }
+			</p>
+		}
+		@components.TerminalLine(2) {
+			<p class="flex items-center gap-2">
+				@icon.Clock(icon.Props{Class: "size-3"})
+				Updated: { post.UpdatedAt.Format(blogDateFormat) }
+			</p>
+		}
+		@components.TerminalLine(3) {
+			<p class="flex items-center gap-2">
+				@icon.Eye(icon.Props{Class: "size-3"})
+				{ fmt.Sprintf("Views: %d", post.Views) }
+			</p>
+		}
+		@components.TerminalLine(4) {
+			<p>{ fmt.Sprintf("ID: %s", post.ID) }</p>
+		}
+		if seriesLen > 1 {
+			@components.TerminalLine(5) {
+				<p>{ fmt.Sprintf("Series: %d parts", seriesLen) }</p>
+			}
+		}
+	}
+}
+
+templ SeriesNavigation(current *types.BlogResponse, series []*types.BlogResponse) {
+	@components.Terminal("series-navigation", templ.Attributes{"style": "margin-top: calc(var(--spacing) * 8);"}) {
+		@components.TerminalLine(0) {
+			<p class="font-mono"><span class="text-primary">$</span> ls series-parts/</p>
+		}
+		@components.TerminalLine(1) {
+			<p>{ fmt.Sprintf("This post is part of a %d-part series:", len(series)) }</p>
+		}
+		for i, entry := range series {
+			@components.TerminalLine(i + 2) {
+				if entry.ID == current.ID {
+					<div class="rounded-md border border-primary bg-primary/10 px-4 py-2 text-primary">
+						{ fmt.Sprintf("Part %d: %s", i+1, seriesPartLabel(entry)) }
+					</div>
+				} else {
+					@components.Link(components.LinkAttr{Href: fmt.Sprintf("/blog/%s", entry.ID)}) {
+						<div class="rounded-md border border-border bg-card/50 px-4 py-2 hover:bg-accent hover:border-primary/50 transition-colors cursor-pointer">
+							{ fmt.Sprintf("Part %d: %s", i+1, seriesPartLabel(entry)) }
+						</div>
+					}
+				}
+			}
+		}
+	}
+}
+
+templ PostFooterNavigation(serverCtx fiber.Ctx, post *types.BlogResponse) {
+	if post.Prequel != nil || post.Sequel != nil {
+		@components.Terminal("navigation", templ.Attributes{"style": "margin-top: calc(var(--spacing) * 8);"}) {
+			@components.TerminalLine(0) {
+				<p class="font-mono"><span class="text-primary">$</span> ls ../related-posts/</p>
+			}
+			@components.TerminalLine(1) {
+				<div class="flex items-center justify-between gap-4">
+					if post.Prequel != nil {
+						@components.Link(components.LinkAttr{Href: fmt.Sprintf("/blog/%s", post.Prequel.ID)}) {
+							<span class="inline-flex items-center gap-1 p-1 py-1 px-2 rounded-sm border border-border hover:bg-accent transition-colors cursor-pointer">
+								@icon.ChevronLeft(icon.Props{Class: "size-4"})
+								Previous Post
+							</span>
+						}
+					} else {
+						<span></span>
+					}
+					if post.Sequel != nil {
+						@components.Link(components.LinkAttr{Href: fmt.Sprintf("/blog/%s", post.Sequel.ID)}) {
+							<span class="inline-flex items-center gap-1 py-1 px-2 rounded-sm border border-border hover:bg-accent transition-colors cursor-pointer">
+								Next Post
+								@icon.ChevronRight(icon.Props{Class: "size-4"})
+							</span>
+						}
+					}
+				</div>
+			}
+		}
+	}
+	<div class="mt-6 text-center text-sm text-muted-foreground">
+		Share this post:
+		<a href={ blogShareURL(serverCtx, post) } target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">X</a>
+	</div>
+}
+
+templ BlogPostError(id string, message string) {
+	@components.Terminal("error") {
+		@components.TerminalLine(0) {
+			<p class="font-mono">
+				<span class="text-primary">$</span>
+				{ fmt.Sprintf("curl -X GET /api/blog?id=%s", id) }
+			</p>
+		}
+		@components.TerminalLine(1) {
+			<p class="text-destructive">{ fmt.Sprintf("Error: %s", message) }</p>
+		}
+		@components.TerminalLine(2) {
+			<p class="font-mono"><span class="text-primary">$</span> echo "Please try again later"</p>
+		}
+		@components.TerminalLine(3) {
+			<p>Please try again later</p>
+		}
+	}
+}

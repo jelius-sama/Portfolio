@@ -1,0 +1,104 @@
+package pages
+
+import (
+	"fmt"
+	"git.jelius.dev/jelius-sama/Portfolio/template/components"
+)
+
+// errorTitle gives common status codes a human message instead of just
+// showing the bare number twice on the page.
+func errorTitle(code int) string {
+	switch code {
+	case 404:
+		return "Page not found"
+	case 403:
+		return "Access denied"
+	case 401:
+		return "Authentication required"
+	case 500:
+		return "Something went wrong"
+	case 503:
+		return "Service unavailable"
+	case 501:
+		return "Feature in development"
+	default:
+		return "Unexpected error"
+	}
+}
+
+script errorScript(code int) {
+	try {
+		const currentElement = document.getElementById(`error-status-${code}`);
+		if (!currentElement) return;
+
+		const bodies = document.querySelectorAll('body');
+		const originalStyles = [];
+
+		bodies.forEach(body => {
+			originalStyles.push({
+				element: body,
+				display: body.style.display,
+				height: body.style.height,
+				flexDirection: body.style.flexDirection
+			});
+
+			body.style.display = 'flex';
+			body.style.height = '100vh';
+			body.style.flexDirection = 'column';
+		});
+
+		currentElement.addEventListener('htmx:beforeCleanupElement', function cleanupHandler(evt) {
+			originalStyles.forEach(saved => {
+				saved.element.style.display = saved.display;
+				saved.element.style.height = saved.height;
+				saved.element.style.flexDirection = saved.flexDirection;
+			});
+			currentElement.removeEventListener('htmx:beforeCleanupElement', cleanupHandler);
+		});
+	} catch (error) {
+		console.log("Caught error:", error)
+	}
+}
+
+// Error renders the site's error page (404, 500, etc.) using the same
+// terminal-card design language as the rest of the site. The <main> id
+// is kept exactly as before since HTMX swaps this element on navigation.
+templ Error(code int, err error) {
+	<main id={ fmt.Sprintf("error-status-%d", code) } class="relative isolate flex-1 items-center justify-center overflow-hidden bg-background px-6 py-24">
+		<!-- ambient glow, same treatment as Hero's -->
+		@errorScript(code)
+		<div
+			class="pointer-events-none absolute left-1/2 top-0 -z-10 -translate-x-1/2 -translate-y-1/3 rounded-full bg-primary/10 blur-3xl"
+			aria-hidden="true"
+		></div>
+		<div class="mx-auto flex w-full max-w-lg flex-col items-center text-center">
+			<p class="font-mono text-7xl font-bold tracking-tight text-primary sm:text-8xl">
+				{ fmt.Sprintf("%d", code) }
+			</p>
+			<h1 class="mt-4 font-mono text-2xl font-bold text-foreground sm:text-3xl">
+				{ errorTitle(code) }
+			</h1>
+			<div class="mt-10 w-full">
+				@components.Terminal("error.log") {
+					@components.TerminalLine(0) {
+						<span class="text-primary">$</span>
+						<span class="text-foreground">cat error.log</span>
+					}
+					@components.TerminalLine(1) {
+						<span class="text-[#f38ba8]">{ err.Error() }</span>
+					}
+				}
+			</div>
+			@components.Link(components.LinkAttr{
+				Href:  "/",
+				Class: "mt-10 inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+			}) {
+				<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="m12 19-7-7 7-7"></path>
+					<path d="M19 12H5"></path>
+				</svg>
+				Go back home
+			}
+		</div>
+	</main>
+}

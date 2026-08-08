@@ -1,0 +1,32 @@
+package components
+
+type ExperienceEntry struct {
+	Name        string
+	Description string
+	DateRange   string
+	IsActive    bool
+}
+
+templ Experience(data []ExperienceEntry) {
+	<section id="experience" class="bg-background py-24 sm:py-32">
+		<div class="mx-auto max-w-6xl px-3">
+			@SectionHeading("Experience")
+			<p class="mt-4 text-center text-sm text-muted-foreground">
+				My non-professional journey:
+			</p>
+			<div class="mt-12">
+				@Terminal("experience.log") {
+					<div class="space-y-6">
+						for i := range(data) {
+							<div class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(i), templ.KV("border-l-2 border-primary pl-4", data[i].IsActive) }>
+								<h4 class="font-mono text-sm font-semibold text-primary">{  data[i].Name }</h4>
+								<p class="mt-1 text-foreground">{  data[i].Description }</p>
+								<p class="text-sm text-muted-foreground">{  data[i].DateRange }</p>
+							</div>
+						}
+					</div>
+				}
+			</div>
+		</div>
+	</section>
+}

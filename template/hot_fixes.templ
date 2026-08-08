@@ -1,0 +1,71 @@
+package template
+
+templ HTMXHotFixes() {
+	<script>
+		// Global HTMX error handling: if a request fails, the server might
+		// return either a proper rendered HTML error page (e.g. pages/error.templ
+		// for a 404/500 route) or a raw ErrorResp JSON body ({ code, message })
+		// from an API-style endpoint. HTML gets swapped in by htmx as normal;
+		// JSON gets intercepted here and rendered as a themed card instead, so
+		// components (like the old blogErrorHandlerScript) no longer need to
+		// duplicate this handling themselves.
+		document.body.addEventListener('htmx:beforeSwap', function (evt) {
+			const xhr = evt.detail.xhr;
+			if (!xhr || xhr.status < 400) return;
+
+			const contentType = xhr.getResponseHeader('Content-Type') || '';
+
+			if (contentType.indexOf('application/json') !== -1) {
+				// Raw ErrorResp — don't let htmx swap the JSON text in; render
+				// our own card into whatever target this request was aimed at.
+				evt.detail.shouldSwap = false;
+				evt.detail.isError = false;
+
+				let message = 'Something went wrong.';
+				try {
+					const body = JSON.parse(xhr.responseText);
+					if (body && body.message) message = body.message;
+				} catch (e) {
+					// non-JSON body despite the header — fall back to the default
+				}
+
+				renderHtmxErrorCard(evt.detail.target, message);
+				return;
+			}
+
+			// HTML error page rendered server-side (404/500/etc.) — let htmx
+			// swap it in normally.
+			evt.detail.shouldSwap = true;
+			evt.detail.isError = false;
+		});
+
+		// renderHtmxErrorCard builds a compact themed error card and swaps it
+		// into `target` (falling back to #main, then <body>, if target isn't
+		// a usable element). The "Go back home" link is a plain <a href="/">
+		// with no hx-* attributes and is never passed to htmx.process(), so
+		// clicking it does a real full-page navigation/reload rather than an
+		// htmx swap — appropriate here since something already went wrong
+		// with the SPA request path.
+		function renderHtmxErrorCard(target, message) {
+			const container = (target && target.nodeType === 1)
+				? target
+				: (document.getElementById('main') || document.body);
+
+			const card = document.createElement('div');
+			card.className = 'mx-auto flex max-w-md flex-col items-center gap-3 rounded-md border border-[#f38ba8]/40 bg-card my-6 px-6 py-6 text-center';
+
+			const msgEl = document.createElement('p');
+			msgEl.className = 'font-mono text-sm text-[#f38ba8]';
+			msgEl.textContent = message;
+			card.appendChild(msgEl);
+
+			const home = document.createElement('a');
+			home.href = '/';
+			home.textContent = 'Go back home';
+			home.className = 'inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90';
+			card.appendChild(home);
+
+			container.replaceChildren(card);
+		}
+	</script>
+}

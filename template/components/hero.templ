@@ -1,0 +1,129 @@
+package components
+
+import (
+	"fmt"
+	"git.jelius.dev/jelius-sama/Portfolio/types"
+)
+
+type EDLevel uint8
+
+const (
+	EDLevelUG EDLevel = iota
+	EDLevelPG
+	EDLevelHS
+	EDLevelGoodNil
+	EDLevelBadNil
+)
+
+func (edl EDLevel) String() string {
+	switch edl {
+	case EDLevelHS:
+		return "High School"
+	case EDLevelPG:
+		return "Post Graduate"
+	case EDLevelUG:
+		return "Undergraduate"
+	case EDLevelGoodNil:
+		return "Employed"
+	case EDLevelBadNil:
+		return "Unemployed" // Maybe change to "Hire me" ?
+	default:
+		return ""
+	}
+}
+
+type HeroData struct {
+	ImagePath         string
+	CVPath            string
+	ImageAltText      *string
+	FirstName         string
+	LastName          string
+	EducationLevel    EDLevel
+	StudyDomain       string
+	WhoAmI            string
+	SpecializedDomain []string
+}
+
+script scrollToSection(id string) {
+    const target = document.getElementById(id);
+    if (target) {
+        target.scrollIntoView({ 
+            behavior: "smooth",
+            block: "start" 
+        });
+    }
+}
+
+templ Hero(data HeroData) {
+	<section class="relative isolate overflow-hidden bg-background py-24 sm:py-32">
+		<div
+			class="pointer-events-none absolute left-1/2 top-0 -z-10 h-[32rem] w-[64rem] -translate-x-1/2 -translate-y-1/3 rounded-full bg-primary/10 blur-3xl"
+			aria-hidden="true"
+		></div>
+		<div class="mx-auto flex max-w-2xl flex-col items-center px-3 text-center">
+			@AvatarRing(fmt.Sprintf("%s%s", types.EVAssetCDNHostname.Get().Value, data.ImagePath), data.ImageAltText)
+			<p class="mt-8 text-sm text-muted-foreground">Hello, I'm</p>
+			<h1 class="mt-2 font-mono text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
+				<span class="text-primary">{ data.FirstName }</span> { data.LastName }
+			</h1>
+			<p class="mt-4 text-lg text-muted-foreground">
+				{ data.EducationLevel.String() } <span class="mx-2 text-primary">·</span> { data.StudyDomain }
+			</p>
+			<div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+				<a
+					href={ fmt.Sprintf("%s%s", types.EVAssetCDNHostname.Get().Value, data.CVPath) }
+					download
+					class="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+				>
+					<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M12 3v12"></path>
+						<path d="m7 11 5 5 5-5"></path>
+						<path d="M5 20h14"></path>
+					</svg>
+					Download CV
+				</a>
+				<button
+					hx-on:click={ scrollToSection("contact") }
+					class="inline-flex items-center gap-2 rounded-md border border-border px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+				>
+					Contact Info
+					<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M5 12h14"></path>
+						<path d="m13 6 6 6-6 6"></path>
+					</svg>
+				</button>
+			</div>
+		</div>
+		<div class="mx-auto mt-16 max-w-6xl px-3">
+			@Terminal("guest@" + types.EVDomainname.Get().Value + ": ~") {
+				@TerminalLine(0) {
+					<span class="text-primary">{ "guest@" + types.EVDomainname.Get().Value + ":~" }$</span>
+					<span class="text-foreground">whoami</span>
+				}
+				@TerminalLine(1) {
+					<span class="text-muted-foreground">{ data.WhoAmI }</span>
+				}
+				@TerminalLine(2) {
+					<span class="text-primary">{ "guest@" + types.EVDomainname.Get().Value + ":~" }$</span>
+					<span class="text-foreground">cat skills.txt</span>
+				}
+				@TerminalLine(3) {
+					for i := range(data.SpecializedDomain) {
+						if i == 0 {
+							<span class="text-muted-foreground">{ data.SpecializedDomain[i] }</span>
+						} else {
+							<span class="mx-2 text-primary">•</span>
+							<span class="text-muted-foreground">{ data.SpecializedDomain[i] }</span>
+						}
+					}
+				}
+				/*
+				@TerminalLine(4) {
+					<span class="text-primary">{"guest@" + types.EVDomainname.Get().Value + ":~"}$</span>
+					<span class="ml-1 inline-block h-4 w-2 translate-y-0.5 bg-primary caret-blink"></span>
+				}
+				*/
+			}
+		</div>
+	</section>
+}

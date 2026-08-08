@@ -1,0 +1,60 @@
+package components
+
+import (
+	"fmt"
+	"git.jelius.dev/jelius-sama/Portfolio/types"
+)
+
+type LinksFooter struct {
+	WhoAmI      string
+	TotalLinks  int
+	QRImagePath string
+}
+
+// LinksOutro renders the closing block for the /links page: a "stats"
+// terminal (a short git-log-style summary, the QR code, and a closing
+// echo), plus a small "built with" line. Call @Footer() separately after
+// this, same as on the home page — kept out of here so Footer stays the
+// one shared, site-wide component.
+templ LinksOutro(arg LinksFooter) {
+	<section id="links-outro" class="pb-24 sm:pb-32">
+		<div class="mx-auto max-w-6xl">
+			@Terminal("stats") {
+				<div class="space-y-6">
+					@TerminalLine(0) {
+						<span class="text-primary">"guest@" + types.EVDomainname.Get().Value + ":~"$</span>
+						<span class="text-foreground">whoami</span>
+					}
+					@TerminalLine(1) {
+						<span class="text-muted-foreground">{ arg.WhoAmI }</span>
+					}
+					@TerminalLine(2) {
+						<span class="text-primary">"guest@" + types.EVDomainname.Get().Value + ":~"$</span>
+						<span class="text-foreground">ls social-links/</span>
+					}
+					@TerminalLine(3) {
+						<span class="text-muted-foreground">{ fmt.Sprintf("%d social links configured", arg.TotalLinks) }</span>
+						<span class="mx-2 text-primary">•</span>
+						<span class="text-muted-foreground">Click any link below to connect with me</span>
+					}
+					<div class={ "flex flex-col /*items-center*/ gap-3 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(1) }>
+						<p class="self-start">
+							<span class="text-primary">$</span>
+							<span class="text-foreground">qr-fetch</span>
+						</p>
+						<div class="w-full max-w-sm overflow-hidden rounded-md border border-border bg-secondary/40 p-4 flex justify-center items-center">
+							<img src={ fmt.Sprintf("%s%s", types.EVAssetCDNHostname.Get().Value, arg.QRImagePath) } alt="QR code linking to jelius.dev" class="w-full h-full rounded-sm"/>
+						</div>
+					</div>
+					<p class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(2) }>
+						<span class="text-primary">$</span>
+						<span class="text-foreground">echo "Thanks for visiting!"</span>
+					</p>
+					<p class={ "text-muted-foreground animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(3) }>
+						Thanks for visiting!
+					</p>
+				</div>
+			}
+		</div>
+	</section>
+}

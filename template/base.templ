@@ -1,0 +1,87 @@
+package template
+
+import (
+	"git.jelius.dev/jelius-sama/Portfolio/template/components"
+	"git.jelius.dev/jelius-sama/Portfolio/types"
+	"github.com/gofiber/fiber/v3"
+)
+
+var baseScript = templ.NewOnceHandle()
+
+templ Base(serverCtx fiber.Ctx, metadata *types.Metadata, body templ.Component, footer templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en">
+		@Metadata(metadata)
+		<body hx-ext="head-support">
+			@components.Header(serverCtx)
+			if body != nil {
+				@body
+			}
+			if footer != nil {
+				@footer
+			}
+			@baseScript.Once() {
+				@HTMXScript()
+				@HTMXHeadSupport()
+				@HTMXHotFixes()
+				<script>
+					let currentTrackingTimer = null;
+					let currentAbortController = null;
+
+					function trackAnalytics(path) {
+						if (currentTrackingTimer) {
+							clearTimeout(currentTrackingTimer);
+						}
+						if (currentAbortController) {
+							currentAbortController.abort(); // Cancels the ongoing HTTP request
+						}
+
+						currentAbortController = new AbortController();
+						const signal = currentAbortController.signal;
+
+						const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+						const trackingPayload = {
+							user_time_zone: userTimeZone,
+							page_path: path
+						};
+
+						currentTrackingTimer = setTimeout(() => {
+							// Pass the signal into fetch options
+							fetch('/api/analytics/track', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify(trackingPayload),
+								signal: signal // Binds the fetch to our cancellation context
+							})
+							.then(response => {
+								if (response.ok) {
+									console.log('Analytics tracked successfully, you can read the source code here: `https://git.jelius.dev/jelius-sama/Portfolio.git`');
+								}
+							})
+							.catch(error => {
+								// Handle or ignore explicit cancellations gracefully
+								if (error.name === 'AbortError') {
+									console.log('Tracking cancelled!');
+								} else {
+									console.error('Tracking failed:', error);
+								}
+							});
+						}, 5000);
+					}
+
+					document.addEventListener("DOMContentLoaded", function() {
+						trackAnalytics(window.location.pathname);
+					});
+
+					document.addEventListener("htmx:beforeSwap", function(event) {
+						if (event.detail.target.tagName.toLowerCase() === "main" || event.detail.target.id === "main") {
+							trackAnalytics(event.detail.pathInfo.requestPath)
+						}
+					});
+				</script>
+			}
+		</body>
+	</html>
+}

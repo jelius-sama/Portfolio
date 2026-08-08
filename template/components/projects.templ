@@ -1,0 +1,147 @@
+package components
+
+import "strings"
+import "fmt"
+import "git.jelius.dev/jelius-sama/Portfolio/types"
+
+type ProjectLink struct {
+	Label string
+	Href  string
+	Kind  string // "code" | "demo" | "blog"
+}
+
+func projectLinkClass(kind string) string {
+	if kind == "demo" {
+		return "inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+	}
+	return "inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-accent"
+}
+
+type ProjectData struct {
+	Title       string
+	Description string
+	Tags        []string
+	Links       []ProjectLink
+	Thumbnail   string
+}
+
+func strEncode(s string) string {
+	s = strings.ToLower(s)
+	return strings.ReplaceAll(s, " ", "-")
+}
+
+templ Projects(data []ProjectData) {
+	<section id="projects" class="bg-background py-24 sm:py-32">
+		<div class="mx-auto max-w-6xl px-3">
+			@SectionHeading("Projects")
+			<div class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+				for i := range(data) {
+					@ProjectCard(i, strEncode(data[i].Title), data[i].Title,
+						data[i].Description,
+						data[i].Tags,
+						data[i].Links) {
+						if len(data[i].Thumbnail) != 0 {
+							<img src={ fmt.Sprintf("%s%s", types.EVAssetCDNHostname.Get().Value, data[i].Thumbnail) } alt={ data[i].Title } class="h-full w-full object-cover"/>
+						} else {
+							@ProjectPreviewPlaceholder(data[i].Title)
+						}
+					}
+				}
+			</div>
+			<div class="mt-8">
+				@Terminal("more-projects") {
+					@TerminalLine(0) {
+						<span class="text-primary">$</span>
+						<span class="text-foreground">ls projects/ --all</span>
+					}
+					@TerminalLine(1) {
+						<span class="text-muted-foreground">Found { len(data) } projects in current directory</span>
+					}
+					@TerminalLine(2) {
+						<span class="text-primary">$</span>
+						<span class="text-foreground">echo "More projects coming soon..."</span>
+					}
+					@TerminalLine(3) {
+						<span class="text-muted-foreground">More projects coming soon...</span>
+					}
+				}
+			</div>
+		</div>
+	</section>
+}
+
+// ProjectCard renders one project: a terminal-chrome window title, a
+// preview slot (drop in an <img> or ProjectPreviewPlaceholder as
+// children), name, description, tag pills, and action links.
+//
+// index staggers the card's fade/slide-in via lineDelay, reused from
+// terminal.templ so this section animates on the same rhythm as the
+// rest of the page.
+templ ProjectCard(index int, windowTitle, name, description string, tags []string, links []ProjectLink) {
+	<div class={ "flex flex-col overflow-hidden rounded-lg border border-border bg-card shadow-xl animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(index) }>
+		<div class="flex items-center gap-2 border-b border-border bg-secondary/60 px-4 py-3">
+			<span class="h-3 w-3 rounded-full bg-[#f38ba8]"></span>
+			<span class="h-3 w-3 rounded-full bg-[#f9e2af]"></span>
+			<span class="h-3 w-3 rounded-full bg-[#a6e3a1]"></span>
+			<span class="ml-3 truncate font-mono text-xs text-muted-foreground">{ windowTitle }</span>
+		</div>
+		<div class="flex flex-1 flex-col p-5">
+			<div class="flex aspect-video items-center justify-center overflow-hidden rounded-md border border-border bg-gradient-to-br from-primary/10 to-accent/20">
+				{ children... }
+			</div>
+			<h3 class="mt-5 font-mono text-lg font-bold text-primary">{ name }</h3>
+			<p class="mt-2 flex-1 text-sm text-muted-foreground">{ description }</p>
+			<div class="mt-4 flex flex-wrap gap-2">
+				for _, tag := range tags {
+					<span class="rounded-md border border-border bg-secondary/60 px-2 py-1 font-mono text-xs text-muted-foreground">
+						{ tag }
+					</span>
+				}
+			</div>
+			<div class="mt-5 flex flex-wrap gap-3">
+				for _, link := range links {
+					<a href={ templ.URL(link.Href) } class={ projectLinkClass(link.Kind) }>
+						@projectLinkIcon(link.Kind)
+						{ link.Label }
+					</a>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// ProjectPreviewPlaceholder is the fallback preview tile for projects
+// that don't have a screenshot yet: an icon + the project's short name
+// on the same gradient background as ProjectCard's preview slot.
+templ ProjectPreviewPlaceholder(label string) {
+	<div class="flex flex-col items-center gap-3 text-[#89dceb]">
+		<svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+			<rect x="3" y="4" width="18" height="16" rx="2"></rect>
+			<path d="M7 8h10"></path>
+			<path d="M7 12h10"></path>
+			<path d="M7 16h6"></path>
+		</svg>
+		<span class="font-mono text-sm font-bold uppercase tracking-wide">{ label }</span>
+	</div>
+}
+
+templ projectLinkIcon(kind string) {
+	if kind == "code" {
+		<svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="m18 16 4-4-4-4"></path>
+			<path d="m6 8-4 4 4 4"></path>
+			<path d="m14.5 4-5 16"></path>
+		</svg>
+	} else if kind == "demo" {
+		<svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+			<path d="M15 3h6v6"></path>
+			<path d="M10 14 21 3"></path>
+		</svg>
+	} else {
+		<svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+			<path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+		</svg>
+	}
+}

@@ -1,0 +1,72 @@
+package components
+
+var skillAccentDots = []string{
+	"bg-[#89b4fa]",
+	"bg-[#f9e2af]",
+	"bg-[#a6e3a1]",
+	"bg-[#cba6f7]",
+	"bg-[#fab387]",
+	"bg-[#94e2d5]",
+}
+
+func skillDotClass(index int) string {
+	return skillAccentDots[index%len(skillAccentDots)]
+}
+
+type SkillData struct {
+	Languages  []string
+	Frameworks []string
+	Others     []string
+}
+
+templ Skills(data SkillData) {
+	<section id="skills" class="bg-background py-24 sm:py-32">
+		<div class="mx-auto max-w-6xl px-3">
+			@SectionHeading("Skills & Technologies")
+			<p class="mt-4 text-center text-sm text-muted-foreground">
+				Technologies and tools I work with:
+			</p>
+			<div class="mt-12 grid grid-cols-1 gap-10 sm:grid-cols-3 sm:gap-8">
+				<div>
+					<h3 class="font-mono text-sm font-semibold uppercase tracking-wide text-primary">
+						Languages
+					</h3>
+					for i := range(data.Languages) {
+						<ul class="mt-4 space-y-2.5">
+							<li class={ "flex items-center gap-2.5 rounded-md border border-border bg-card px-4 py-2.5 transition-colors hover:border-primary/40 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(i) }>
+								<span class={ "h-2 w-2 shrink-0 rounded-full", skillDotClass(i) }></span>
+								<span class="font-mono text-sm text-foreground">{ data.Languages[i] }</span>
+							</li>
+						</ul>
+					}
+				</div>
+				<div>
+					<h3 class="font-mono text-sm font-semibold uppercase tracking-wide text-primary">
+						Frameworks
+					</h3>
+					for i := range(data.Frameworks) {
+						<ul class="mt-4 space-y-2.5">
+							<li class={ "flex items-center gap-2.5 rounded-md border border-border bg-card px-4 py-2.5 transition-colors hover:border-primary/40 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(i) }>
+								<span class={ "h-2 w-2 shrink-0 rounded-full", skillDotClass(i) }></span>
+								<span class="font-mono text-sm text-foreground">{ data.Frameworks[i] }</span>
+							</li>
+						</ul>
+					}
+				</div>
+				<div>
+					<h3 class="font-mono text-sm font-semibold uppercase tracking-wide text-primary">
+						Others
+					</h3>
+					for i := range(data.Others) {
+						<ul class="mt-4 space-y-2.5">
+							<li class={ "flex items-center gap-2.5 rounded-md border border-border bg-card px-4 py-2.5 transition-colors hover:border-primary/40 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(i) }>
+								<span class={ "h-2 w-2 shrink-0 rounded-full", skillDotClass(i) }></span>
+								<span class="font-mono text-sm text-foreground">{ data.Others[i] }</span>
+							</li>
+						</ul>
+					}
+				</div>
+			</div>
+		</div>
+	</section>
+}

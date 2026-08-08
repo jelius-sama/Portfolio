@@ -1,0 +1,17 @@
+package components
+
+// AvatarRing renders the dashed, slowly-spinning selection ring around a
+// profile photo — used by Hero and by ProfileHandle (links page) so the
+// avatar treatment stays identical everywhere it appears.
+templ AvatarRing(src string, alt *string) {
+	<div class="relative">
+		<div class="absolute -inset-3 rounded-full border-2 border-dashed border-primary/50 animate-spin [animation-duration:40s] motion-reduce:animate-none"></div>
+		<img
+			src={ src }
+			if alt != nil {
+				alt={ *alt }
+			}
+			class="relative h-32 w-32 rounded-full object-cover ring-4 ring-background sm:h-36 sm:w-36"
+		/>
+	</div>
+}

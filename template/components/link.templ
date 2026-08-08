@@ -1,0 +1,25 @@
+package components
+
+type LinkAttr struct {
+	Id    string
+	Href  string
+	Class string
+}
+
+templ Link(attr LinkAttr) {
+	<a
+		if len(attr.Id) != 0 {
+			id={ attr.Id }
+		}
+		href={ attr.Href }
+		hx-get={ attr.Href }
+		if len(attr.Class) != 0 {
+			class={ attr.Class }
+		}
+		hx-target="main"
+		hx-swap="outerHTML show:window:top"
+		hx-push-url="true"
+	>
+		{ children... }
+	</a>
+}

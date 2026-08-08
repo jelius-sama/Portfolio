@@ -1,0 +1,49 @@
+package components
+
+// AuroraBackdrop renders a fixed, full-viewport background layer: a
+// solid base color plus several large, slowly-drifting blurred color
+// blobs in Catppuccin Mocha accents — the "linktree-style" colorful
+// background behind an otherwise plain page.
+//
+// It's `position: fixed` with a negative z-index, so it stays put while
+// the page scrolls over it and sits behind all normal-flow content
+// automatically — no z-index juggling needed on the content side.
+//
+// For it to actually show through, the sections placed on top of it
+// need to NOT paint their own opaque background — this component
+// supplies the page's base color, so ProfileHandle/SocialLinksList/
+// LinksOutro had their own `bg-background` removed to let it show.
+//
+// Usage: drop `@AuroraBackdrop()` as the first thing inside your page's
+// <main>, before any section content.
+templ AuroraBackdrop() {
+	<div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-background" aria-hidden="true">
+		<div class="aurora-blob absolute left-[8%] top-[6%] h-72 w-72 rounded-full bg-[#cba6f7]/25 blur-3xl sm:h-96 sm:w-96"></div>
+		<div class="aurora-blob aurora-blob-delay-1 absolute right-[6%] top-[18%] h-80 w-80 rounded-full bg-[#89b4fa]/20 blur-3xl sm:h-[28rem] sm:w-[28rem]"></div>
+		<div class="aurora-blob aurora-blob-delay-2 absolute bottom-[18%] left-[12%] h-72 w-72 rounded-full bg-[#fab387]/20 blur-3xl sm:h-96 sm:w-96"></div>
+		<div class="aurora-blob aurora-blob-delay-3 absolute bottom-[6%] right-[10%] h-64 w-64 rounded-full bg-[#94e2d5]/20 blur-3xl sm:h-80 sm:w-80"></div>
+		<div class="aurora-blob aurora-blob-delay-4 absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#f5c2e7]/10 blur-3xl sm:h-80 sm:w-80"></div>
+	</div>
+	<style>
+		@keyframes aurora-drift {
+			0%, 100% { transform: translate(0, 0) scale(1); }
+			33% { transform: translate(3%, 4%) scale(1.06); }
+			66% { transform: translate(-3%, -2%) scale(0.94); }
+		}
+
+		.aurora-blob {
+			animation: aurora-drift 26s ease-in-out infinite;
+		}
+
+		.aurora-blob-delay-1 { animation-delay: -6s; }
+		.aurora-blob-delay-2 { animation-delay: -12s; }
+		.aurora-blob-delay-3 { animation-delay: -18s; }
+		.aurora-blob-delay-4 { animation-delay: -9s; }
+
+		@media (prefers-reduced-motion: reduce) {
+			.aurora-blob {
+				animation: none;
+			}
+		}
+	</style>
+}

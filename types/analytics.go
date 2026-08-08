@@ -1,37 +1,73 @@
 package types
 
-import "time"
-
-type AnalyticsEvent struct {
-	SessionID      string         `json:"session_id"`
-	EventType      string         `json:"event_type"`
-	EventTimestamp *time.Time     `json:"event_timestamp,omitempty"`
-	PageURL        string         `json:"page_url"`
-	ReferrerURL    string         `json:"referrer_url,omitempty"`
-	IPAddress      string         `json:"ip_address,omitempty"`
-	Country        string         `json:"country,omitempty"`
-	Region         string         `json:"region,omitempty"`
-	City           string         `json:"city,omitempty"`
-	UserAgent      string         `json:"user_agent,omitempty"`
-	DeviceType     string         `json:"device_type,omitempty"`
-	BrowserName    string         `json:"browser_name,omitempty"`
-	BrowserVersion string         `json:"browser_version,omitempty"`
-	OSName         string         `json:"os_name,omitempty"`
-	OSVersion      string         `json:"os_version,omitempty"`
-	ScreenWidth    *int           `json:"screen_width,omitempty"`
-	ScreenHeight   *int           `json:"screen_height,omitempty"`
-	ViewportWidth  *int           `json:"viewport_width,omitempty"`
-	ViewportHeight *int           `json:"viewport_height,omitempty"`
-	Language       string         `json:"language,omitempty"`
-	UTMSource      string         `json:"utm_source,omitempty"`
-	UTMMedium      string         `json:"utm_medium,omitempty"`
-	UTMCampaign    string         `json:"utm_campaign,omitempty"`
-	UTMTerm        string         `json:"utm_term,omitempty"`
-	UTMContent     string         `json:"utm_content,omitempty"`
-	PageLoadTimeMs *int           `json:"page_load_time_ms,omitempty"`
-	TimeOnPageSec  *float64       `json:"time_on_page_sec,omitempty"`
-	ScrollDepthPct *float64       `json:"scroll_depth_pct,omitempty"`
-	ElementID      string         `json:"element_id,omitempty"`
-	ErrorMessage   string         `json:"error_message,omitempty"`
-	Metadata       map[string]any `json:"metadata,omitempty"`
+type TopCountryResponse struct {
+    CountryCode string  `json:"country_code"`
+    VisitCount  int     `json:"visit_count"`
+    Percentage  float64 `json:"percentage"`
 }
+
+type PaginatedTopCountriesResponse struct {
+    Data      []TopCountryResponse `json:"data"`
+    Page      int                  `json:"page"`
+    Limit     int                  `json:"limit"`
+    HasMore   bool                 `json:"has_more"`
+    TotalRows int                  `json:"total_rows"`
+}
+
+type AvgVisitsResponse struct {
+    TimeWindow  string  `json:"time_window"`
+    CountryCode string  `json:"country_code"`
+    PagePath    string  `json:"page_path"`
+    AvgVisits   float64 `json:"avg_visits"`
+    Date        string  `json:"date"`
+}
+
+type PaginatedAvgVisitsResponse struct {
+    Data      []AvgVisitsResponse `json:"data"`
+    Page      int                 `json:"page"`
+    Limit     int                 `json:"limit"`
+    HasMore   bool                `json:"has_more"`
+    TotalRows int                 `json:"total_rows"`
+}
+
+type AnalyticsEventResponse struct {
+    EventID      int64  `json:"event_id"`
+    CountryCode  string `json:"country_code"`
+    PagePath     string `json:"page_path"`
+    TimestampUTC string `json:"timestamp"`
+}
+
+type PaginatedEventsResponse struct {
+    Data      []AnalyticsEventResponse `json:"data"`
+    Page      int                      `json:"page"`
+    Limit     int                      `json:"limit"`
+    HasMore   bool                     `json:"has_more"`
+    TotalRows int                      `json:"total_rows"`
+}
+
+type TopPageResponse struct {
+    PagePath   string  `json:"page_path"`
+    VisitCount int     `json:"visit_count"`
+    Percentage float64 `json:"percentage"`
+}
+
+type PaginatedTopPagesResponse struct {
+    Data      []TopPageResponse `json:"data"`
+    Page      int               `json:"page"`
+    Limit     int               `json:"limit"`
+    HasMore   bool              `json:"has_more"`
+    TotalRows int               `json:"total_rows"`
+}
+
+type TrackAnalyticsRequest struct {
+    UserTimeZone string `json:"user_time_zone"`
+    PagePath     string `json:"page_path"`
+}
+
+type SortOrder uint8
+
+const (
+    SOAsc SortOrder = iota
+    SODesc
+)
+

@@ -1,255 +1,109 @@
 package main
 
 import (
-	vars "KazuFolio"
-	"KazuFolio/api"
-	"KazuFolio/db"
-	"KazuFolio/types"
-	"KazuFolio/util"
-	"database/sql"
-	"errors"
-	"github.com/jelius-sama/logger"
-	_ "modernc.org/sqlite"
-	"net/http"
-	"os"
-	"os/signal"
-	"path/filepath"
-	"syscall"
+    "net/url"
+    "os"
+    "path/filepath"
+    "strings"
+
+    "git.jelius.dev/jelius-sama/Portfolio/db"
+    "git.jelius.dev/jelius-sama/Portfolio/middleware"
+    "git.jelius.dev/jelius-sama/Portfolio/types"
+    "github.com/gofiber/fiber/v3"
+    "github.com/jelius-sama/logger"
 )
 
 var (
-	Environment = "development"
-	DevPort     = "6969"
-	Version     string
-	Home        string
-	Host        = "http://localhost"
-
-	ReverseProxy string
-	ProxyPort    string
+    Environment  string
+    Host         string
+    AssetCDNHost string
+    Version      string
+    Port         string
 )
 
-// NOTE: Be sure to explicitly set the home path in the `../config/server.config.json` file.
-//   - This is important because if the server runs directly without a reverse proxy,
-//     it may require root privileges, in which case `os.UserHomeDir()` may not resolve
-//     to the intended user's home directory.
-//   - Conversely, if the server does not run with root privileges, it will be unable
-//     to bind to ports 443 or 80. This may force users to specify a port number
-//     in the URL when accessing your domain.
 func init() {
-	exePath, err := os.Executable()
-	if err != nil {
-		logger.Panic("could not get executable path:", err)
-	}
+    var env []types.Env
 
-	if Environment == types.ENV.Dev && Home == "" {
-		if h, err := os.UserHomeDir(); err == nil {
-			Home = h
-		}
-	}
+    var parsedURL, err = url.Parse(AssetCDNHost)
+    if err != nil {
+        logger.Panic(err)
+    }
 
-	if ReverseProxy == "true" {
-		if util.IsValidPort(ProxyPort) == false {
-			logger.Panic("supplied port for reverse proxy is invalid.")
-		}
+    if u, err := url.Parse(Host); err != nil {
+        logger.Panic(err)
+    } else {
+        // Grab everything up to the very first dot
+        if idx := strings.Index(u.Host, "."); idx != -1 {
+            env = append(env,
+                types.Env{Key: types.EVDomainname.Get().Key, Value: u.Host[:idx]},
+            )
+        } else {
+            env = append(env,
+                types.Env{Key: types.EVDomainname.Get().Key, Value: u.Hostname()},
+            )
+        }
+    }
 
-		vars.ReverseProxy = types.BehindReverseProxy{
-			StatementValid: true,
-			Port:           ProxyPort,
-		}
-	} else {
-		vars.ReverseProxy = types.BehindReverseProxy{
-			StatementValid: false,
-		}
-	}
+    var dataDir string = os.Getenv("XDG_DATA_HOME")
+    if len(dataDir) == 0 {
+        var home, err = os.UserHomeDir()
+        if err != nil {
+            logger.Panic(err)
+        }
+        dataDir = filepath.Join(home, ".local", "share", parsedURL.Hostname())
+    } else {
+        dataDir = filepath.Join(dataDir, parsedURL.Hostname())
+    }
 
-	os.Setenv("ROOT_PATH", filepath.Dir(filepath.Dir(exePath)))
-	os.Setenv("version", Version)
-	os.Setenv("env", Environment)
-	logger.Configure(logger.Cnf{
-		IsDev: logger.IsDev{
-			EnvironmentVariable: logger.StringPtr("env"),
-			ExpectedValue:       logger.StringPtr("development"),
-		},
-		UseSyslog: true,
-	})
-	os.Setenv("home", Home)
-	os.Setenv("host", Host)
-	os.Setenv("db_file", filepath.Join(Home, "/portfolio.db"))
+    env = append(env,
+        types.Env{Key: types.EVEnv.Get().Key, Value: Environment},
+        types.Env{Key: types.EVHostname.Get().Key, Value: Host},
+        types.Env{Key: types.EVAssetCDNHostname.Get().Key, Value: AssetCDNHost},
+        types.Env{Key: types.EVVersion.Get().Key, Value: Version},
+        types.Env{Key: types.EVPort.Get().Key, Value: Port},
+        types.Env{Key: types.EVDataDir.Get().Key, Value: dataDir},
+    )
 
-	db.Conn, err = sql.Open("sqlite", os.Getenv("db_file"))
-	if err != nil {
-		logger.Panic(err)
-	}
+    types.InitEnv(env)
 
-	if err = db.InitializeSchema(db.Conn); err != nil {
-		logger.Panic(err)
-	}
+    logger.Configure(logger.Cnf{
+        IsDev: logger.IsDev{
+            EnvironmentVariable: new(types.EVEnv.Get().Key),
+            ExpectedValue:       new(types.EMDev.String()),
+        },
+        UseSyslog: false,
+        // UseSyslog: os.Getenv(types.EVEnv.Get().Key) != types.EMDev.String(),
+    })
+
+    var dbPath string
+    if types.EVEnv.Get().Value == types.EMDev.String() {
+        cwd, err := os.Getwd()
+        if err != nil {
+            logger.Fatal("Failed to determine working directory:", err.Error())
+        }
+        dbPath = filepath.Join(cwd, "db.sqlite3")
+    } else {
+        dbPath = filepath.Join(dataDir, "db.sqlite3")
+    }
+
+    logger.Info("Server Data Directory:", dataDir)
+    logger.Info("SQLite DB Path:", dbPath)
+    err = db.InitDB(dbPath)
+    if err != nil {
+        logger.Fatal("Failed to initialize database:", err.Error())
+    }
 }
 
-func initGracefulShutdown(stop chan struct{}) {
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
-
-	go func() {
-		sig := <-sigs
-		logger.Warning("Received signal: " + sig.String() + ". Shutting down gracefully…")
-		close(stop) // Tell main() to exit cleanly
-	}()
-}
-
-func fileExists(filePath string) bool {
-	_, err := os.Stat(filePath)
-	if err == nil {
-		return true
-	}
-	if errors.Is(err, os.ErrNotExist) {
-		return false
-	}
-	// Handle other potential errors (e.g., permissions)
-	logger.Panic("Error checking file `"+filePath+"`\n    ", err)
-	return false
-}
-
-type ServerResp struct {
-	Http  error
-	Https error
-}
-
-// TODO: Implement automatic cache purge when a new build is detected.
 func main() {
-	stop := make(chan struct{})
-	initGracefulShutdown(stop)
+    defer db.CloseDB() // if we are in main we can assume that `init()` was successful.
 
-	defer db.Conn.Close()
+    var cnf fiber.Config = fiber.Config{
+        ErrorHandler: middleware.ErrHandler,
+    }
 
-	// INFO:: startServer checks the current environment configuration.
-	//         - In development mode, it starts the server on the DevPort.
-	//         - In production mode:
-	//           - If behind a reverse proxy, it starts the server on ReverseProxy.Port.
-	//           - Otherwise, it attempts to start the server with HTTPS on port 443 and HTTP on port 80.
-	//             The HTTP server only forwards requests to HTTPS.
-	//           - If SSL certificates are not found for port 443, the server defaults to starting on port 80.
-	startServer := func() (ServerResp, string) {
-		respChan := make(chan ServerResp, 2)
+    var app *fiber.App = fiber.New(cnf)
+    Router(app)
 
-		routeHandler := util.Chain(util.MiddlewareChain{
-			Handler: api.HandleRouting(),
-			Middlewares: []types.Middleware{
-				api.RecoveryMiddleware,
-				api.LoggingMiddleware,
-			},
-		})
-
-		// INFO: Development Server
-		if Environment == types.ENV.Dev {
-			if util.IsValidPort(DevPort) == false {
-				logger.Panic("supplied port for dev server is invalid, falling back to :6969")
-				DevPort = "6969"
-			}
-
-			os.Setenv("port", DevPort)
-			logger.Info("Development server started on port :" + DevPort)
-
-			go func() {
-				err := http.ListenAndServe(":"+DevPort, routeHandler)
-				respChan <- ServerResp{Http: err}
-			}()
-
-			return <-respChan, DevPort
-		}
-
-		// TODO: Support secure connection over https
-		if vars.ReverseProxy.StatementValid == true {
-			os.Setenv("port", vars.ReverseProxy.Port)
-			logger.Info("Production server started behind reverse proxy on port :" + vars.ReverseProxy.Port)
-
-			go func() {
-				err := http.ListenAndServe(":"+vars.ReverseProxy.Port, routeHandler)
-				respChan <- ServerResp{Http: err}
-			}()
-
-			return <-respChan, vars.ReverseProxy.Port
-		}
-
-		// INFO: Production server
-		fullchain := os.Getenv("FULL_CHAIN")
-		privkey := os.Getenv("PRIV_KEY")
-
-		exists1 := fileExists(fullchain)
-		exists2 := fileExists(privkey)
-
-		if exists1 && exists2 {
-			portToStart := "443"
-			os.Setenv("port", portToStart)
-			logger.Info("Production server started on port :" + portToStart)
-
-			go func() {
-				// TODO: Hot reload the certificates in case it expires there is no downtime.
-				err := http.ListenAndServeTLS(":"+portToStart, fullchain, privkey, routeHandler)
-				respChan <- ServerResp{Https: err}
-			}()
-
-			go func() {
-				err := http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					target := "https://" + r.Host + r.URL.RequestURI()
-					http.Redirect(w, r, target, http.StatusMovedPermanently)
-				}))
-				respChan <- ServerResp{Http: err}
-			}()
-
-			var combined ServerResp
-			for i := 0; i < 2; i++ {
-				resp := <-respChan
-				if resp.Http != nil {
-					combined.Http = resp.Http
-				}
-				if resp.Https != nil {
-					combined.Https = resp.Https
-				}
-			}
-
-			return combined, portToStart
-		}
-
-		// INFO: If no SSL certificates were found, fallback to HTTP only mode
-		fallbackPort := "80"
-		os.Setenv("port", fallbackPort)
-		logger.Warning("Production server was started without SSL certificate falling back to http only mode.")
-		logger.Info("Production server started on port :" + fallbackPort)
-
-		go func() {
-			err := http.ListenAndServe(":"+fallbackPort, routeHandler)
-			respChan <- ServerResp{Http: err}
-		}()
-
-		return <-respChan, fallbackPort
-	}
-
-	go func() {
-		if serverResp, port := startServer(); serverResp.Http != nil || serverResp.Https != nil {
-			if serverResp.Http != nil {
-				if vars.ReverseProxy.StatementValid == true {
-					logger.Error("Server failed behind reverse proxy on port " + port + ": " + serverResp.Http.Error())
-				} else {
-					logger.Error("HTTP server failed on port " + port + ":\n" + serverResp.Http.Error())
-				}
-			}
-			if serverResp.Https != nil {
-				logger.Error("HTTPS server failed on port " + port + ":\n" + serverResp.Https.Error())
-			}
-			logger.Panic("One or more servers failed to start.")
-		}
-	}()
-
-	<-stop
-
-	logger.Configure(logger.Cnf{
-		IsDev: logger.IsDev{
-			EnvironmentVariable: logger.StringPtr("env"),
-			ExpectedValue:       logger.StringPtr("development"),
-		},
-		UseSyslog: false,
-	})
-	logger.Okay("Server successfully shutdown.")
-	return
+    logger.Fatal(app.Listen(types.EVPort.Get().Value))
 }
+

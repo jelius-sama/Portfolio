@@ -1,0 +1,18 @@
+package components
+
+templ About(msg []string) {
+	<section id="about" class="bg-background py-24 sm:py-32">
+		<div class="mx-auto max-w-6xl px-3">
+			@SectionHeading("Who Am I")
+			<div class="mt-12">
+				@Terminal("about-me") {
+					for i := range(msg) {
+						@TerminalLine(i) {
+							<span class="text-muted-foreground">{ msg[i] }</span>
+						}
+					}
+				}
+			</div>
+		</div>
+	</section>
+}

@@ -1,0 +1,310 @@
+package components
+
+import (
+	"fmt"
+	"git.jelius.dev/jelius-sama/Portfolio/types"
+	"github.com/gofiber/fiber/v3"
+	"maps"
+	"slices"
+	"strings"
+)
+
+var headerScript = templ.NewOnceHandle()
+
+func getPath(c string) string {
+	if c == "/" {
+		return ""
+	} else {
+		var _, exists = types.Pages[c]
+		if exists {
+			return c
+		} else {
+			// NOTE: This may be fine for now but if we have more dynamic routes this will be messy
+			if strings.HasPrefix(c, "/blog/") {
+				return ""
+			}
+			return "/error"
+		}
+	}
+}
+
+func cleanPath(path string, currentPath string) string {
+	if currentPath != "/" && path == "/" {
+		return "Portfolio"
+	}
+	if currentPath == path {
+		return ""
+	}
+	if strings.Contains(path, ".") {
+		return ""
+	}
+
+	var cleaned = strings.ReplaceAll(strings.TrimPrefix(path, "/"), "-", " ")
+	return strings.ToUpper(string(cleaned[0])) + cleaned[1:]
+}
+
+script initPages(pages []string) {
+    window.pages = pages;
+}
+
+// mobileNavRow renders one numbered row in the mobile navigation panel:
+// "01. Blogs ... page", styled as the same bordered bg-card row used
+// elsewhere on the site (SkillItem, LinkItem) rather than a new style.
+templ mobileNavRow(index int, href, label string) {
+	@Link(LinkAttr{Href: href, Class: "mobile-nav-row group flex items-center justify-between gap-4 rounded-md border border-border bg-card px-4 py-3 transition-colors hover:border-primary/40"}) {
+		<span class="font-mono text-sm text-foreground">
+			<span class="text-primary">{ fmt.Sprintf("%02d.", index) }</span>
+			{ " " }{ label }
+		</span>
+		<span class="font-mono text-xs text-muted-foreground">page</span>
+	}
+}
+
+templ Header(serverCtx fiber.Ctx) {
+	<header id="header" class="fixed top-0 z-50 border-b border-border bg-background/80 backdrop-blur w-full">
+		<div class="mx-auto flex max-w-6xl items-center justify-between px-3 py-3 sm:py-5">
+			@Link(LinkAttr{Id: "current-path", Href: "/", Class: "font-mono text-lg font-semibold text-foreground"}) {
+				<span class="text-primary">&gt;</span> jelius.dev{ getPath(serverCtx.Path()) }
+			}
+			<nav id="nav-links" class="hidden items-center gap-8 font-mono text-sm text-muted-foreground sm:flex">
+				{{
+					var pages = slices.Collect(maps.Keys(types.Pages))
+					pages = slices.DeleteFunc(pages, func(s string) bool {
+						return strings.Contains(s, ":")
+					})
+					slices.Sort(pages)
+				}}
+				@initPages(pages)
+				for _, k := range pages {
+					{{ var path string = cleanPath(k, serverCtx.Path()) }}
+					if len(path) != 0 {
+						@Link(LinkAttr{Href: k}) {
+							{ path }
+						}
+					}
+				}
+			</nav>
+			<button
+				id="mobile-menu-button"
+				type="button"
+				aria-label="Toggle menu"
+				aria-controls="mobile-nav"
+				aria-expanded="false"
+				class="relative z-50 inline-flex items-center justify-center rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:hidden"
+			>
+				<svg id="menu-icon-open" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M4 6h16"></path>
+					<path d="M4 12h16"></path>
+					<path d="M4 18h16"></path>
+				</svg>
+				<svg id="menu-icon-close" class="hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M18 6 6 18"></path>
+					<path d="m6 6 12 12"></path>
+				</svg>
+			</button>
+		</div>
+		<!-- mobile navigation panel: sits directly below the header (header
+		     is `sticky`, which establishes the containing block this
+		     `absolute` panel positions against) -->
+		<div id="mobile-nav" class="absolute inset-x-0 top-full z-40 hidden px-3 pb-6 pt-3 sm:hidden">
+			<div id="mobile-nav-backdrop" class="fixed inset-0 -z-10 bg-background/70 backdrop-blur-sm" aria-hidden="true"></div>
+			@Terminal("navigation") {
+				<div class="space-y-4">
+					<p>
+						<span class="text-primary">$</span>
+						<span class="text-foreground">ls /navigation/</span>
+					</p>
+					<div id="mobile-nav-links" class="space-y-3">
+						{{ mobileIndex := 0 }}
+						for _, k := range pages {
+							{{ var path string = cleanPath(k, serverCtx.Path()) }}
+							if len(path) != 0 {
+								{{ mobileIndex++ }}
+								@mobileNavRow(mobileIndex, k, path)
+							}
+						}
+					</div>
+				</div>
+			}
+		</div>
+		// FIXME: Uncaught SyntaxError: redeclaration of const
+		// The above error can be seen sometimes when navigating back
+		// and forth using the browser back and forward button.
+		// Why is the `.Once` wrapped function running more than once?
+		// For a temporary fix, maybe we can wrap it in a try-catch block
+		@headerScript.Once() {
+			<script>
+				try {
+					const onPathnameChange = (callback) => {
+						document.body.addEventListener('htmx:pushedIntoHistory', () => callback(window.location.pathname));
+						window.addEventListener('popstate', () => callback(window.location.pathname));
+					};
+					const getPath = (path) => {
+						if (path === "/") {
+							return "";
+						} else {
+							if (window.pages.includes(path)) return path
+							if (path.startsWith("/blog/")) return ""
+							return "/error"
+						};
+					};
+					const decodeHtmlEntities = (str) => {
+						const parser = new DOMParser();
+						const dom = parser.parseFromString(str, 'text/html');
+						return dom.body.textContent;
+					};
+					const cleanPath= (path, currentPath) => {
+						if (currentPath !== "/" && path === "/") return "Portfolio";
+						if (currentPath === path) return "";
+						// Remove leading slash and replace all dashes with spaces
+						let	cleaned = path.replace(/^\//, '').replaceAll('-', ' ');
+						if (cleaned.length === 0) return "";
+						if (cleaned.includes(".")) return "";
+
+						// Capitalize the first letter and append the rest
+						return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+					};
+
+					const logoEl = document.getElementById("current-path");
+					const navLinksEl = document.getElementById("nav-links");
+					onPathnameChange((path) => {
+						if (logoEl) {
+							const iconEl = document.createElement("span");
+							iconEl.textContent = decodeHtmlEntities("&gt;");
+							iconEl.classList.add("text-primary");
+							logoEl.replaceChildren(iconEl, ` jelius.dev${getPath(path)}`);
+						};
+
+						if (navLinksEl) {
+							navLinksEl.replaceChildren();
+
+						    window.pages.forEach((k) => {
+							   const cleanedPath = cleanPath(k, path);
+
+								if (cleanedPath.length !== 0) {
+									const link = document.createElement("a");
+									link.href = k;
+									link.textContent = cleanedPath;
+									link.setAttribute("hx-get", k);
+									link.setAttribute("hx-target", "main");
+									link.setAttribute("hx-push-url", "true");
+									link.setAttribute("hx-swap", "outerHTML show:window:top");
+									if (typeof htmx !== "undefined") {
+										htmx.process(link);
+									}
+									navLinksEl.appendChild(link);
+								}
+							});
+						}
+					});
+
+					// --- mobile navigation panel (additive — registers its own
+					// onPathnameChange listener rather than editing the one above) ---
+					const mobileNavPanel = document.getElementById("mobile-nav");
+					const mobileNavBackdrop = document.getElementById("mobile-nav-backdrop");
+					const mobileNavLinksEl = document.getElementById("mobile-nav-links");
+					const menuButton = document.getElementById("mobile-menu-button");
+					const menuIconOpen = document.getElementById("menu-icon-open");
+					const menuIconClose = document.getElementById("menu-icon-close");
+
+					const closeMobileNav = () => {
+						if (mobileNavPanel) mobileNavPanel.classList.add("hidden");
+						if (menuIconOpen) menuIconOpen.classList.remove("hidden");
+						if (menuIconClose) menuIconClose.classList.add("hidden");
+						if (menuButton) menuButton.setAttribute("aria-expanded", "false");
+
+						document.querySelectorAll('main').forEach(main => {
+							main.style.filter = 'none';
+							main.style.pointerEvents = 'auto';
+							main.style.userSelect = 'auto';
+							main.style.overflow = 'auto';
+						});
+						document.querySelectorAll('body').forEach(body => {
+							body.style.overflow = 'auto';
+						});
+					};
+
+					const openMobileNav = () => {
+						document.querySelectorAll('main').forEach(main => {
+							main.style.transition = 'filter 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+						});
+						document.querySelectorAll('main').forEach(main => {
+							main.style.filter = 'blur(var(--blur-sm))';
+							main.style.pointerEvents = 'none';
+							main.style.userSelect = 'none';
+							main.style.overflow = 'hidden';
+						});
+						document.querySelectorAll('body').forEach(body => {
+							body.style.overflow = 'hidden';
+						});
+						if (mobileNavPanel) mobileNavPanel.classList.remove("hidden");
+						if (menuIconOpen) menuIconOpen.classList.add("hidden");
+						if (menuIconClose) menuIconClose.classList.remove("hidden");
+						if (menuButton) menuButton.setAttribute("aria-expanded", "true");
+					};
+
+					if (menuButton) {
+						menuButton.addEventListener("click", () => {
+							if (mobileNavPanel && mobileNavPanel.classList.contains("hidden")) {
+								openMobileNav();
+							} else {
+								closeMobileNav();
+							}
+						});
+					}
+
+					if (mobileNavBackdrop) {
+						mobileNavBackdrop.addEventListener("click", closeMobileNav);
+					}
+
+					const renderMobileNavLinks = (path) => {
+						if (!mobileNavLinksEl) return;
+						mobileNavLinksEl.replaceChildren();
+
+						let index = 0;
+						window.pages.forEach((k) => {
+							const cleanedPath = cleanPath(k, path);
+							if (cleanedPath.length !== 0) {
+								index += 1;
+
+								const row = document.createElement("a");
+								row.href = k;
+								row.className = "mobile-nav-row group flex items-center justify-between gap-4 rounded-md border border-border bg-card px-4 py-3 transition-colors hover:border-primary/40";
+								row.setAttribute("hx-get", k);
+								row.setAttribute("hx-target", "main");
+								row.setAttribute("hx-push-url", "true");
+								row.setAttribute("hx-swap", "outerHTML show:window:top");
+								if (typeof htmx !== "undefined") {
+									htmx.process(row);
+								}
+
+								const label = document.createElement("span");
+								label.className = "font-mono text-sm text-foreground";
+								const numSpan = document.createElement("span");
+								numSpan.className = "text-primary";
+								numSpan.textContent = String(index).padStart(2, "0") + ".";
+								label.appendChild(numSpan);
+								label.appendChild(document.createTextNode(" " + cleanedPath));
+
+								const tag = document.createElement("span");
+								tag.className = "font-mono text-xs text-muted-foreground";
+								tag.textContent = "page";
+
+								row.appendChild(label);
+								row.appendChild(tag);
+								mobileNavLinksEl.appendChild(row);
+							}
+						});
+					};
+
+					onPathnameChange((path) => {
+						closeMobileNav();
+						renderMobileNavLinks(path);
+					});
+				} catch (error) {
+					console.log("Caught error:", error)
+				}
+			</script>
+		}
+	</header>
+}

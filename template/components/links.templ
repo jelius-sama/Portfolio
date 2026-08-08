@@ -1,0 +1,52 @@
+package components
+
+import "git.jelius.dev/jelius-sama/Portfolio/template/icon"
+
+// LinkEntry is one row in the /links page's social-links list.
+type LinkEntry struct {
+	Icon     string
+	Title    string
+	Subtitle string
+	Href     string
+}
+
+// SocialLinksList renders the "social-links" terminal window containing
+// one LinkItem row per entry in linkEntries.
+templ SocialLinksList(links []LinkEntry) {
+	<section id="links-list" class="pb-24 sm:pb-32">
+		<div class="mx-auto max-w-6xl">
+			@Terminal("social-links") {
+				<div class="space-y-4">
+					for i, entry := range links {
+						@LinkItem(i, entry.Icon, entry.Title, entry.Subtitle, entry.Href)
+					}
+				</div>
+			}
+		</div>
+	</section>
+}
+
+// LinkItem renders one linktree-style row: an icon, a title + subtitle,
+// and an external-link chevron on the right. index staggers the
+// fade/slide-in via lineDelay, same rhythm as the rest of the site.
+templ LinkItem(index int, iconName, title, subtitle, href string) {
+	<a
+		href={ templ.URL(href) }
+		target="_blank"
+		rel="noopener noreferrer"
+		class={ "group flex items-center justify-between gap-4 rounded-md border border-border bg-card px-2 sm:px-5 py-4 transition-colors hover:border-primary/40 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(index) }
+	>
+		<div class="flex items-center gap-4">
+			@icon.Icon(iconName)(icon.Props{Class: "size-4"})
+			<div>
+				<p class="font-mono text-base font-semibold text-foreground">{ title }</p>
+				<p class="text-sm text-muted-foreground">{ subtitle }</p>
+			</div>
+		</div>
+		<svg class="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+			<path d="M15 3h6v6"></path>
+			<path d="M10 14 21 3"></path>
+		</svg>
+	</a>
+}

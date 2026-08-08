@@ -1,0 +1,264 @@
+package pages
+
+import (
+	"fmt"
+	"git.jelius.dev/jelius-sama/Portfolio/template/components"
+	"git.jelius.dev/jelius-sama/Portfolio/types"
+	"time"
+)
+
+// FIXME: Due to how "show:window:top" works in HTMX, the load more has already been triggered by the time HTMX scrolls to top.
+templ Blogs(args BlogsSectionArgs) {
+	<main
+		id="blogs"
+		if len(args.Post) == 0 {
+			class="h-[calc(100vh-(((var(--spacing)*8)*(var(--text-multiplier)+0.6))+(var(--text-xs))))] mx-auto max-w-6xl p-3 pt-[calc(var(--header-padding)+(var(--spacing)*3))]"
+		} else {
+			class="mx-auto max-w-6xl p-3 pt-[calc(var(--header-padding)+(var(--spacing)*3))]"
+		}
+	>
+		@BlogsIntro()
+		@BlogsSection(args)
+	</main>
+}
+
+type BlogsSectionArgs struct {
+	Post        []types.BlogPost
+	HasMore     bool
+	TotalPosts  int
+	LoadedPages int
+	TotalPages  int
+	Sort        types.BlogsSortOrder
+}
+
+templ BlogsSection(args BlogsSectionArgs) {
+	<div id="blog-section" class="flex flex-col py-3 gap-3">
+		@BlogInfo(BlogInfoArgs{
+			Sort:        args.Sort,
+			LoadedPosts: len(args.Post),
+			TotalPosts:  args.TotalPosts,
+			LoadedPages: args.LoadedPages,
+			TotalPages:  args.TotalPages,
+		})
+		@BlogSortSelect(args.Sort)
+		@BlogPostsList(args.Post, args.HasMore, args.LoadedPages+1, args.Sort)
+	</div>
+}
+
+templ BlogsIntro() {
+	<div class="flex flex-col items-center text-center">
+		<div class="flex h-16 w-16 items-center justify-center rounded-full bg-primary">
+			<svg class="h-7 w-7 text-primary-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M4 11a9 9 0 0 1 9 9"></path>
+				<path d="M4 4a16 16 0 0 1 16 16"></path>
+				<circle cx="5" cy="19" r="1"></circle>
+			</svg>
+		</div>
+		<h1 class="mt-6 font-mono text-3xl font-bold text-foreground sm:text-4xl">My Blog Posts</h1>
+		<p class="mt-3 text-muted-foreground">Explore my thoughts on development and technology</p>
+	</div>
+}
+
+// BlogInfo renders the "blog-info" terminal. Since the list is
+// server-rendered with real data from the start (no client fetch on
+// first load), this always shows the real counts — no loading state.
+//
+// The three inner <p> ids (blog-info-status/-sort/-displaying/-pages)
+// are OOB swap targets: when more posts are loaded via
+// BlogLoadMoreTrigger, have that handler's response also include
+// @BlogInfoOOBUpdate(...) so these numbers stay in sync — see that
+// component's doc comment for the exact response shape.
+type BlogInfoArgs struct {
+	Sort        types.BlogsSortOrder
+	LoadedPosts int
+	TotalPosts  int
+	LoadedPages int
+	TotalPages  int
+}
+
+templ BlogInfo(args BlogInfoArgs) {
+	@components.Terminal("blog-info") {
+		<div class="space-y-4">
+			<div>
+				<p>
+					<span class="text-primary">$</span>
+					<span class="text-foreground">ls /var/www/blogs/posts/</span>
+				</p>
+				<p id="blog-info-status" class="text-muted-foreground">{ fmt.Sprintf("Found %d articles.", args.TotalPosts) }</p>
+			</div>
+			<div>
+				<p>
+					<span class="text-primary">$</span>
+					<span class="text-foreground">cat /etc/blog-config.conf</span>
+				</p>
+				<p id="blog-info-sort" class="text-muted-foreground">{ fmt.Sprintf("Sort by: %s", args.Sort.String()) }</p>
+				<p id="blog-info-displaying" class="text-muted-foreground">{ fmt.Sprintf("Displaying: %d of %d", args.LoadedPosts, args.TotalPosts) }</p>
+				<p id="blog-info-pages" class={ "text-muted-foreground", templ.KV("hidden", args.LoadedPages == 0) }>
+					{ fmt.Sprintf("Loaded pages: %d of %d", args.LoadedPages, args.TotalPages) }
+				</p>
+			</div>
+		</div>
+	}
+}
+
+// BlogInfoOOBUpdate renders the same three lines as BlogInfo, each
+// carrying hx-swap-oob="true" so htmx updates them in place by id —
+// include this in the response returned to BlogLoadMoreTrigger's
+// hx-get, alongside the new post rows and the next primary-target
+// content (see blog_posts_list.templ for the full contract).
+templ BlogInfoOOBUpdate(args BlogInfoArgs) {
+	<p id="blog-info-status" hx-swap-oob="true" class="text-muted-foreground">{ fmt.Sprintf("Found %d articles.", args.TotalPosts) }</p>
+	<p id="blog-info-sort" hx-swap-oob="true" class="text-muted-foreground">{ fmt.Sprintf("Sort by: %s", args.Sort.String()) }</p>
+	<p id="blog-info-displaying" hx-swap-oob="true" class="text-muted-foreground">{ fmt.Sprintf("Displaying: %d of %d", args.LoadedPosts, args.TotalPosts) }</p>
+	<p id="blog-info-pages" hx-swap-oob="true" class="text-muted-foreground">{ fmt.Sprintf("Loaded pages: %d of %d", args.LoadedPages, args.TotalPages) }</p>
+}
+
+// BlogSortSelect renders the sort dropdown, wired to reload the blog
+// section on change via htmx.
+//
+// ASSUMPTION: targets an element with id="blog-section" wrapping
+// BlogInfo + BlogPostsList — wrap those two in a
+// <div id="blog-section"> when you assemble the page, or change the
+// hx-target below to whatever container you actually use.
+templ BlogSortSelect(current types.BlogsSortOrder) {
+	<div class="flex justify-end">
+		<div class="relative">
+			<select
+				id="blog-sort"
+				name="sort"
+				hx-get="/api/blogs?page=1"
+				hx-trigger="change"
+				hx-target="#blog-section"
+				hx-swap="outerHTML show:window:top"
+				hx-include="this"
+				class="appearance-none rounded-md border border-border bg-card py-2 pl-4 pr-9 font-mono text-sm text-foreground transition-colors hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-ring"
+			>
+				<option value={ types.BSONew } selected?={ current == types.BSONew }>Sort by: Newest</option>
+				<option value={ types.BSOOld } selected?={ current == types.BSOOld }>Sort by: Oldest</option>
+				<option value={ types.BSOPopular } selected?={ current == types.BSOPopular }>Sort by: Most Viewed</option>
+			</select>
+			<svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="m6 9 6 6 6-6"></path>
+			</svg>
+		</div>
+	</div>
+}
+
+func formatTime(t time.Time) string {
+	// "January" -> Full Month Name
+	// "_2"     -> Day of the month without a leading zero
+	// "2006"   -> 4-digit Year
+	// "15:04"  -> 24-hour Time format
+	return t.UTC().Format("January _2, 2006 at 15:04 UTC")
+}
+
+// BlogPostItem renders one row: title + excerpt, an arrow icon, and a
+// Published/Views/Updated meta line — matches the card row pattern used
+// elsewhere on the site (SkillItem, LinkItem).
+//
+// Uses @Link so it goes through the same htmx routing as the rest of
+// the site. Note: LinkAttr only exposes Href/Class/Id, so unlike
+// TerminalLine/SkillItem this can't stagger its entrance animation by
+// index — every row uses the same fixed fade/slide-in instead.
+templ BlogPostItem(post types.BlogPost) {
+	@components.Link(components.LinkAttr{
+		Href:  "/blog/" + post.ID,
+		Class: "group flex flex-col gap-4 rounded-md border border-border bg-card  px-2 sm:px-5 py-2 sm:py-5 transition-colors hover:border-primary/40 animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none",
+	}) {
+		<div class="flex items-start justify-between gap-4">
+			<div class="min-w-0">
+				<h3 class="font-mono text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
+					{ post.Title }
+				</h3>
+				if post.Excerpt != "" {
+					<p class="mt-1 text-sm text-muted-foreground">{ post.Excerpt }</p>
+				}
+			</div>
+			<svg class="mt-1 h-5 w-5 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M5 12h14"></path>
+				<path d="m13 6 6 6-6 6"></path>
+			</svg>
+		</div>
+		<div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-1 font-mono text-xs text-muted-foreground">
+			<div class="space-y-1">
+				<p>{ fmt.Sprintf("Published: %s", formatTime(post.PublishedAt)) }</p>
+				<p>{ fmt.Sprintf("Views: %d", post.Views) }</p>
+			</div>
+			if post.UpdatedAt != post.PublishedAt {
+				<p>{ fmt.Sprintf("Updated: %s", formatTime(post.UpdatedAt)) }</p>
+			}
+		</div>
+	}
+}
+
+templ BlogPostsList(posts []types.BlogPost, hasMore bool, nextPage int, sort types.BlogsSortOrder) {
+	@components.Terminal("blog-posts") {
+		<div id="blog-posts-list" class="space-y-4">
+			if len(posts) == 0 {
+				<div class="text-center text-gray-500 font-mono py-4">No blog posts found.</div>
+			} else {
+				for _, post := range posts {
+					@BlogPostItem(post)
+				}
+			}
+		</div>
+	}
+	if hasMore {
+		@BlogLoadMoreTrigger(nextPage, sort)
+	} else {
+		if len(posts) != 0 {
+			@BlogEndOfPosts()
+		}
+	}
+}
+
+// BlogLoadMoreTrigger is the infinite-scroll sentinel: as soon as it
+// scrolls into view, hx-trigger="revealed" fires the request. It carries
+// the "blog-load-trigger" class so the response-error handler below can
+// find it regardless of whether it's the original trigger or a retry
+// button rendered in its place.
+//
+// RESPONSE CONTRACT (server-side, once the real endpoint exists) — for
+// GET /api/blogs?page={nextPage}&sort={sort}, return all of the
+// following concatenated in one HTML response:
+//  1. @BlogPostsOOB(newPosts)               — appends the new rows
+//  2. @BlogInfoOOBUpdate(sortLabel, ...)     — updates the count lines
+//  3. Either @BlogLoadMoreTrigger(next+1, sort) if more pages remain,
+//     or @BlogEndOfPosts() if this was the last page — this becomes the
+//     primary swap (hx-target="this", hx-swap="outerHTML") replacing
+//     this element.
+// On error, return the ErrorResp JSON with a non-2xx status — the
+// script below intercepts that via htmx:responseError and swaps in a
+// retry card instead of trying to swap non-HTML content.
+templ BlogLoadMoreTrigger(nextPage int, sort types.BlogsSortOrder) {
+	<div
+		class="blog-load-trigger mt-8 text-center text-sm text-muted-foreground"
+		hx-get={ fmt.Sprintf("/api/blogs?page=%d&sort=%s", nextPage, sort) }
+		hx-trigger="revealed"
+		hx-swap="outerHTML"
+		hx-target="this"
+	>
+		Loading more posts...
+	</div>
+}
+
+// BlogEndOfPosts is the static marker shown once there's nothing left
+// to load — either as the initial render (hasMore=false) or as the
+// final primary-swap response from BlogLoadMoreTrigger's last page.
+templ BlogEndOfPosts() {
+	<p class="mt-8 text-center text-sm text-muted-foreground">End of posts.</p>
+}
+
+// BlogPostsOOB wraps each new post in a `display: contents` div carrying
+// hx-swap-oob="beforeend:#blog-posts-list" — `contents` keeps the
+// wrapper out of the box model entirely so the appended rows still sit
+// flush in the list's own space-y-4, rather than nesting inside an
+// extra visible box. (Needed because LinkAttr doesn't expose a way to
+// put hx-swap-oob directly on BlogPostItem's own <a> tag.)
+templ BlogPostsOOB(posts []types.BlogPost) {
+	for _, post := range posts {
+		<div class="contents" hx-swap-oob="beforeend:#blog-posts-list">
+			@BlogPostItem(post)
+		</div>
+	}
+}

@@ -1,0 +1,59 @@
+package components
+
+import (
+	"fmt"
+	"git.jelius.dev/jelius-sama/Portfolio/types"
+)
+
+type QuickContactLinks struct {
+	Platform string
+	Icon     string
+	URL      string
+}
+
+type ContactData struct {
+	QuickLinks  []QuickContactLinks
+	QRImagePath string
+	Email       string
+}
+
+templ Contact(data ContactData) {
+	<section id="contact" class="bg-background pt-24 pb-24 sm:pt-32 sm:pb-[calc(var(--spacing)*64)]">
+		<div class="mx-auto max-w-6xl px-3">
+			@SectionHeading("Get in Touch")
+			<div class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
+				@Terminal("contact-info") {
+					<div class="space-y-6">
+						@EmailLink(0, data.Email)
+						<div class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(1) }>
+							<p class="text-sm text-muted-foreground">Social Media Profiles</p>
+							<div class="mt-4 space-y-4">
+								for i := range(data.QuickLinks) {
+									@SocialLink(i+2, data.QuickLinks[i].Icon, data.QuickLinks[i].Platform, data.QuickLinks[i].URL)
+								}
+							</div>
+						</div>
+					</div>
+				}
+				@Terminal("terminal") {
+					<div class="space-y-6">
+						<p class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(0) }>
+							<span class="text-primary">$</span>
+							<span class="text-foreground">qr-fetch</span>
+						</p>
+						<div class={ "mx-auto max-w-xs overflow-hidden rounded-md border border-border animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(1) }>
+							<img src={ fmt.Sprintf("%s%s", types.EVAssetCDNHostname.Get().Value, data.QRImagePath) } alt="QR code linking to jelius.dev" class="block w-full p-2"/>
+						</div>
+						/*
+						<p class={ "animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-500 ease-out motion-reduce:animate-none", lineDelay(2) }>
+							<span class="text-primary">$</span>
+							<span class="text-muted-foreground">help</span>
+							<span class="caret-blink ml-1 inline-block h-4 w-1.5 translate-y-0.5 bg-primary"></span>
+						</p>
+						*/
+					</div>
+				}
+			</div>
+		</div>
+	</section>
+}

@@ -1,0 +1,50 @@
+package pages
+
+import (
+	"fmt"
+	"git.jelius.dev/jelius-sama/Portfolio/template/components"
+	"git.jelius.dev/jelius-sama/Portfolio/types"
+)
+
+type LinksArg struct {
+	Links        []components.LinkEntry
+	Footer       components.LinksFooter
+	ImagePath    string
+	ImageAltText *string
+	Handle       string
+	TagLine      string
+}
+
+templ Links(arg LinksArg) {
+	<main id="links">
+		@components.AuroraBackdrop()
+		@ProfileHandle(fmt.Sprintf("%s%s", types.EVAssetCDNHostname.Get().Value, arg.ImagePath), arg.ImageAltText, arg.Handle, arg.TagLine)
+		<div class="mx-auto max-w-6xl px-3">
+			@components.SocialLinksList(arg.Links)
+			@components.LinksOutro(components.LinksFooter{
+				WhoAmI:      arg.Footer.WhoAmI,
+				TotalLinks:  len(arg.Links),
+				QRImagePath: arg.Footer.QRImagePath,
+			})
+		</div>
+	</main>
+}
+
+templ ProfileHandle(avatarSrc string, avatarAlt *string, handle, tagline string) {
+	<section class="relative isolate overflow-hidden px-3 pt-20 pb-10 sm:pt-28">
+		<!-- ambient glow, same treatment as Hero's -->
+		<div
+			class="pointer-events-none absolute left-1/2 top-0 -z-10 h-[32rem] w-[64rem] -translate-x-1/2 -translate-y-1/3 rounded-full bg-primary/10 blur-3xl"
+			aria-hidden="true"
+		></div>
+		<div class="mx-auto flex max-w-2xl flex-col items-center text-center">
+			@components.AvatarRing(avatarSrc, avatarAlt)
+			<h1 class="mt-6 font-mono text-2xl font-bold text-foreground sm:text-3xl">
+				<span class="text-primary">{ string(rune(0x40)) }</span>{ handle }
+			</h1>
+			<p class="mt-2 text-sm text-muted-foreground">
+				{ tagline }
+			</p>
+		</div>
+	</section>
+}
