@@ -6,6 +6,7 @@ build
 assets/*
 
 !assets/manifest.json
+!assets/images
 !assets/sw.js
 db.sqlite3
 db.sqlite3-*
