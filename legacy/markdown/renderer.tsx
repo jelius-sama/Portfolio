@@ -1,3 +1,8 @@
+/*!
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ * Copyright (c) 2026 Jelius Basumatary
+ */
+
 import React from "react"
 import { useState } from "react"
 import ReactMarkdown from "react-markdown"

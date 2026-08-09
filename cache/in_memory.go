@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 Jelius Basumatary
+
 // Package cache provides a short-lived, in-process response cache for Fiber v3
 // route handlers. It exists to solve two things at once:
 //

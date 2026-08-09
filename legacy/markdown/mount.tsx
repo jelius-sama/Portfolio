@@ -1,3 +1,8 @@
+/*!
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ * Copyright (c) 2026 Jelius Basumatary
+ */
+
 import { createRoot, type Root } from "react-dom/client"
 import { MarkdownRenderer } from "./renderer"
 

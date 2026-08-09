@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (c) 2026 Jelius Basumatary
+
 package db
 
 // createBlogsTable creates the blogs table with support for posts, relationships, and soft deletes

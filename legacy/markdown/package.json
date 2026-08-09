@@ -1,8 +1,9 @@
 {
+  "license": "AGPL-3.0-or-later",
   "name": "markdown",
   "private": true,
   "scripts": {
-    "build": "VERSION=$(make -s -C ../.. --eval 'print-v:; @echo $(VERSION)' print-v) && esbuild ./mount.tsx --bundle --minify --format=iife --jsx=automatic --outfile=../../assets/js/markdown-renderer-$VERSION.js"
+    "build": "VERSION=$(make -s -C ../.. --eval 'print-v:; @echo $(VERSION)' print-v) && esbuild ./mount.tsx --bundle --minify --format=iife --jsx=automatic --legal-comments=inline --outfile=../../assets/js/markdown-renderer-$VERSION.js"
   },
   "devDependencies": {
     "@types/bun": "latest"
