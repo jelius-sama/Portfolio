@@ -9,6 +9,7 @@ type MiddlewareHandler uint8
 const (
     MHNoCache MiddlewareHandler = iota
     MHStaticAsset
+    MHHTMXCache
     MHStaticPages
 )
 

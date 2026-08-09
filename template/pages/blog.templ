@@ -84,6 +84,18 @@ templ BlogPost(serverCtx fiber.Ctx, post *types.BlogResponse, mdContent *string)
 						@templ.Raw(fmt.Sprintf(
 							`<script type="application/json" data-markdown-source>%s</script>`, mdStr,
 						))
+						<div data-markdown-loading class="w-full flex items-center justify-center mx-auto py-12">
+							<p class="font-mono text-muted-foreground inline-flex items-baseline gap-1">
+								<span>Loading</span>
+								<span class="inline-flex gap-0.5" aria-hidden="true">
+									<span class="animate-bounce motion-reduce:animate-none [animation-delay:-0.3s]">.</span>
+									<span class="animate-bounce motion-reduce:animate-none [animation-delay:-0.15s]">.</span>
+									<span class="animate-bounce motion-reduce:animate-none">.</span>
+								</span>
+								<span class="sr-only">Loading content, please wait.</span>
+							</p>
+						</div>
+						<div data-markdown-mount></div>
 					</article>
 				}
 				@PostFooterNavigation(serverCtx, post)

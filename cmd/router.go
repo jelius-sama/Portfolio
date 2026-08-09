@@ -8,6 +8,7 @@ import (
     "git.jelius.dev/jelius-sama/Portfolio/api"
     "git.jelius.dev/jelius-sama/Portfolio/api/analytics"
     "git.jelius.dev/jelius-sama/Portfolio/api/blogs"
+    "git.jelius.dev/jelius-sama/Portfolio/cache"
     "git.jelius.dev/jelius-sama/Portfolio/middleware"
     "git.jelius.dev/jelius-sama/Portfolio/renderer"
     "git.jelius.dev/jelius-sama/Portfolio/types"
@@ -40,22 +41,19 @@ func init() {
         MaxAge:         31536000 * time.Second, // 1 year
         MustRevalidate: true,
     })
-
-    // FIXME: Only use `pageCache`, if the DNS/proxy supports request headers as cache key
-    // Cloudflare doesn't so don't cache in my case.
-    // var pageCache = routerCtx.MiddlewareHandlers[types.MHStaticPages]
-    // if types.EVEnv.Get().Value == types.EMDev.String() {
-    //     pageCache = routerCtx.MiddlewareHandlers[types.MHNoCache]
-    // }
+    routerCtx.MiddlewareHandlers[types.MHHTMXCache] = cache.New(
+        5*time.Minute,
+        "HX-Request", "HX-Target", "HX-Current-URL", "HX-Boosted",
+    ).Middleware()
 
     types.Pages = map[string]types.Page{
-        "/":             types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{routerCtx.UI.RenderHome}},
-        "/links":        types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{routerCtx.UI.RenderLinks}},
-        "/blogs":        types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{routerCtx.UI.RenderBlogs}},
-        "/robots.txt":   types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{api.GenerateRobots}},
-        "/sitemap.xml":  types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{api.GenerateSitemap}},
-        "/blog/:id":     types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{routerCtx.UI.RenderBlog}},
-        "/achievements": types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{routerCtx.UI.RenderAchievements}},
+        "/":             types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHHTMXCache], Handlers: []any{routerCtx.UI.RenderHome}},
+        "/links":        types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHHTMXCache], Handlers: []any{routerCtx.UI.RenderLinks}},
+        "/blogs":        types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHHTMXCache], Handlers: []any{routerCtx.UI.RenderBlogs}},
+        "/robots.txt":   types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHStaticPages], Handlers: []any{api.GenerateRobots}},
+        "/sitemap.xml":  types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHStaticPages], Handlers: []any{api.GenerateSitemap}},
+        "/blog/:id":     types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHHTMXCache], Handlers: []any{routerCtx.UI.RenderBlog}},
+        "/achievements": types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHHTMXCache], Handlers: []any{routerCtx.UI.RenderAchievements}},
     }
 }
 
