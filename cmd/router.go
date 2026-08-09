@@ -8,6 +8,7 @@ import (
     "git.jelius.dev/jelius-sama/Portfolio/api"
     "git.jelius.dev/jelius-sama/Portfolio/api/analytics"
     "git.jelius.dev/jelius-sama/Portfolio/api/blogs"
+    "git.jelius.dev/jelius-sama/Portfolio/cache"
     "git.jelius.dev/jelius-sama/Portfolio/middleware"
     "git.jelius.dev/jelius-sama/Portfolio/renderer"
     "git.jelius.dev/jelius-sama/Portfolio/types"
@@ -40,20 +41,19 @@ func init() {
         MaxAge:         31536000 * time.Second, // 1 year
         MustRevalidate: true,
     })
-
-    var pageCache = routerCtx.MiddlewareHandlers[types.MHStaticPages]
-    if types.EVEnv.Get().Value == types.EMDev.String() {
-        pageCache = routerCtx.MiddlewareHandlers[types.MHNoCache]
-    }
+    routerCtx.MiddlewareHandlers[types.MHHTMXCache] = cache.New(
+        5*time.Minute,
+        "HX-Request", "HX-Target", "HX-Current-URL", "HX-Boosted",
+    ).Middleware()
 
     types.Pages = map[string]types.Page{
-        "/":             types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderHome}},
-        "/links":        types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderLinks}},
-        "/blogs":        types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlogs}},
-        "/robots.txt":   types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{api.GenerateRobots}},
-        "/sitemap.xml":  types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHNoCache], Handlers: []any{api.GenerateSitemap}},
-        "/blog/:id":     types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderBlog}},
-        "/achievements": types.Page{Handler: pageCache, Handlers: []any{routerCtx.UI.RenderAchievements}},
+        "/":             types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHHTMXCache], Handlers: []any{routerCtx.UI.RenderHome}},
+        "/links":        types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHHTMXCache], Handlers: []any{routerCtx.UI.RenderLinks}},
+        "/blogs":        types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHHTMXCache], Handlers: []any{routerCtx.UI.RenderBlogs}},
+        "/robots.txt":   types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHStaticPages], Handlers: []any{api.GenerateRobots}},
+        "/sitemap.xml":  types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHStaticPages], Handlers: []any{api.GenerateSitemap}},
+        "/blog/:id":     types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHHTMXCache], Handlers: []any{routerCtx.UI.RenderBlog}},
+        "/achievements": types.Page{Handler: routerCtx.MiddlewareHandlers[types.MHHTMXCache], Handlers: []any{routerCtx.UI.RenderAchievements}},
     }
 }
 
@@ -81,18 +81,7 @@ func Router(app *fiber.App) {
     apiHandle.Get("/blog/:id", func(c fiber.Ctx) error { return blogs.GetBlog(c) })
     apiHandle.Post("/blog", blogs.CreateBlog)
 
-    if types.EVEnv.Get().Value == types.EMDev.String() {
-        if _, err := os.Stat("assets"); os.IsNotExist(err) {
-            logger.Panic("assets dir missing; golang's lack of #ifdef forces runtime hacks just to stop assets leaking into prod")
-        }
-        app.Get("/assets/*", routerCtx.MiddlewareHandlers[types.MHNoCache], static.New("assets", static.Config{
-            Compress:      true,
-            CacheDuration: 0 * time.Second,
-            NotFoundHandler: func(c fiber.Ctx) error {
-                return middleware.ErrHandler(c, fiber.ErrNotFound)
-            },
-        }))
-    } else {
+    if types.EVEnv.Get().Value == types.EMProd.String() {
         var assetDir = filepath.Join(types.EVDataDir.Get().Value, "assets")
 
         if _, err := os.Stat(assetDir); err != nil {
@@ -111,6 +100,19 @@ func Router(app *fiber.App) {
 
     for k, v := range types.Pages {
         app.Get(k, v.Handler, v.Handlers...)
+    }
+
+    if types.EVEnv.Get().Value == types.EMDev.String() {
+        if _, err := os.Stat("assets"); os.IsNotExist(err) {
+            logger.Panic("assets dir missing; golang's lack of #ifdef forces runtime hacks just to stop assets leaking into prod")
+        }
+        app.Get("/*", routerCtx.MiddlewareHandlers[types.MHNoCache], static.New("assets", static.Config{
+            Compress:      true,
+            CacheDuration: 0 * time.Second,
+            NotFoundHandler: func(c fiber.Ctx) error {
+                return middleware.ErrHandler(c, fiber.ErrNotFound)
+            },
+        }))
     }
 }
 
