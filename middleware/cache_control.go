@@ -49,6 +49,8 @@ func NewCacheControl(config CacheConfig) fiber.Handler {
         // Set the header on the response context
         c.Set("Cache-Control", headerValue)
 
+        // handlers that runs after this middleware may overwrite the cache control header as it wants to.
+        // the flow is: this middleware -> actual handler -> tcp out
         return c.Next()
     }
 }
