@@ -7,7 +7,7 @@ import { createRoot, type Root } from "react-dom/client"
 import { MarkdownRenderer } from "./renderer"
 
 if (!(window as any).__mdRendererLoaded) {
-    ; (window as any).__mdRendererLoaded = true
+    (window as any).__mdRendererLoaded = true
 
     const roots = new WeakMap<Element, Root>()
 
