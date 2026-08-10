@@ -35,15 +35,15 @@ templ Base(serverCtx fiber.Ctx, metadata *types.Metadata, body templ.Component, 
 					const visitedPath = new Set();
 
 					function trackAnalytics(path) {
-						if (visitedPath.has(path)) return;
-						visitedPath.add(path);
-
 						if (currentTrackingTimer) {
 							clearTimeout(currentTrackingTimer);
 						}
 						if (currentAbortController) {
 							currentAbortController.abort(); // Cancels the ongoing HTTP request
 						}
+
+						if (visitedPath.has(path)) return;
+						visitedPath.add(path);
 
 						currentAbortController = new AbortController();
 						const signal = currentAbortController.signal;
