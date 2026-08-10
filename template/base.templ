@@ -43,7 +43,6 @@ templ Base(serverCtx fiber.Ctx, metadata *types.Metadata, body templ.Component, 
 						}
 
 						if (visitedPath.has(path)) return;
-						visitedPath.add(path);
 
 						currentAbortController = new AbortController();
 						const signal = currentAbortController.signal;
@@ -67,6 +66,7 @@ templ Base(serverCtx fiber.Ctx, metadata *types.Metadata, body templ.Component, 
 							.then(response => {
 								if (response.ok) {
 									console.log('Analytics tracked successfully, you can read the source code here: `https://git.jelius.dev/jelius-sama/Portfolio.git`');
+									visitedPath.add(trackingPayload.page_path);
 								}
 							})
 							.catch(error => {
