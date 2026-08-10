@@ -74,8 +74,7 @@ func init() {
             EnvironmentVariable: new(types.EVEnv.Get().Key),
             ExpectedValue:       new(types.EMDev.String()),
         },
-        UseSyslog: false,
-        // UseSyslog: os.Getenv(types.EVEnv.Get().Key) != types.EMDev.String(),
+        UseSyslog: os.Getenv(types.EVEnv.Get().Key) != types.EMDev.String(),
     })
 
     var dbPath string

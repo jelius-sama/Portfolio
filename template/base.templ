@@ -35,8 +35,8 @@ templ Base(serverCtx fiber.Ctx, metadata *types.Metadata, body templ.Component, 
 					const visitedPath = new Set();
 
 					function trackAnalytics(path) {
-						if (visitedPathSet.has(path)) return;
-						visitedPathSet.add(path);
+						if (visitedPath.has(path)) return;
+						visitedPath.add(path);
 
 						if (currentTrackingTimer) {
 							clearTimeout(currentTrackingTimer);
