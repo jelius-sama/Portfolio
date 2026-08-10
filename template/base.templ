@@ -23,15 +23,21 @@ templ Base(serverCtx fiber.Ctx, metadata *types.Metadata, body templ.Component, 
 			if footer != nil {
 				@footer
 			}
+			@components.Toaster()
 			@baseScript.Once() {
 				@HTMXScript()
 				@HTMXHeadSupport()
 				@HTMXHotFixes()
+				@components.ToastScript()
 				<script>
 					let currentTrackingTimer = null;
 					let currentAbortController = null;
+					const visitedPath = new Set();
 
 					function trackAnalytics(path) {
+						if (visitedPathSet.has(path)) return;
+						visitedPathSet.add(path);
+
 						if (currentTrackingTimer) {
 							clearTimeout(currentTrackingTimer);
 						}

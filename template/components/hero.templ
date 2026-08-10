@@ -57,6 +57,20 @@ script scrollToSection(id string) {
     }
 }
 
+var heroScript = templ.NewOnceHandle()
+
+script tempCvNotAvailableToast() {
+	const btn = document.getElementById("cv-dl-link");
+	if (!btn) return;
+	btn.addEventListener("click", (event) => {
+		event.preventDefault()
+		window.tui.toast.add({
+			type: btn.getAttribute("data-toast-type") || undefined,
+			description: btn.getAttribute("data-toast-description"),
+		});
+	});
+}
+
 templ Hero(data HeroData) {
 	<section class="relative isolate overflow-hidden bg-background py-24 sm:py-32">
 		<div
@@ -74,10 +88,16 @@ templ Hero(data HeroData) {
 			</p>
 			<div class="mt-10 flex flex-wrap items-center justify-center gap-4">
 				<a
+					id="cv-dl-link"
+					data-toast-type="error"
+					data-toast-description="CV not available, please try again later."
 					href={ fmt.Sprintf("%s%s", types.EVAssetCDNHostname.Get().Value, data.CVPath) }
 					download
 					class="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 				>
+					@heroScript.Once() {
+						@tempCvNotAvailableToast()
+					}
 					<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M12 3v12"></path>
 						<path d="m7 11 5 5 5-5"></path>

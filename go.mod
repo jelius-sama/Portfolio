@@ -3,9 +3,11 @@ module git.jelius.dev/jelius-sama/Portfolio
 go 1.26.5
 
 require (
+	github.com/Oudwins/tailwind-merge-go v0.2.3
 	github.com/a-h/templ v0.3.1020
 	github.com/gofiber/fiber/v3 v3.4.0
 	github.com/jelius-sama/logger v1.5.0
+	golang.org/x/sys v0.46.0
 	modernc.org/sqlite v1.55.0
 )
 
@@ -29,7 +31,6 @@ require (
 	github.com/valyala/fasthttp v1.72.0 // indirect
 	golang.org/x/crypto v0.53.0 // indirect
 	golang.org/x/net v0.56.0 // indirect
-	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
 	modernc.org/libc v1.74.1 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
