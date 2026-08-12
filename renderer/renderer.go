@@ -47,6 +47,7 @@ func Renderer(c fiber.Ctx, metadata *types.Metadata, bodyContent templ.Component
                 logger.Error(err)
                 return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
             }
+            return c.SendString(buf.String())
         case types.TPBoth:
             if err := bodyContent.Render(c.RequestCtx(), &buf); err != nil {
                 return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")

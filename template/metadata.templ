@@ -78,19 +78,21 @@ templ Metadata(metadata *types.Metadata) {
 		<meta hx-preserve="true" charset="UTF-8"/>
 		<meta hx-preserve="true" name="viewport" content="width=device-width, initial-scale=1.0"/>
 		@templ.Raw(generateJsonLdScript())
-		<title>{ metadata.Title }</title>
-		for _, link := range metadata.Links {
-			if link.Media != nil {
-				<link rel={ link.Rel } href={ link.Href } media={ *link.Media }/>
-			} else {
-				<link rel={ link.Rel } href={ link.Href }/>
+		if metadata != nil {
+			<title>{ metadata.Title }</title>
+			for _, link := range metadata.Links {
+				if link.Media != nil {
+					<link rel={ link.Rel } href={ link.Href } media={ *link.Media }/>
+				} else {
+					<link rel={ link.Rel } href={ link.Href }/>
+				}
 			}
-		}
-		for _, m := range metadata.Meta {
-			if m.Name != nil {
-				<meta name={ *m.Name } content={ m.Content }/>
-			} else if m.Property != nil {
-				<meta property={ *m.Property } content={ m.Content }/>
+			for _, m := range metadata.Meta {
+				if m.Name != nil {
+					<meta name={ *m.Name } content={ m.Content }/>
+				} else if m.Property != nil {
+					<meta property={ *m.Property } content={ m.Content }/>
+				}
 			}
 		}
 	</head>

@@ -4,6 +4,8 @@
 package middleware
 
 import (
+    "fmt"
+    "runtime/debug"
     "strings"
 
     "github.com/gofiber/fiber/v3"
@@ -14,8 +16,8 @@ func RecoveryMiddleware() fiber.Handler {
     return func(c fiber.Ctx) error {
         defer func() {
             if err := recover(); err != nil {
-                logger.Error(err)
-                logger.Error("Encountered a panic, returning 500 to client and recovering the server ASAP!")
+                logger.Error(fmt.Sprintf("%s\n\n%s", err, debug.Stack()))
+                logger.Info("Encountered a panic, returning 500 to client and recovering the server ASAP!")
                 if strings.HasPrefix(c.Path(), "/api/") || strings.HasPrefix(c.Path(), "/assets/") {
                     c.Set("Content-Type", "application/json")
                     c.Status(500)

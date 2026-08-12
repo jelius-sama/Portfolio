@@ -3,6 +3,8 @@
 
 package components
 
+import "fmt"
+
 type LinkAttr struct {
 	Id    string
 	Href  string
@@ -14,6 +16,9 @@ templ Link(attr LinkAttr) {
 		if len(attr.Id) != 0 {
 			id={ attr.Id }
 		}
+		{ templ.Attributes{
+			"hx-on:htmx:before-request": fmt.Sprintf("if (window.location.pathname === '%s') event.preventDefault();", attr.Href),
+		} ... }
 		href={ attr.Href }
 		hx-get={ attr.Href }
 		if len(attr.Class) != 0 {
